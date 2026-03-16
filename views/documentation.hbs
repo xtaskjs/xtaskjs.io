@@ -1,0 +1,97 @@
+{{> site-header viewer=viewer}}
+
+<main class="spring-like-home docs-home">
+  <section class="docs-hero" id="overview">
+    <div class="hero-copy docs-hero-copy">
+      <p class="eyebrow">{{t "site.docs.hub.eyebrow"}}</p>
+      <h1>{{t "site.docs.hub.title"}}</h1>
+      <p>{{t "site.docs.hub.subtitle"}}</p>
+      <div class="hero-cta">
+        <a href="/documentation/architecture" class="cta-primary">{{t "site.docs.hub.openArchitecture"}}</a>
+        <a href="/documentation/decorators" class="cta-secondary">{{t "site.docs.hub.browseDecorators"}}</a>
+      </div>
+      <p class="stack stack-inline">{{t "site.docs.hub.stats" packages=packageCount decorators=decoratorCount samples=sampleCount}}</p>
+    </div>
+    <div class="docs-overview-grid">
+      {{#each highlights}}
+        <article class="feature-card docs-overview-card">
+          <h3>{{title}}</h3>
+          <p>{{text}}</p>
+        </article>
+      {{/each}}
+    </div>
+  </section>
+
+  <section class="docs-layout">
+    <aside class="docs-sidebar-card">
+      <p class="eyebrow">{{t "site.docs.hub.onThisPage"}}</p>
+      <nav class="docs-sidebar-nav" aria-label="{{t "site.docs.hub.documentationSections"}}">
+        {{#each docsPages}}
+          <a href="{{href}}"{{#if isCurrent}} class="is-current"{{/if}}>{{label}}</a>
+        {{/each}}
+      </nav>
+      <div class="docs-sidebar-meta">
+        <p>{{t "site.docs.hub.repo"}} <a href="{{repoUrl}}" target="_blank" rel="noreferrer">xtaskjs/xtask</a></p>
+        <p>{{t "site.docs.hub.scope"}}</p>
+      </div>
+    </aside>
+
+    <div class="docs-content">
+      <section class="section docs-section" id="quick-start">
+        <div class="docs-section-heading">
+          <p class="eyebrow">{{t "site.docs.hub.quickStartEyebrow"}}</p>
+          <h2>{{t "site.docs.hub.quickStartTitle"}}</h2>
+        </div>
+        <div class="docs-two-column">
+          <article class="feature-card">
+            <h3>{{t "site.docs.hub.install"}}</h3>
+            <div class="docs-code-block"><pre><code>{{quickStart.install}}</code></pre></div>
+          </article>
+          <article class="feature-card">
+            <h3>{{t "site.docs.hub.bootstrap"}}</h3>
+            <div class="docs-code-block"><pre><code>{{quickStart.bootstrap}}</code></pre></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="section docs-section" id="sections">
+        <div class="docs-section-heading">
+          <p class="eyebrow">{{t "site.docs.hub.sectionsEyebrow"}}</p>
+          <h2>{{t "site.docs.hub.sectionsTitle"}}</h2>
+        </div>
+        <div class="docs-package-grid">
+          {{#each featuredPages}}
+            <article class="project-card docs-package-card">
+              <p class="eyebrow">{{t "site.docs.hub.documentationBadge"}}</p>
+              <h3><a href="{{href}}">{{label}}</a></h3>
+              <p>{{description}}</p>
+              <a href="{{href}}" class="cta-secondary inline-btn">{{t "site.docs.hub.openSection" label=label}}</a>
+            </article>
+          {{/each}}
+        </div>
+      </section>
+
+      <section class="section docs-section" id="highlights">
+        <div class="docs-section-heading">
+          <p class="eyebrow">{{t "site.docs.hub.highlightsEyebrow"}}</p>
+          <h2>{{t "site.docs.hub.highlightsTitle"}}</h2>
+        </div>
+        <div class="docs-overview-grid">
+          {{#each highlights}}
+            <article class="feature-card docs-overview-card">
+              <h3>{{title}}</h3>
+              <p>{{text}}</p>
+            </article>
+          {{/each}}
+        </div>
+      </section>
+    </div>
+  </section>
+</main>
+
+<footer class="global-footer">
+  <div class="footer-wrap">
+    <p>{{t "site.docs.hub.footer"}}</p>
+    <a href="/admin/login">{{t "site.footer.adminAccess"}}</a>
+  </div>
+</footer>

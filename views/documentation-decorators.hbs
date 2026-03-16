@@ -1,0 +1,100 @@
+{{> site-header viewer=viewer}}
+
+<main class="spring-like-home docs-home">
+  <section class="docs-hero">
+    <div class="hero-copy docs-hero-copy">
+      <p class="eyebrow">{{t "site.docs.decorators.eyebrow"}}</p>
+      <h1>{{t "site.docs.decorators.title"}}</h1>
+      <p>{{t "site.docs.decorators.subtitle"}}</p>
+      <div class="hero-cta">
+        <a href="#decorator-catalog" class="cta-primary">{{t "site.docs.decorators.browseCatalog"}}</a>
+        <a href="/documentation/packages" class="cta-secondary">{{t "site.docs.decorators.openPackages"}}</a>
+      </div>
+      <p class="stack stack-inline">{{t "site.docs.decorators.stats" decorators=decoratorCount groups=decoratorGroupCount}}</p>
+    </div>
+    <div class="docs-overview-grid">
+      <article class="feature-card docs-overview-card">
+        <h3>{{t "site.docs.decorators.groupedByType"}}</h3>
+        <p>{{t "site.docs.decorators.groupedByTypeText"}}</p>
+      </article>
+      <article class="feature-card docs-overview-card">
+        <h3>{{t "site.docs.decorators.packageAware"}}</h3>
+        <p>{{t "site.docs.decorators.packageAwareText"}}</p>
+      </article>
+      <article class="feature-card docs-overview-card">
+        <h3>{{t "site.docs.decorators.exampleDriven"}}</h3>
+        <p>{{t "site.docs.decorators.exampleDrivenText"}}</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="docs-layout">
+    <aside class="docs-sidebar-card">
+      <p class="eyebrow">{{t "site.docs.decorators.documentation"}}</p>
+      <nav class="docs-sidebar-nav" aria-label="{{t "site.docs.hub.documentationSections"}}">
+        {{#each docsPages}}
+          <a href="{{href}}"{{#if isCurrent}} class="is-current"{{/if}}>{{label}}</a>
+        {{/each}}
+      </nav>
+      <div class="docs-sidebar-meta">
+        <p>{{t "site.docs.hub.repo"}} <a href="{{repoUrl}}" target="_blank" rel="noreferrer">xtaskjs/xtask</a></p>
+        <p>{{t "site.docs.decorators.coverage"}} {{#each packageCoverage}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}</p>
+      </div>
+    </aside>
+
+    <div class="docs-content">
+      <section class="section docs-section" id="decorator-catalog">
+        <div class="docs-section-heading">
+          <p class="eyebrow">{{t "site.docs.decorators.catalogEyebrow"}}</p>
+          <h2>{{t "site.docs.decorators.catalogTitle"}}</h2>
+        </div>
+        <div class="docs-package-grid">
+          {{#each decoratorGroups}}
+            <article class="project-card docs-package-card">
+              <p class="eyebrow">{{t "site.docs.decorators.groupBadge"}}</p>
+              <h3><a href="#{{id}}">{{title}}</a></h3>
+              <p>{{description}}</p>
+              <p class="docs-sample-chip">{{decorators.length}} {{t "site.docs.decorators.countLabel"}}</p>
+            </article>
+          {{/each}}
+        </div>
+      </section>
+
+      {{#each decoratorGroups}}
+        <section class="section docs-section" id="{{id}}">
+          <div class="docs-section-heading">
+            <p class="eyebrow">{{t "site.docs.decorators.groupBadge"}}</p>
+            <h2>{{title}}</h2>
+            <p>{{description}}</p>
+          </div>
+          <div class="docs-decorator-grid">
+            {{#each decorators}}
+              <article class="feature-card docs-decorator-card">
+                <div class="docs-decorator-meta">
+                  <div class="docs-tag-row">
+                    <span class="docs-pill">{{packageName}}</span>
+                    <span class="docs-pill">{{kind}}</span>
+                    <span class="docs-pill">{{targets}}</span>
+                  </div>
+                </div>
+                <h3>{{name}}</h3>
+                <p>{{summary}}</p>
+                <div class="docs-code-block">
+                  <div class="docs-code-header">{{exampleTitle}}</div>
+                  <pre><code>{{exampleCode}}</code></pre>
+                </div>
+              </article>
+            {{/each}}
+          </div>
+        </section>
+      {{/each}}
+    </div>
+  </section>
+</main>
+
+<footer class="global-footer">
+  <div class="footer-wrap">
+    <p>{{t "site.docs.hub.footer"}}</p>
+    <a href="/admin/login">{{t "site.footer.adminAccess"}}</a>
+  </div>
+</footer>

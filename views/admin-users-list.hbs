@@ -1,0 +1,137 @@
+{{> site-header viewer=viewer}}
+
+<main class="spring-like-home admin-shell">
+  <section class="section admin-header-row">
+    <div class="hero-copy">
+      <p class="eyebrow">{{t "admin.shared.eyebrow"}}</p>
+      <h1>{{t "admin.users.title"}}</h1>
+      <p>{{t "admin.users.subtitle"}}</p>
+    </div>
+    <div class="admin-actions">
+      <a href="/admin/news" class="cta-secondary">{{t "admin.shared.manageNews"}}</a>
+      <form method="post" action="/admin/logout">
+        <button type="submit" class="cta-secondary">{{t "admin.shared.logout"}}</button>
+      </form>
+    </div>
+  </section>
+
+  {{#if message}}
+    <section class="section">
+      <article class="admin-flash">
+        {{#if (eq message "role-updated")}}{{t "admin.users.flash.roleUpdated"}}
+        {{else}}{{#if (eq message "status-updated")}}{{t "admin.users.flash.statusUpdated"}}
+        {{else}}{{t "admin.users.flash.default"}}{{/if}}{{/if}}
+      </article>
+    </section>
+  {{/if}}
+
+  {{#if error}}
+    <section class="section">
+      <article class="form-error">{{error}}</article>
+    </section>
+  {{/if}}
+
+  <section class="section">
+    <form method="get" action="/admin/users" class="admin-search-bar">
+      <input
+        type="search"
+        name="q"
+        value="{{search}}"
+        placeholder="{{t "admin.users.searchPlaceholder"}}"
+        aria-label="{{t "admin.users.searchAria"}}"
+        class="admin-search-input"
+      />
+      <button type="submit" class="cta-primary admin-search-btn">{{t "admin.users.search"}}</button>
+      {{#if search}}
+        <a href="/admin/users" class="cta-secondary">{{t "admin.users.clear"}}</a>
+      {{/if}}
+    </form>
+    <p class="admin-result-count">{{t "admin.users.resultCount" count=total}}{{#if search}} {{t "admin.users.resultsFor" search=search}}{{/if}}</p>
+  </section>
+
+  <section class="section">
+    <div class="admin-news-grid admin-user-grid">
+      {{#if users.length}}
+        {{#each users}}
+          <article class="news-card admin-news-card admin-user-card">
+            <header class="news-card-header">
+              <div>
+                <h3>{{fullName}}</h3>
+                <p class="news-meta">@{{username}}</p>
+              </div>
+              <p class="stack docs-install-chip">{{#if isAdminRole}}{{t "admin.users.roleAdmin"}}{{else}}{{t "admin.users.roleUser"}}{{/if}}</p>
+            </header>
+            <p class="news-summary">{{email}}</p>
+            <p class="news-status">{{t "admin.users.status" status=(t (ternary isActive "admin.users.active" "admin.users.inactive"))}}</p>
+            <p class="news-meta">{{t "admin.users.joined" date=(formatDateTime createdAt)}}</p>
+            <section class="admin-user-activity">
+              <h4 class="admin-user-activity-title">{{t "admin.users.recentLoginsTitle"}}</h4>
+              {{#if hasRecentLogins}}
+                <ul class="docs-list admin-user-login-list">
+                  {{#each recentLogins}}
+                    <li>
+                      <strong>{{#if locationLabel}}{{locationLabel}}{{else}}{{#if countryName}}{{countryName}}{{else}}{{t "admin.users.unknownLocation"}}{{/if}}{{/if}}</strong>
+                      <span class="admin-user-login-meta">{{t "admin.users.loginAt" date=(formatDateTime createdAt)}}</span>
+                      {{#if ipAddress}}
+                        <span class="admin-user-login-meta">{{t "admin.users.ipAddress" ip=ipAddress}}</span>
+                      {{/if}}
+                    </li>
+                  {{/each}}
+                </ul>
+              {{else}}
+                <p class="news-meta">{{t "admin.users.noLoginHistory"}}</p>
+              {{/if}}
+              {{#if registrationCountryName}}
+                <p class="news-meta">{{t "admin.users.registrationOrigin" country=registrationCountryName}}</p>
+              {{/if}}
+              <p><a href="{{detailHref}}" class="cta-secondary">{{t "admin.users.viewDetails"}}</a></p>
+            </section>
+            <div class="admin-card-actions admin-user-actions">
+              <form method="post" action="/admin/users/role">
+                <input type="hidden" name="id" value="{{id}}" />
+                <input type="hidden" name="role" value="{{nextRole}}" />
+                <button type="submit" class="cta-secondary">{{#if isAdminRole}}{{t "admin.users.convertToUser"}}{{else}}{{t "admin.users.promoteToAdmin"}}{{/if}}</button>
+              </form>
+              <form method="post" action="/admin/users/status">
+                <input type="hidden" name="id" value="{{id}}" />
+                <input type="hidden" name="status" value="{{nextStatus}}" />
+                <button type="submit" class="danger-btn danger-btn-alt">{{#if isActive}}{{t "admin.users.deactivate"}}{{else}}{{t "admin.users.reactivate"}}{{/if}}</button>
+              </form>
+            </div>
+          </article>
+        {{/each}}
+      {{else}}
+        <article class="feature-card">
+          <h3>{{t "admin.users.emptyTitle"}}</h3>
+          <p>{{#if search}}{{t "admin.users.emptySearchPrefix"}} <a href="/admin/users">{{t "admin.users.emptySearchAction"}}</a>.{{else}}{{t "admin.users.emptyDefault"}}{{/if}}</p>
+        </article>
+      {{/if}}
+    </div>
+  </section>
+
+  {{#if (gt totalPages 1)}}
+    <nav class="section admin-pagination" aria-label="{{t "admin.users.paginationAria"}}">
+      {{#if hasPrev}}
+        <a href="/admin/users?page={{prevPage}}{{#if search}}&q={{search}}{{/if}}" class="cta-secondary pagination-btn">{{t "admin.users.previous"}}</a>
+      {{else}}
+        <span class="pagination-btn pagination-disabled">{{t "admin.users.previous"}}</span>
+      {{/if}}
+
+      <div class="pagination-pages">
+        {{#each pages}}
+          {{#if isCurrent}}
+            <span class="pagination-page pagination-current">{{number}}</span>
+          {{else}}
+            <a href="/admin/users?page={{number}}{{#if ../search}}&q={{../search}}{{/if}}" class="pagination-page">{{number}}</a>
+          {{/if}}
+        {{/each}}
+      </div>
+
+      {{#if hasNext}}
+        <a href="/admin/users?page={{nextPage}}{{#if search}}&q={{search}}{{/if}}" class="cta-secondary pagination-btn">{{t "admin.users.next"}}</a>
+      {{else}}
+        <span class="pagination-btn pagination-disabled">{{t "admin.users.next"}}</span>
+      {{/if}}
+    </nav>
+  {{/if}}
+</main>

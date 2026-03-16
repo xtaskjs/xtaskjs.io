@@ -1,0 +1,105 @@
+{{> site-header viewer=viewer}}
+
+<main class="spring-like-home admin-shell">
+  <section class="section admin-header-row">
+    <div class="hero-copy">
+      <p class="eyebrow">{{t "admin.shared.eyebrow"}}</p>
+      <h1>{{t "admin.news.title"}}</h1>
+      <p>{{t "admin.news.subtitle"}}</p>
+    </div>
+    <div class="admin-actions">
+      <a href="/admin/users" class="cta-secondary">{{t "admin.shared.manageUsers"}}</a>
+      <a href="/admin/news/new" class="cta-primary">{{t "admin.news.create"}}</a>
+      <form method="post" action="/admin/logout">
+        <button type="submit" class="cta-secondary">{{t "admin.shared.logout"}}</button>
+      </form>
+    </div>
+  </section>
+
+  {{#if message}}
+    <section class="section">
+      <article class="admin-flash">
+        {{#if (eq message "created")}}{{t "admin.news.flash.created"}}
+        {{else}}{{#if (eq message "updated")}}{{t "admin.news.flash.updated"}}
+        {{else}}{{#if (eq message "deleted")}}{{t "admin.news.flash.deleted"}}
+        {{else}}{{t "admin.news.flash.default"}}{{/if}}{{/if}}{{/if}}
+      </article>
+    </section>
+  {{/if}}
+
+  <section class="section">
+    <form method="get" action="/admin/news" class="admin-search-bar">
+      <input
+        type="search"
+        name="q"
+        value="{{search}}"
+        placeholder="{{t "admin.news.searchPlaceholder"}}"
+        aria-label="{{t "admin.news.searchAria"}}"
+        class="admin-search-input"
+      />
+      <button type="submit" class="cta-primary admin-search-btn">{{t "admin.news.search"}}</button>
+      {{#if search}}
+        <a href="/admin/news" class="cta-secondary">{{t "admin.news.clear"}}</a>
+      {{/if}}
+    </form>
+    <p class="admin-result-count">{{t "admin.news.resultCount" count=total}}{{#if search}} {{t "admin.news.resultsFor" search=search}}{{/if}}</p>
+  </section>
+
+  <section class="section">
+    <div class="admin-news-grid">
+      {{#if news.length}}
+        {{#each news}}
+          <article class="news-card admin-news-card">
+            {{#if imageUrl}}
+              <img src="{{imageUrl}}" alt="{{title}}" class="news-card-image" />
+            {{/if}}
+            <header class="news-card-header">
+              <h3>{{title}}</h3>
+              <p class="news-meta">{{t "admin.news.created" date=(formatDateTime createdAt)}}</p>
+            </header>
+            <p class="news-summary">{{summary}}</p>
+            <p class="news-status">{{t "admin.news.status" status=(t (ternary isPublished "admin.news.published" "admin.news.draft"))}}</p>
+            <div class="admin-card-actions">
+              <a href="/admin/news/edit?id={{id}}" class="cta-secondary">{{t "admin.news.edit"}}</a>
+              <form method="post" action="/admin/news/delete" onsubmit="return confirm('{{t "admin.news.deleteConfirm"}}');">
+                <input type="hidden" name="id" value="{{id}}" />
+                <button type="submit" class="danger-btn">{{t "admin.news.delete"}}</button>
+              </form>
+            </div>
+          </article>
+        {{/each}}
+      {{else}}
+        <article class="feature-card">
+          <h3>{{t "admin.news.emptyTitle"}}</h3>
+          <p>{{#if search}}{{t "admin.news.emptySearchPrefix"}} <a href="/admin/news">{{t "admin.news.emptySearchAction"}}</a>.{{else}}{{t "admin.news.emptyDefault"}}{{/if}}</p>
+        </article>
+      {{/if}}
+    </div>
+  </section>
+
+  {{#if (gt totalPages 1)}}
+    <nav class="section admin-pagination" aria-label="{{t "admin.news.paginationAria"}}">
+      {{#if hasPrev}}
+        <a href="/admin/news?page={{prevPage}}{{#if search}}&q={{search}}{{/if}}" class="cta-secondary pagination-btn">{{t "admin.news.previous"}}</a>
+      {{else}}
+        <span class="pagination-btn pagination-disabled">{{t "admin.news.previous"}}</span>
+      {{/if}}
+
+      <div class="pagination-pages">
+        {{#each pages}}
+          {{#if isCurrent}}
+            <span class="pagination-page pagination-current">{{number}}</span>
+          {{else}}
+            <a href="/admin/news?page={{number}}{{#if ../search}}&q={{../search}}{{/if}}" class="pagination-page">{{number}}</a>
+          {{/if}}
+        {{/each}}
+      </div>
+
+      {{#if hasNext}}
+        <a href="/admin/news?page={{nextPage}}{{#if search}}&q={{search}}{{/if}}" class="cta-secondary pagination-btn">{{t "admin.news.next"}}</a>
+      {{else}}
+        <span class="pagination-btn pagination-disabled">{{t "admin.news.next"}}</span>
+      {{/if}}
+    </nav>
+  {{/if}}
+</main>

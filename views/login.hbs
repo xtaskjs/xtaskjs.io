@@ -1,0 +1,42 @@
+{{> site-header viewer=viewer}}
+
+<main class="spring-like-home admin-shell">
+  <section class="section">
+    <div class="hero-copy">
+      <p class="eyebrow">{{t "auth.login.eyebrow"}}</p>
+      <h1>{{t "auth.login.title"}}</h1>
+      <p>{{t "auth.login.subtitle"}}</p>
+    </div>
+  </section>
+
+  <section class="section auth-page-grid">
+    <article class="admin-card">
+      <h2>{{t "auth.login.formTitle"}}</h2>
+      {{#if hasError}}
+        <p class="form-error">{{#if errorMessage}}{{errorMessage}}{{else}}{{t "auth.login.invalidCredentials"}}{{/if}}</p>
+      {{/if}}
+      {{#if infoMessageKey}}
+        <p class="form-success">{{t infoMessageKey}}</p>
+      {{/if}}
+      <form method="post" action="/login" class="admin-form">
+        <label for="identifier">{{t "auth.login.identifier"}}</label>
+        <input id="identifier" name="identifier" type="text" autocomplete="username" required value="{{form.identifier}}" />
+
+        <label for="password">{{t "auth.login.password"}}</label>
+        <input id="password" name="password" type="password" autocomplete="current-password" required />
+
+        <button type="submit" class="cta-primary btn-full">{{t "auth.login.submit"}}</button>
+      </form>
+      <div class="auth-inline-actions">
+        <a href="/forgot-password" class="cta-secondary inline-btn">{{t "auth.login.forgotPassword"}}</a>
+      </div>
+    </article>
+
+    <article class="feature-card auth-aside-card">
+      <h2>{{t "auth.login.newHere"}}</h2>
+      <p>{{t "auth.login.newHereBody"}}</p>
+      <a href="/register" class="cta-secondary inline-btn">{{t "auth.login.createAccount"}}</a>
+      <p class="auth-note">{{t "auth.login.newHereNote"}}</p>
+    </article>
+  </section>
+</main>

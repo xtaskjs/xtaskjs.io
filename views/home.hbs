@@ -1,0 +1,110 @@
+{{> site-header viewer=viewer}}
+
+<main class="spring-like-home">
+  <section class="hero-slab" id="why">
+    <div class="hero-copy">
+      <p class="eyebrow">{{t "site.home.eyebrow"}}</p>
+      <h1>{{t "site.home.title"}}</h1>
+      <p>{{t "site.home.tagline"}}</p>
+      <div class="hero-cta">
+        <a href="#learn" class="cta-primary">{{t "site.home.quickStart"}}</a>
+        <a href="https://github.com/xtaskjs/xtaskjs" target="_blank" rel="noreferrer" class="cta-secondary">{{t "site.home.exploreGithub"}}</a>
+      </div>
+      <p class="stack stack-inline">{{t "site.home.stack"}}</p>
+    </div>
+    <aside class="hero-panel">
+      <h2>{{t "site.home.productionReady"}}</h2>
+      <ul>
+        <li>{{t "site.home.productionItems.one"}}</li>
+        <li>{{t "site.home.productionItems.two"}}</li>
+        <li>{{t "site.home.productionItems.three"}}</li>
+      </ul>
+    </aside>
+  </section>
+
+  <section class="section" id="learn">
+    <h2>{{t "site.home.learnTitle"}}</h2>
+    <div class="card-grid three">
+      <article class="feature-card">
+        <h3>{{t "site.home.guidesTitle"}}</h3>
+        <p>{{t "site.home.guidesBody"}}</p>
+        <a href="/documentation/architecture#quick-start" class="cta-secondary inline-btn">{{t "site.home.guidesAction"}}</a>
+      </article>
+      <article class="feature-card">
+        <h3>{{t "site.home.referenceTitle"}}</h3>
+        <p>{{t "site.home.referenceBody"}}</p>
+        <a href="/documentation/packages" class="cta-secondary inline-btn">{{t "site.home.referenceAction"}}</a>
+      </article>
+      <article class="feature-card">
+        <h3>{{t "site.home.examplesTitle"}}</h3>
+        <p>{{t "site.home.examplesBody"}}</p>
+        <a href="/documentation/samples" class="cta-secondary inline-btn">{{t "site.home.examplesAction"}}</a>
+      </article>
+    </div>
+  </section>
+
+  <section class="section" id="projects">
+    <h2>{{t "site.home.projectsTitle"}}</h2>
+    <div class="project-grid">
+      {{#each projectPackages}}
+        <article class="project-card project-package-card">
+          <div class="project-card-heading">
+            <h3><a href="{{npmUrl}}" target="_blank" rel="noreferrer">{{name}}</a></h3>
+            <span class="stack project-version-chip">v{{latestVersion}}</span>
+          </div>
+          <p>{{description}}</p>
+          <p class="project-published-at">
+            {{#if publishedAt}}
+              {{t "site.home.publishedOnNpm" date=(formatDateTime publishedAt)}}
+            {{else}}
+              {{t "site.home.publishedOnNpm" date=(t "site.home.npmUnavailable")}}
+            {{/if}}
+          </p>
+        </article>
+      {{/each}}
+    </div>
+    <a href="/documentation" class="cta-primary inline-btn">{{t "site.home.openDocumentationHub"}}</a>
+  </section>
+
+  <section class="section split" id="community">
+    <article class="feature-card">
+      <h3>{{t "site.home.communityTitle"}}</h3>
+      <p>{{t "site.home.communityBody"}}</p>
+    </article>
+    <article class="feature-card" id="support">
+      <h3>{{t "site.home.supportTitle"}}</h3>
+      <p>{{t "site.home.supportBody"}}</p>
+    </article>
+  </section>
+
+  <section class="section" id="news">
+    <h2>{{t "site.home.latestNewsTitle"}}</h2>
+    <div class="news-feed compact">
+      {{#if latestNews.length}}
+        {{#each latestNews}}
+          <article class="news-card">              {{#if imageUrl}}
+                <img src="{{imageUrl}}" alt="{{title}}" class="news-card-image" />
+                {{/if}}            <header class="news-card-header">
+              <h3>{{title}}</h3>
+                <p class="news-meta">{{formatDateTime createdAt}}</p>
+            </header>
+            <p class="news-summary">{{summary}}</p>
+          </article>
+        {{/each}}
+      {{else}}
+        <article class="feature-card">
+            <h3>{{t "site.home.latestNewsEmptyTitle"}}</h3>
+            <p>{{t "site.home.latestNewsEmptyBody"}}</p>
+        </article>
+      {{/if}}
+    </div>
+      <a href="/news" class="cta-secondary inline-btn">{{t "site.home.openFullNews"}}</a>
+  </section>
+</main>
+
+<footer class="global-footer">
+  <div class="footer-wrap">
+      <p>{{t "site.footer.builtWith"}}</p>
+      <a href="https://github.com/xtaskjs/xtaskjs" target="_blank" rel="noreferrer">{{t "site.footer.github"}}</a>
+  </div>
+</footer>

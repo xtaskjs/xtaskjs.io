@@ -1,0 +1,44 @@
+{{> site-header viewer=viewer}}
+
+<main class="spring-like-home">
+  <section class="section">
+    <div class="hero-copy">
+      <p class="eyebrow">{{t "site.news.eyebrow"}}</p>
+      <h1>{{t "site.news.title"}}</h1>
+      <p>{{t "site.news.subtitle"}}</p>
+    </div>
+  </section>
+
+  <section class="section" id="news-feed">
+    <h2>{{t "site.news.latestNewsTitle"}}</h2>
+    <div class="news-feed">
+      {{#if news.length}}
+        {{#each news}}
+          <article class="news-card" id="news-item-{{id}}">
+            {{#if imageUrl}}
+              <img src="{{imageUrl}}" alt="{{title}}" class="news-card-image" />
+            {{/if}}
+            <header class="news-card-header">
+              <h3>{{title}}</h3>
+              <p class="news-meta">{{t "site.news.published" date=(formatDateTime createdAt)}}</p>
+            </header>
+            <p class="news-summary">{{summary}}</p>
+            <p class="news-content">{{content}}</p>
+          </article>
+        {{/each}}
+      {{else}}
+        <article class="feature-card">
+          <h3>{{t "site.news.emptyTitle"}}</h3>
+          <p>{{t "site.news.emptyBody"}}</p>
+        </article>
+      {{/if}}
+    </div>
+  </section>
+</main>
+
+<footer class="global-footer">
+  <div class="footer-wrap">
+    <p>{{t "site.footer.builtWith"}}</p>
+    <a href="/admin/login">{{t "site.footer.adminAccess"}}</a>
+  </div>
+</footer>

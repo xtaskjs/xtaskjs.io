@@ -1,0 +1,36 @@
+{{> site-header viewer=viewer}}
+
+<main class="spring-like-home admin-shell">
+  <section class="section">
+    <div class="hero-copy">
+      <p class="eyebrow">{{t "auth.admin.eyebrow"}}</p>
+      <h1>{{t "auth.admin.title"}}</h1>
+      <p>{{t "auth.admin.subtitle"}}</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <article class="admin-card">
+      <h2>{{t "auth.admin.accessTitle"}}</h2>
+      {{#if hasError}}
+        <p class="form-error">{{#if errorMessage}}{{errorMessage}}{{else}}{{t "auth.login.invalidCredentials"}}{{/if}}</p>
+      {{/if}}
+      {{#if infoMessageKey}}
+        <p class="form-success">{{t infoMessageKey}}</p>
+      {{/if}}
+      <form method="post" action="/admin/login" class="admin-form">
+        <label for="username">{{t "auth.admin.username"}}</label>
+        <input id="username" name="username" type="text" required value="{{form.username}}" />
+
+        <label for="password">{{t "auth.admin.password"}}</label>
+        <input id="password" name="password" type="password" required />
+
+        <button type="submit" class="cta-primary btn-full">{{t "auth.admin.submit"}}</button>
+      </form>
+      <div class="auth-inline-actions">
+        <a href="/login" class="cta-secondary inline-btn">{{t "auth.admin.standardLogin"}}</a>
+        <a href="/news" class="cta-secondary inline-btn">{{t "auth.admin.backToNews"}}</a>
+      </div>
+    </article>
+  </section>
+</main>

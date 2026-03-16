@@ -1,0 +1,154 @@
+{{> site-header viewer=viewer}}
+
+<main class="spring-like-home admin-shell">
+  <section class="section admin-header-row">
+    <div class="hero-copy">
+      <p class="eyebrow">{{t "admin.shared.eyebrow"}}</p>
+      <h1>{{t "admin.users.detail.title" name=user.fullName}}</h1>
+      <p>{{t "admin.users.detail.subtitle"}}</p>
+    </div>
+    <div class="admin-actions">
+      <a href="/admin/users" class="cta-secondary">{{t "admin.users.detail.backToUsers"}}</a>
+      <a href="/admin/news" class="cta-secondary">{{t "admin.shared.manageNews"}}</a>
+      <form method="post" action="/admin/logout">
+        <button type="submit" class="cta-secondary">{{t "admin.shared.logout"}}</button>
+      </form>
+    </div>
+  </section>
+
+  <section class="section dashboard-grid">
+    <article class="admin-card dashboard-card">
+      <h2>{{t "admin.users.detail.accountTitle"}}</h2>
+      <dl class="profile-grid">
+        <div>
+          <dt>{{t "auth.dashboard.fullName"}}</dt>
+          <dd>{{user.fullName}}</dd>
+        </div>
+        <div>
+          <dt>{{t "auth.dashboard.username"}}</dt>
+          <dd>{{user.username}}</dd>
+        </div>
+        <div>
+          <dt>{{t "auth.dashboard.email"}}</dt>
+          <dd>{{user.email}}</dd>
+        </div>
+        <div>
+          <dt>{{t "auth.dashboard.role"}}</dt>
+          <dd>{{#if (eq user.role "admin")}}{{t "admin.users.roleAdmin"}}{{else}}{{t "admin.users.roleUser"}}{{/if}}</dd>
+        </div>
+        <div>
+          <dt>{{t "auth.dashboard.status"}}</dt>
+          <dd>{{#if user.isActive}}{{t "admin.users.active"}}{{else}}{{t "admin.users.inactive"}}{{/if}}</dd>
+        </div>
+        <div>
+          <dt>{{t "auth.dashboard.emailVerification"}}</dt>
+          <dd>{{#if user.emailVerified}}{{t "auth.dashboard.verified"}}{{else}}{{t "auth.dashboard.pending"}}{{/if}}</dd>
+        </div>
+        <div>
+          <dt>{{t "admin.users.detail.registrationCountry"}}</dt>
+          <dd>{{#if user.registrationCountryName}}{{user.registrationCountryName}}{{else}}{{t "admin.users.unknownLocation"}}{{/if}}</dd>
+        </div>
+        <div>
+          <dt>{{t "admin.users.detail.registrationIp"}}</dt>
+          <dd>{{#if user.registrationIpAddress}}{{user.registrationIpAddress}}{{else}}-{{/if}}</dd>
+        </div>
+        <div>
+          <dt>{{t "auth.dashboard.joined"}}</dt>
+          <dd>{{formatDateTime user.createdAt}}</dd>
+        </div>
+        <div>
+          <dt>{{t "auth.dashboard.updated"}}</dt>
+          <dd>{{formatDateTime user.updatedAt}}</dd>
+        </div>
+      </dl>
+    </article>
+
+    <article class="feature-card dashboard-card">
+      <h2>{{t "admin.users.detail.historySummaryTitle"}}</h2>
+      <p class="news-meta">{{t "admin.users.detail.historySummary" count=totalEvents}}</p>
+      <ul class="docs-list">
+        <li>{{t "admin.users.detail.summaryItems.one"}}</li>
+        <li>{{t "admin.users.detail.summaryItems.two"}}</li>
+        <li>{{t "admin.users.detail.summaryItems.three"}}</li>
+      </ul>
+    </article>
+  </section>
+
+  <section class="section">
+    <article class="admin-card">
+      <div class="news-card-header">
+        <div>
+          <h2>{{t "admin.users.detail.loginHistoryTitle"}}</h2>
+          <p class="news-meta">{{t "admin.users.detail.loginHistorySubtitle"}}</p>
+        </div>
+      </div>
+
+      {{#if hasLoginEvents}}
+        <div class="admin-login-history-list">
+          {{#each loginEvents}}
+            <article class="feature-card admin-login-history-item">
+              <div class="news-card-header">
+                <div>
+                  <h3>{{#if locationLabel}}{{locationLabel}}{{else}}{{#if countryName}}{{countryName}}{{else}}{{t "admin.users.unknownLocation"}}{{/if}}{{/if}}</h3>
+                  <p class="news-meta">{{t "admin.users.loginAt" date=(formatDateTime createdAt)}}</p>
+                </div>
+                {{#if ipAddress}}
+                  <p class="stack docs-install-chip">{{ipAddress}}</p>
+                {{/if}}
+              </div>
+              <dl class="profile-grid admin-login-history-grid">
+                <div>
+                  <dt>{{t "admin.users.detail.country"}}</dt>
+                  <dd>{{#if countryName}}{{countryName}}{{else}}-{{/if}}</dd>
+                </div>
+                <div>
+                  <dt>{{t "admin.users.detail.region"}}</dt>
+                  <dd>{{#if region}}{{region}}{{else}}-{{/if}}</dd>
+                </div>
+                <div>
+                  <dt>{{t "admin.users.detail.city"}}</dt>
+                  <dd>{{#if city}}{{city}}{{else}}-{{/if}}</dd>
+                </div>
+                <div>
+                  <dt>{{t "admin.users.detail.ipLabel"}}</dt>
+                  <dd>{{#if ipAddress}}{{ipAddress}}{{else}}-{{/if}}</dd>
+                </div>
+              </dl>
+              {{#if userAgent}}
+                <p class="news-summary"><strong>{{t "admin.users.detail.userAgent"}}</strong>: {{userAgent}}</p>
+              {{/if}}
+            </article>
+          {{/each}}
+        </div>
+      {{else}}
+        <p class="news-meta">{{t "admin.users.noLoginHistory"}}</p>
+      {{/if}}
+    </article>
+  </section>
+
+  {{#if (gt totalPages 1)}}
+    <nav class="section admin-pagination" aria-label="{{t "admin.users.detail.paginationAria"}}">
+      {{#if hasPrev}}
+        <a href="{{basePath}}?page={{prevPage}}" class="cta-secondary pagination-btn">{{t "admin.users.previous"}}</a>
+      {{else}}
+        <span class="pagination-btn pagination-disabled">{{t "admin.users.previous"}}</span>
+      {{/if}}
+
+      <div class="pagination-pages">
+        {{#each pages}}
+          {{#if isCurrent}}
+            <span class="pagination-page pagination-current">{{number}}</span>
+          {{else}}
+            <a href="{{../basePath}}?page={{number}}" class="pagination-page">{{number}}</a>
+          {{/if}}
+        {{/each}}
+      </div>
+
+      {{#if hasNext}}
+        <a href="{{basePath}}?page={{nextPage}}" class="cta-secondary pagination-btn">{{t "admin.users.next"}}</a>
+      {{else}}
+        <span class="pagination-btn pagination-disabled">{{t "admin.users.next"}}</span>
+      {{/if}}
+    </nav>
+  {{/if}}
+</main>

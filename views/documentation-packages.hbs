@@ -1,0 +1,73 @@
+{{> site-header viewer=viewer}}
+
+<main class="spring-like-home docs-home">
+  <section class="docs-hero">
+    <div class="hero-copy docs-hero-copy">
+      <p class="eyebrow">{{t "site.docs.packages.eyebrow"}}</p>
+      <h1>{{t "site.docs.packages.title"}}</h1>
+      <p>{{t "site.docs.packages.subtitle"}}</p>
+      <div class="hero-cta">
+        <a href="#package-catalog" class="cta-primary">{{t "site.docs.packages.browseCatalog"}}</a>
+        <a href="/documentation/decorators" class="cta-secondary">{{t "site.docs.packages.openDecorators"}}</a>
+      </div>
+      <p class="stack stack-inline">{{t "site.docs.packages.stats" count=packageCount}}</p>
+    </div>
+    <div class="docs-overview-grid">
+      <article class="feature-card docs-overview-card">
+        <h3>{{t "site.docs.packages.coreRuntime"}}</h3>
+        <p>{{t "site.docs.packages.coreRuntimeText"}}</p>
+      </article>
+      <article class="feature-card docs-overview-card">
+        <h3>{{t "site.docs.packages.adapterLayer"}}</h3>
+        <p>{{t "site.docs.packages.adapterLayerText"}}</p>
+      </article>
+      <article class="feature-card docs-overview-card">
+        <h3>{{t "site.docs.packages.integrations"}}</h3>
+        <p>{{t "site.docs.packages.integrationsText"}}</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="docs-layout">
+    <aside class="docs-sidebar-card">
+      <p class="eyebrow">{{t "site.docs.packages.documentation"}}</p>
+      <nav class="docs-sidebar-nav" aria-label="{{t "site.docs.hub.documentationSections"}}">
+        {{#each docsPages}}
+          <a href="{{href}}"{{#if isCurrent}} class="is-current"{{/if}}>{{label}}</a>
+        {{/each}}
+      </nav>
+      <div class="docs-sidebar-meta">
+        <p>{{t "site.docs.hub.repo"}} <a href="{{repoUrl}}" target="_blank" rel="noreferrer">xtaskjs/xtask</a></p>
+        <p>{{t "site.docs.packages.focus"}}</p>
+      </div>
+    </aside>
+
+    <div class="docs-content">
+      <section class="section docs-section" id="package-catalog">
+        <div class="docs-section-heading">
+          <p class="eyebrow">{{t "site.docs.packages.catalogEyebrow"}}</p>
+          <h2>{{t "site.docs.packages.catalogTitle"}}</h2>
+        </div>
+        <div class="docs-package-grid">
+          {{#each packages}}
+            <article class="project-card docs-package-card">
+              <p class="eyebrow">{{path}}</p>
+              <h3><a href="/documentation/packages/{{slug}}">{{name}}</a></h3>
+              <p>{{tagline}}</p>
+              <p class="docs-package-purpose">{{purpose}}</p>
+              <p class="docs-sample-chip">{{t "site.docs.packages.sampleCoverage" sample=sample}}</p>
+              <a href="/documentation/packages/{{slug}}" class="cta-secondary inline-btn docs-package-index-link">{{t "site.docs.packages.openPackage"}}</a>
+            </article>
+          {{/each}}
+        </div>
+      </section>
+    </div>
+  </section>
+</main>
+
+<footer class="global-footer">
+  <div class="footer-wrap">
+    <p>{{t "site.docs.hub.footer"}}</p>
+    <a href="/admin/login">{{t "site.footer.adminAccess"}}</a>
+  </div>
+</footer>

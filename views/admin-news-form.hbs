@@ -1,0 +1,62 @@
+{{> site-header viewer=viewer}}
+
+<main class="spring-like-home admin-shell">
+  <section class="section admin-header-row">
+    <div class="hero-copy">
+      <p class="eyebrow">{{t "admin.shared.eyebrow"}}</p>
+      <h1>{{#if news.id}}{{t "admin.news.form.editTitle"}}{{else}}{{t "admin.news.form.createTitle"}}{{/if}}</h1>
+      <p>{{t "admin.news.form.subtitle"}}</p>
+    </div>
+    <div class="admin-actions">
+      <a href="/admin/users" class="cta-secondary">{{t "admin.shared.manageUsers"}}</a>
+      <a href="/admin/news" class="cta-secondary">{{t "admin.news.form.backToList"}}</a>
+      <form method="post" action="/admin/logout">
+        <button type="submit" class="cta-secondary">{{t "admin.shared.logout"}}</button>
+      </form>
+    </div>
+  </section>
+
+  <section class="section">
+    <article class="admin-card">
+      {{#if errorMessageKey}}
+        <p class="form-error">{{t errorMessageKey}}</p>
+      {{else}}
+        {{#if error}}
+          <p class="form-error">{{error}}</p>
+        {{/if}}
+      {{/if}}
+      <form method="post" action="{{action}}" enctype="multipart/form-data" class="admin-form">
+        {{#if news.id}}
+          <input type="hidden" name="id" value="{{news.id}}" />
+        {{/if}}
+        <label for="title">{{t "admin.news.form.title"}}</label>
+        <input id="title" name="title" type="text" required value="{{news.title}}" />
+
+        <label for="summary">{{t "admin.news.form.summary"}}</label>
+        <textarea id="summary" name="summary" rows="3" required>{{news.summary}}</textarea>
+
+        <label for="content">{{t "admin.news.form.content"}}</label>
+        <textarea id="content" name="content" rows="8" required>{{news.content}}</textarea>
+
+        <label for="image">{{t "admin.news.form.image"}}</label>
+        {{#if news.imageUrl}}
+          <div class="admin-current-image">
+            <img src="{{news.imageUrl}}" alt="{{t "admin.news.form.currentCover"}}" class="admin-image-preview" />
+            <label class="checkbox-row">
+              <input name="removeImage" type="checkbox" value="on" />
+              {{t "admin.news.form.removeImage"}}
+            </label>
+          </div>
+        {{/if}}
+        <input id="image" name="image" type="file" accept="image/jpeg,image/png,image/gif,image/webp" />
+
+        <label class="checkbox-row" for="isPublished">
+          <input id="isPublished" name="isPublished" type="checkbox" {{#if news.isPublished}}checked{{/if}} />
+          {{t "admin.news.form.publish"}}
+        </label>
+
+        <button type="submit" class="cta-primary btn-full">{{#if news.id}}{{t "admin.news.form.saveAction"}}{{else}}{{t "admin.news.form.publishAction"}}{{/if}}</button>
+      </form>
+    </article>
+  </section>
+</main>

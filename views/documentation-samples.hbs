@@ -1,0 +1,83 @@
+{{> site-header viewer=viewer}}
+
+<main class="spring-like-home docs-home">
+  <section class="docs-hero">
+    <div class="hero-copy docs-hero-copy">
+      <p class="eyebrow">{{t "site.docs.samples.eyebrow"}}</p>
+      <h1>{{t "site.docs.samples.title"}}</h1>
+      <p>{{t "site.docs.samples.subtitle"}}</p>
+      <div class="hero-cta">
+        <a href="#samples" class="cta-primary">{{t "site.docs.samples.browseCatalog"}}</a>
+        <a href="/documentation/architecture" class="cta-secondary">{{t "site.docs.samples.openArchitecture"}}</a>
+      </div>
+      <p class="stack stack-inline">{{t "site.docs.samples.stats" count=sampleCount}}</p>
+    </div>
+    <div class="docs-overview-grid">
+      <article class="feature-card docs-overview-card">
+        <h3>{{t "site.docs.samples.startSmall"}}</h3>
+        <p>{{t "site.docs.samples.startSmallText"}}</p>
+      </article>
+      <article class="feature-card docs-overview-card">
+        <h3>{{t "site.docs.samples.swapAdapters"}}</h3>
+        <p>{{t "site.docs.samples.swapAdaptersText"}}</p>
+      </article>
+      <article class="feature-card docs-overview-card">
+        <h3>{{t "site.docs.samples.addIntegrations"}}</h3>
+        <p>{{t "site.docs.samples.addIntegrationsText"}}</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="docs-layout">
+    <aside class="docs-sidebar-card">
+      <p class="eyebrow">{{t "site.docs.samples.documentation"}}</p>
+      <nav class="docs-sidebar-nav" aria-label="{{t "site.docs.hub.documentationSections"}}">
+        {{#each docsPages}}
+          <a href="{{href}}"{{#if isCurrent}} class="is-current"{{/if}}>{{label}}</a>
+        {{/each}}
+      </nav>
+      <div class="docs-sidebar-meta">
+        <p>{{t "site.docs.hub.repo"}} <a href="{{repoUrl}}" target="_blank" rel="noreferrer">xtaskjs/xtask</a></p>
+        <p>{{t "site.docs.samples.focus"}}</p>
+      </div>
+    </aside>
+
+    <div class="docs-content">
+      <section class="section docs-section" id="samples">
+        <div class="docs-section-heading">
+          <p class="eyebrow">{{t "site.docs.samples.catalogEyebrow"}}</p>
+          <h2>{{t "site.docs.samples.catalogTitle"}}</h2>
+        </div>
+        <div class="docs-sample-grid">
+          {{#each samples}}
+            <article class="feature-card docs-sample-card" id="sample-{{name}}">
+              <p class="eyebrow">{{folder}}</p>
+              <h3>{{name}}</h3>
+              <p>{{summary}}</p>
+              <p class="stack docs-install-chip">{{stack}}</p>
+              <h3>{{t "site.docs.samples.endpoints"}}</h3>
+              <ul class="docs-list">
+                {{#each endpoints}}
+                  <li>{{this}}</li>
+                {{/each}}
+              </ul>
+              <h3>{{t "site.docs.samples.typicalFlow"}}</h3>
+              <ol class="docs-list docs-list-numbered">
+                {{#each flow}}
+                  <li>{{this}}</li>
+                {{/each}}
+              </ol>
+            </article>
+          {{/each}}
+        </div>
+      </section>
+    </div>
+  </section>
+</main>
+
+<footer class="global-footer">
+  <div class="footer-wrap">
+    <p>{{t "site.docs.hub.footer"}}</p>
+    <a href="/admin/login">{{t "site.footer.adminAccess"}}</a>
+  </div>
+</footer>

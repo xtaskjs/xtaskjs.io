@@ -1,0 +1,114 @@
+{{> site-header viewer=viewer}}
+
+<main class="spring-like-home docs-home">
+  <section class="docs-hero">
+    <div class="hero-copy docs-hero-copy">
+      <p class="eyebrow">{{t "site.docs.architecture.eyebrow"}}</p>
+      <h1>{{t "site.docs.architecture.title"}}</h1>
+      <p>{{t "site.docs.architecture.subtitle"}}</p>
+      <div class="hero-cta">
+        <a href="#quick-start" class="cta-primary">{{t "site.docs.architecture.quickStart"}}</a>
+        <a href="/documentation/packages" class="cta-secondary">{{t "site.docs.architecture.openPackages"}}</a>
+      </div>
+    </div>
+    <div class="docs-overview-grid">
+      <article class="feature-card docs-overview-card">
+        <h3>{{t "site.docs.architecture.bootSequence"}}</h3>
+        <p>{{t "site.docs.architecture.bootSequenceText"}}</p>
+      </article>
+      <article class="feature-card docs-overview-card">
+        <h3>{{t "site.docs.architecture.requestPath"}}</h3>
+        <p>{{t "site.docs.architecture.requestPathText"}}</p>
+      </article>
+      <article class="feature-card docs-overview-card">
+        <h3>{{t "site.docs.architecture.securityLayering"}}</h3>
+        <p>{{t "site.docs.architecture.securityLayeringText"}}</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="docs-layout">
+    <aside class="docs-sidebar-card">
+      <p class="eyebrow">{{t "site.docs.architecture.documentation"}}</p>
+      <nav class="docs-sidebar-nav" aria-label="{{t "site.docs.hub.documentationSections"}}">
+        {{#each docsPages}}
+          <a href="{{href}}"{{#if isCurrent}} class="is-current"{{/if}}>{{label}}</a>
+        {{/each}}
+      </nav>
+      <div class="docs-sidebar-meta">
+        <p>{{t "site.docs.hub.repo"}} <a href="{{repoUrl}}" target="_blank" rel="noreferrer">xtaskjs/xtask</a></p>
+        <p>{{t "site.docs.architecture.focus"}}</p>
+      </div>
+    </aside>
+
+    <div class="docs-content">
+      <section class="section docs-section" id="quick-start">
+        <div class="docs-section-heading">
+          <p class="eyebrow">{{t "site.docs.hub.quickStartEyebrow"}}</p>
+          <h2>{{t "site.docs.hub.quickStartTitle"}}</h2>
+        </div>
+        <div class="docs-two-column">
+          <article class="feature-card">
+            <h3>{{t "site.docs.hub.install"}}</h3>
+            <div class="docs-code-block"><pre><code>{{quickStart.install}}</code></pre></div>
+          </article>
+          <article class="feature-card">
+            <h3>{{t "site.docs.hub.bootstrap"}}</h3>
+            <div class="docs-code-block"><pre><code>{{quickStart.bootstrap}}</code></pre></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="section docs-section" id="bootstrap-flow">
+        <div class="docs-section-heading">
+          <p class="eyebrow">{{t "site.docs.architecture.bootstrapFlowEyebrow"}}</p>
+          <h2>{{t "site.docs.architecture.bootstrapFlowTitle"}}</h2>
+        </div>
+        <div class="docs-flow-rail">
+          {{#each bootstrapFlow}}
+            <article class="docs-flow-step">
+              <h3>{{title}}</h3>
+              <p>{{text}}</p>
+            </article>
+          {{/each}}
+        </div>
+      </section>
+
+      <section class="section docs-section" id="request-flow">
+        <div class="docs-section-heading">
+          <p class="eyebrow">{{t "site.docs.architecture.executionFlowEyebrow"}}</p>
+          <h2>{{t "site.docs.architecture.executionFlowTitle"}}</h2>
+        </div>
+        <article class="feature-card docs-diagram-card">
+          <h3>{{t "site.docs.architecture.requestLifecycle"}}</h3>
+          <div class="docs-flow-rail compact">
+            {{#each requestFlow}}
+              <article class="docs-flow-step compact">
+                <h3>{{title}}</h3>
+                <p>{{text}}</p>
+              </article>
+            {{/each}}
+          </div>
+        </article>
+        <article class="feature-card docs-diagram-card">
+          <h3>{{t "site.docs.architecture.securityLifecycle"}}</h3>
+          <div class="docs-flow-rail compact">
+            {{#each securityFlow}}
+              <article class="docs-flow-step compact">
+                <h3>{{title}}</h3>
+                <p>{{text}}</p>
+              </article>
+            {{/each}}
+          </div>
+        </article>
+      </section>
+    </div>
+  </section>
+</main>
+
+<footer class="global-footer">
+  <div class="footer-wrap">
+    <p>{{t "site.docs.hub.footer"}}</p>
+    <a href="/admin/login">{{t "site.footer.adminAccess"}}</a>
+  </div>
+</footer>

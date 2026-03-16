@@ -1,0 +1,184 @@
+{{> site-header viewer=viewer}}
+
+<main class="spring-like-home docs-home">
+  <section class="docs-hero docs-package-detail-hero">
+    <div class="hero-copy docs-hero-copy">
+      <p class="eyebrow">{{t "site.docs.packages.eyebrow"}}</p>
+      <h1>{{packageDoc.name}}</h1>
+      <p>{{packageDoc.tagline}}</p>
+      <div class="hero-cta">
+        <a href="/documentation/packages" class="cta-primary">{{t "site.docs.packages.backToCatalog"}}</a>
+        <a href="{{packageRepoUrl}}" class="cta-secondary" target="_blank" rel="noreferrer">{{t "site.docs.packages.viewSource"}}</a>
+      </div>
+      <div class="docs-chip-list">
+        <span class="stack docs-install-chip">{{packageDoc.install}}</span>
+        <span class="stack docs-install-chip">{{t "site.docs.packages.packagePath"}}: {{packageDoc.path}}</span>
+      </div>
+    </div>
+    <article class="feature-card docs-package-summary-card">
+      <p class="eyebrow">{{t "site.docs.packages.atAGlanceEyebrow"}}</p>
+      <h2>{{t "site.docs.packages.atAGlanceTitle"}}</h2>
+      <p class="docs-package-purpose">{{packageDoc.purpose}}</p>
+      <div class="docs-two-column">
+        <div>
+          <h3>{{t "site.docs.packages.whatItProvides"}}</h3>
+          <ul class="docs-list">
+            {{#each packageDoc.features}}
+              <li>{{this}}</li>
+            {{/each}}
+          </ul>
+        </div>
+        <div>
+          <h3>{{t "site.docs.packages.howItFits"}}</h3>
+          <ul class="docs-list">
+            {{#each packageDoc.integration}}
+              <li>{{this}}</li>
+            {{/each}}
+          </ul>
+        </div>
+      </div>
+    </article>
+  </section>
+
+  <section class="docs-layout">
+    <aside class="docs-sidebar-card">
+      <p class="eyebrow">{{t "site.docs.packages.documentation"}}</p>
+      <nav class="docs-sidebar-nav" aria-label="{{t "site.docs.hub.documentationSections"}}">
+        {{#each docsPages}}
+          <a href="{{href}}"{{#if isCurrent}} class="is-current"{{/if}}>{{label}}</a>
+        {{/each}}
+      </nav>
+      <div class="docs-sidebar-meta">
+        <p>{{t "site.docs.hub.repo"}} <a href="{{repoUrl}}" target="_blank" rel="noreferrer">xtaskjs/xtask</a></p>
+        <p>{{t "site.docs.packages.focus"}}</p>
+      </div>
+    </aside>
+
+    <div class="docs-content">
+      <section class="section docs-section">
+        <div class="docs-section-heading">
+          <p class="eyebrow">{{t "site.docs.packages.runtimeChartEyebrow"}}</p>
+          <h2>{{t "site.docs.packages.runtimeChartTitle"}}</h2>
+        </div>
+        <div class="docs-score-grid">
+          {{#each packageDoc.runtimeChart}}
+            <article class="feature-card docs-score-card">
+              <div class="docs-score-header">
+                <h3>{{label}}</h3>
+                <span>{{t "site.docs.packages.scoreLabel" score=score}}</span>
+              </div>
+              <div class="docs-score-bar" style="--score: {{score}};">
+                <span class="docs-score-fill"></span>
+              </div>
+            </article>
+          {{/each}}
+        </div>
+      </section>
+
+      <section class="section docs-section">
+        <div class="docs-section-heading">
+          <p class="eyebrow">{{t "site.docs.packages.flowEyebrow"}}</p>
+          <h2>{{t "site.docs.packages.flowTitle"}}</h2>
+        </div>
+        <div class="docs-diagram-flow">
+          {{#each packageDoc.lifecycle}}
+            <article class="feature-card docs-stage-card docs-flow-diagram-card">
+              <h3>{{title}}</h3>
+              <p>{{text}}</p>
+            </article>
+          {{/each}}
+        </div>
+      </section>
+
+      <section class="section docs-section">
+        <div class="docs-section-heading">
+          <p class="eyebrow">{{t "site.docs.packages.apiEyebrow"}}</p>
+          <h2>{{t "site.docs.packages.apiTitle"}}</h2>
+        </div>
+        <div class="docs-api-grid">
+          {{#each apiGroups}}
+            <article class="feature-card docs-api-card">
+              <div class="docs-api-card-head">
+                <h3>{{title}}</h3>
+              </div>
+              <ul class="docs-list docs-api-list">
+                {{#each exports}}
+                  <li><span>{{this}}</span></li>
+                {{/each}}
+              </ul>
+            </article>
+          {{/each}}
+        </div>
+      </section>
+
+      <section class="section docs-section">
+        <div class="docs-section-heading">
+          <p class="eyebrow">{{t "site.docs.packages.usageEyebrow"}}</p>
+          <h2>{{t "site.docs.packages.usageTitle"}}</h2>
+        </div>
+        <div class="docs-stage-grid">
+          {{#each packageDoc.usage}}
+            <article class="feature-card docs-stage-card">
+              <h3>{{title}}</h3>
+              <p>{{text}}</p>
+            </article>
+          {{/each}}
+        </div>
+      </section>
+
+      <section class="section docs-section">
+        <div class="docs-section-heading">
+          <p class="eyebrow">{{t "site.docs.packages.exampleEyebrow"}}</p>
+          <h2>{{t "site.docs.packages.exampleTitle"}}</h2>
+        </div>
+        <article class="feature-card docs-package-panel">
+          <div class="docs-code-block">
+            <div class="docs-code-header">{{packageDoc.exampleTitle}}</div>
+            <pre><code>{{packageDoc.exampleCode}}</code></pre>
+          </div>
+        </article>
+      </section>
+
+      <section class="section docs-section">
+        <div class="docs-section-heading">
+          <p class="eyebrow">{{t "site.docs.packages.samplesEyebrow"}}</p>
+          <h2>{{t "site.docs.packages.samplesTitle"}}</h2>
+        </div>
+        <p class="stack docs-install-chip">{{t "site.docs.packages.referenceSamples" sample=packageDoc.sample}}</p>
+        <div class="docs-package-grid docs-related-grid">
+          {{#each sampleLinks}}
+            <article class="project-card docs-package-card docs-related-card">
+              <p class="eyebrow">samples</p>
+              <h3>{{name}}</h3>
+              <a href="{{href}}" class="cta-secondary inline-btn">{{t "site.docs.packages.openSample"}}</a>
+            </article>
+          {{/each}}
+        </div>
+      </section>
+
+      <section class="section docs-section">
+        <div class="docs-section-heading">
+          <p class="eyebrow">{{t "site.docs.packages.relatedEyebrow"}}</p>
+          <h2>{{t "site.docs.packages.relatedTitle"}}</h2>
+        </div>
+        <div class="docs-package-grid docs-related-grid">
+          {{#each relatedPackages}}
+            <article class="project-card docs-package-card docs-related-card">
+              <p class="eyebrow">{{path}}</p>
+              <h3><a href="{{href}}">{{name}}</a></h3>
+              <p>{{tagline}}</p>
+              <a href="{{href}}" class="cta-secondary inline-btn">{{t "site.docs.packages.openRelatedPackage"}}</a>
+            </article>
+          {{/each}}
+        </div>
+      </section>
+    </div>
+  </section>
+</main>
+
+<footer class="global-footer">
+  <div class="footer-wrap">
+    <p>{{t "site.docs.hub.footer"}}</p>
+    <a href="/admin/login">{{t "site.footer.adminAccess"}}</a>
+  </div>
+</footer>

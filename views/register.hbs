@@ -1,0 +1,45 @@
+{{> site-header viewer=viewer}}
+
+<main class="spring-like-home admin-shell">
+  <section class="section">
+    <div class="hero-copy">
+      <p class="eyebrow">{{t "auth.register.eyebrow"}}</p>
+      <h1>{{t "auth.register.title"}}</h1>
+      <p>{{t "auth.register.subtitle"}}</p>
+    </div>
+  </section>
+
+  <section class="section auth-page-grid">
+    <article class="admin-card">
+      <h2>{{t "auth.register.formTitle"}}</h2>
+      {{#if hasError}}
+        <p class="form-error">{{#if errorMessage}}{{errorMessage}}{{else}}{{t errorMessageKey}}{{/if}}</p>
+      {{/if}}
+      <form method="post" action="/register" class="admin-form">
+        <label for="fullName">{{t "auth.register.fullName"}}</label>
+        <input id="fullName" name="fullName" type="text" autocomplete="name" required value="{{form.fullName}}" />
+
+        <label for="username">{{t "auth.register.username"}}</label>
+        <input id="username" name="username" type="text" autocomplete="username" required value="{{form.username}}" />
+
+        <label for="email">{{t "auth.register.email"}}</label>
+        <input id="email" name="email" type="email" autocomplete="email" required value="{{form.email}}" />
+
+        <label for="password">{{t "auth.register.password"}}</label>
+        <input id="password" name="password" type="password" autocomplete="new-password" required />
+
+        <label for="confirmPassword">{{t "auth.register.confirmPassword"}}</label>
+        <input id="confirmPassword" name="confirmPassword" type="password" autocomplete="new-password" required />
+
+        <button type="submit" class="cta-primary btn-full">{{t "auth.register.submit"}}</button>
+      </form>
+    </article>
+
+    <article class="feature-card auth-aside-card">
+      <h2>{{t "auth.register.alreadyRegistered"}}</h2>
+      <p>{{t "auth.register.alreadyRegisteredBody"}}</p>
+      <a href="/login" class="cta-secondary inline-btn">{{t "auth.register.goToLogin"}}</a>
+      <p class="auth-note">{{t "auth.register.note"}}</p>
+    </article>
+  </section>
+</main>
