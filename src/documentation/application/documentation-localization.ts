@@ -48,6 +48,35 @@ type PackageApiGroupLike = {
   readonly exports: readonly string[];
 };
 
+type CliInstallDocLike = {
+  readonly title: string;
+  readonly command: string;
+  readonly text: string;
+};
+
+type CliCommandExampleLike = {
+  readonly title: string;
+  readonly command: string;
+};
+
+type CliCommandDocLike = {
+  readonly name: string;
+  readonly summary: string;
+  readonly usage: string;
+  readonly examples: readonly CliCommandExampleLike[];
+};
+
+type CliOptionDocLike = {
+  readonly flag: string;
+  readonly description: string;
+};
+
+type CliOptionGroupLike = {
+  readonly title: string;
+  readonly description: string;
+  readonly options: readonly CliOptionDocLike[];
+};
+
 type SampleDocLike = {
   readonly name: string;
   readonly folder: string;
@@ -81,13 +110,73 @@ const esTranslations: Record<string, string> = {
   Overview: "Resumen",
   Architecture: "Arquitectura",
   Packages: "Paquetes",
+  CLI: "CLI",
   Decorators: "Decoradores",
   Samples: "Ejemplos",
   "Hub with summary, quick start, and section entry points.": "Centro con resumen, inicio rápido y puntos de entrada a cada sección.",
   "Boot lifecycle, request pipeline, and security flow diagrams.": "Ciclo de arranque, canalización de peticiones y diagramas del flujo de seguridad.",
   "Detailed reference for core, common, adapters, TypeORM, security, mailer, internationalization, and scheduler.": "Referencia detallada de core, common, adaptadores, TypeORM, security, mailer, internationalization y scheduler.",
+  "Console client installation, command reference, and generation workflow.": "Instalación del cliente de consola, referencia de comandos y flujo de generación.",
   "Decorator catalog organized by type and package, with examples.": "Catálogo de decoradores organizado por tipo y paquete, con ejemplos.",
   "Official sample applications and how to use them.": "Aplicaciones de ejemplo oficiales y cómo utilizarlas.",
+  "Project bootstrap": "Arranque de proyectos",
+  "The console client can scaffold a fresh XTaskJS application from the official typescript-starter and optionally install dependencies with npm, pnpm, yarn, or bun.": "El cliente de consola puede crear una aplicación XTaskJS nueva a partir del typescript-starter oficial y opcionalmente instalar dependencias con npm, pnpm, yarn o bun.",
+  "Artifact generation": "Generación de artefactos",
+  "The generate command emits controllers, services, repositories, DTOs, guards, middlewares, modules, and full resources that follow the same decorator patterns used across the upstream samples.": "El comando generate emite controladores, servicios, repositorios, DTOs, guards, middlewares, módulos y recursos completos que siguen los mismos patrones de decoradores usados en los ejemplos oficiales.",
+  "Cache workflow": "Flujo de cache",
+  "The current upstream CLI surface does not ship a dedicated cache generator, but create plus generate module/resource provide the supported starting point for wiring @xtaskjs/cache into a new or existing app.": "La superficie actual de la CLI oficial no incluye un generador dedicado para cache, pero create junto con generate module/resource proporcionan el punto de partida soportado para integrar @xtaskjs/cache en una aplicación nueva o existente.",
+  "Operational checks": "Comprobaciones operativas",
+  "The upstream README also documents npx usage, global-install troubleshooting, and guard, DTO, and CRUD behavior so teams can standardize their scaffolding workflow.": "El README oficial también documenta el uso con npx, la resolución de problemas de instalación global y el comportamiento de guard, DTO y CRUD para que los equipos puedan estandarizar su flujo de scaffolding.",
+  "Global npm install": "Instalación global con npm",
+  "Install the published package globally when you want a shell-wide xtask binary for repeated project scaffolding and code generation.": "Instala el paquete publicado globalmente cuando quieras un binario xtask disponible en toda la shell para repetir scaffolding de proyectos y generación de código.",
+  "One-off execution with npx": "Ejecución puntual con npx",
+  "Use npx to verify the published package or run the console client without changing the current machine's global toolchain.": "Usa npx para verificar el paquete publicado o ejecutar el cliente de consola sin cambiar la cadena global de herramientas de la máquina actual.",
+  "Run from source": "Ejecutar desde el código fuente",
+  "Run the CLI from source while iterating on templates, generators, or release packaging.": "Ejecuta la CLI desde el código fuente mientras iteras sobre plantillas, generadores o el empaquetado de releases.",
+  "Create a cache-ready application": "Crear una aplicación lista para cache",
+  "Use the verified create workflow from the CLI repo to bootstrap an app, then add the cache package before wiring cache decorators into generated code.": "Usa el flujo verificado de create desde el repositorio de la CLI para arrancar una aplicación y después añadir el paquete de cache antes de conectar decoradores de cache en el código generado.",
+  "Bootstraps a new XTaskJS application from the official typescript-starter archive and can install dependencies immediately after scaffolding.": "Crea una nueva aplicación XTaskJS a partir del archivo oficial typescript-starter y puede instalar dependencias justo después del scaffolding.",
+  "Scaffold a new application": "Crear una nueva aplicación",
+  "Skip install and choose a package manager": "Omitir la instalación y elegir un gestor de paquetes",
+  "Emits feature-oriented source files inside an existing XTaskJS app, supporting controller, service, repository, dto, guard, middleware, module, and resource scaffolds.": "Emite archivos fuente orientados a funcionalidades dentro de una app XTaskJS existente, con soporte para scaffolds de controller, service, repository, dto, guard, middleware, module y resource.",
+  "Generate a controller": "Generar un controlador",
+  "Generate a CRUD resource": "Generar un recurso CRUD",
+  "Scaffold a cache-backed resource": "Generar un recurso preparado para cache",
+  "Generate a guarded module scaffold": "Generar un scaffold de módulo con guard",
+  "Global flags": "Flags globales",
+  "Applies to the top-level xtask binary regardless of subcommand.": "Se aplican al binario xtask de nivel superior independientemente del subcomando.",
+  "Print command help and exit.": "Muestra la ayuda del comando y sale.",
+  "Show the installed CLI version.": "Muestra la versión instalada de la CLI.",
+  "Project creation options": "Opciones de creación de proyectos",
+  "Controls how the create command chooses a destination directory and installs dependencies.": "Controla cómo el comando create elige el directorio de destino e instala dependencias.",
+  "Allow scaffolding into a non-empty destination directory.": "Permite hacer scaffolding en un directorio de destino no vacío.",
+  "Download the starter but do not run the selected package manager afterward.": "Descarga el starter pero no ejecuta después el gestor de paquetes seleccionado.",
+  "Choose which package manager to run after scaffolding: npm, pnpm, yarn, or bun.": "Elige qué gestor de paquetes ejecutar después del scaffolding: npm, pnpm, yarn o bun.",
+  "Artifact generation options": "Opciones de generación de artefactos",
+  "Shapes where generated files are written and how much scaffold code is emitted.": "Define dónde se escriben los archivos generados y cuánto código de scaffold se emite.",
+  "Resolve generated output relative to a different source directory.": "Resuelve la salida generada respecto a un directorio fuente distinto.",
+  "Override the route path used by generated controllers.": "Sobrescribe la ruta usada por los controladores generados.",
+  "Write files directly into the target path instead of creating a feature subdirectory.": "Escribe archivos directamente en la ruta de destino en lugar de crear un subdirectorio de funcionalidad.",
+  "Generate a guard file and wire it into module or resource controllers.": "Genera un archivo guard y lo conecta a controladores de module o resource.",
+  "For resource scaffolds, also emit a DTO file for request validation.": "Para scaffolds de resource, emite también un archivo DTO para validación de peticiones.",
+  "For resource scaffolds, emit CRUD-style controller, service, repository, and DTO code.": "Para scaffolds de resource, emite código de controller, service, repository y DTO con estilo CRUD.",
+  "Overwrite existing files instead of aborting when the destination already exists.": "Sobrescribe archivos existentes en lugar de abortar cuando el destino ya existe.",
+  "1. Check the active Node environment": "1. Comprueba el entorno Node activo",
+  "Confirm node -v and the active npm global prefix before assuming the xtask binary is broken.": "Confirma node -v y el prefijo global activo de npm antes de asumir que el binario xtask está roto.",
+  "2. Inspect the global install": "2. Inspecciona la instalación global",
+  "Run npm list -g --depth=0 @xtaskjs/cli and type -a xtask to see whether the current shell can resolve the installed package.": "Ejecuta npm list -g --depth=0 @xtaskjs/cli y type -a xtask para ver si la shell actual puede resolver el paquete instalado.",
+  "3. Reinstall for the active runtime": "3. Reinstala para el runtime activo",
+  "If you use nvm or multiple Node versions, reinstall @xtaskjs/cli in the active version and refresh the shell hash.": "Si usas nvm o varias versiones de Node, reinstala @xtaskjs/cli en la versión activa y refresca la caché de la shell.",
+  "4. Verify with a direct invocation": "4. Verifica con una invocación directa",
+  "Use xtask --help or npx @xtaskjs/cli --help to confirm the published package works before troubleshooting project-specific commands.": "Usa xtask --help o npx @xtaskjs/cli --help para confirmar que el paquete publicado funciona antes de investigar comandos específicos del proyecto.",
+  "The create command downloads the starter project from xtaskjs/typescript-starter.": "El comando create descarga el proyecto starter desde xtaskjs/typescript-starter.",
+  "Supported generate types: controller, service, repository, resource, dto, guard, middleware, and module.": "Tipos compatibles con generate: controller, service, repository, resource, dto, guard, middleware y module.",
+  "Resource and module scaffolds create a feature directory by default; pass --flat to write directly into the chosen path.": "Los scaffolds de resource y module crean un directorio de funcionalidad por defecto; usa --flat para escribir directamente en la ruta elegida.",
+  "The --with-guard flag adds a guard file and applies @UseGuards(...) to generated module or resource controllers.": "La flag --with-guard añade un archivo guard y aplica @UseGuards(...) a los controladores generados de module o resource.",
+  "The --with-dto flag only applies to resource scaffolds, and --crud upgrades the same scaffold to CRUD-style controller, service, repository, and DTO code.": "La flag --with-dto solo se aplica a scaffolds de resource, y --crud mejora ese mismo scaffold con código de controller, service, repository y DTO al estilo CRUD.",
+  "Generated DTOs assume class-validator is installed and may require class-transformer for richer validation pipelines.": "Los DTO generados asumen que class-validator está instalado y pueden requerir class-transformer para canalizaciones de validación más completas.",
+  "The current upstream CLI surface does not ship a dedicated cache generator; scaffold a module or resource first, then add @xtaskjs/cache configuration and decorators inside the generated files.": "La superficie actual de la CLI oficial no incluye un generador dedicado para cache; primero genera un módulo o un recurso y después añade la configuración y los decoradores de @xtaskjs/cache dentro de los archivos generados.",
+  "A practical cache flow is: xtask create cache-demo, xtask generate resource cache-entries --path src/modules --crud --with-dto, then add configureCache(), CacheModel(), and cache decorators in the generated code.": "Un flujo práctico de cache es: xtask create cache-demo, xtask generate resource cache-entries --path src/modules --crud --with-dto, y después añadir configureCache(), CacheModel() y los decoradores de cache en el código generado.",
   "Monorepo shape": "Estructura del monorepo",
   "The upstream xtask repository groups runtime packages and sample applications in one workspace so APIs, adapters, decorators, and integrations evolve together.": "El repositorio principal de xtask agrupa los paquetes del runtime y las aplicaciones de ejemplo en un mismo workspace para que APIs, adaptadores, decoradores e integraciones evolucionen juntos.",
   "Decorator-first design": "Diseño guiado por decoradores",
@@ -517,6 +606,9 @@ export const localizeHighlights = (locale: string, highlights: readonly DocsHigh
     text: translate(locale, highlight.text),
   }));
 
+export const localizeStringList = (locale: string, values: readonly string[]): readonly string[] =>
+  values.map((value) => translate(locale, value));
+
 export const localizeFlowSteps = (locale: string, steps: readonly DocsFlowStepLike[]): readonly DocsFlowStepLike[] =>
   steps.map((step) => ({
     ...step,
@@ -548,6 +640,34 @@ export const localizePackageApiGroups = (locale: string, groups: readonly Packag
   groups.map((group) => ({
     ...group,
     title: translate(locale, group.title),
+  }));
+
+export const localizeCliInstallDocs = (locale: string, docs: readonly CliInstallDocLike[]): readonly CliInstallDocLike[] =>
+  docs.map((doc) => ({
+    ...doc,
+    title: translate(locale, doc.title),
+    text: translate(locale, doc.text),
+  }));
+
+export const localizeCliCommandDocs = (locale: string, docs: readonly CliCommandDocLike[]): readonly CliCommandDocLike[] =>
+  docs.map((doc) => ({
+    ...doc,
+    summary: translate(locale, doc.summary),
+    examples: doc.examples.map((example) => ({
+      ...example,
+      title: translate(locale, example.title),
+    })),
+  }));
+
+export const localizeCliOptionGroups = (locale: string, groups: readonly CliOptionGroupLike[]): readonly CliOptionGroupLike[] =>
+  groups.map((group) => ({
+    ...group,
+    title: translate(locale, group.title),
+    description: translate(locale, group.description),
+    options: group.options.map((option) => ({
+      ...option,
+      description: translate(locale, option.description),
+    })),
   }));
 
 export const localizeSampleDocs = (locale: string, docs: readonly SampleDocLike[]): readonly SampleDocLike[] =>

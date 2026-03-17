@@ -294,5 +294,54 @@ export const generatedPackageApiGroups: Readonly<Record<string, readonly { reado
         "shutdownSchedulerIntegration"
       ]
     }
+  ],
+  "cache": [
+    {
+      "title": "Configuration and models",
+      "sourcePath": "packages/cache/src/configuration.ts",
+      "exports": [
+        "configureCache",
+        "registerCacheModel",
+        "CacheSettings",
+        "CacheModel"
+      ]
+    },
+    {
+      "title": "Repository and services",
+      "sourcePath": "packages/cache/src",
+      "exports": [
+        "CacheRepository",
+        "CacheService",
+        "CacheAdminService",
+        "InjectCacheService",
+        "InjectCacheRepository"
+      ]
+    },
+    {
+      "title": "HTTP caching and management",
+      "sourcePath": "packages/cache/src",
+      "exports": [
+        "HttpCacheService",
+        "InjectHttpCacheService",
+        "CacheResponse",
+        "BrowserCache",
+        "CacheView",
+        "NoStore",
+        "NoCache",
+        "VaryBy",
+        "createCacheManagementController",
+        "InjectCacheAdminService"
+      ]
+    },
+    {
+      "title": "Lifecycle surface",
+      "sourcePath": "packages/cache/src/lifecycle.ts",
+      "exports": [
+        "InjectCacheLifecycleManager",
+        "initializeCacheIntegration",
+        "shutdownCacheIntegration",
+        "resetCacheIntegration"
+      ]
+    }
   ]
 };

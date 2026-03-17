@@ -1102,6 +1102,10 @@ p {
   gap: 1rem;
 }
 
+.docs-two-column > div {
+  min-width: 0;
+}
+
 .docs-code-block {
   overflow: hidden;
   border-radius: 0.9rem;
@@ -1211,6 +1215,10 @@ p {
   gap: 1rem;
 }
 
+.docs-package-summary-card > * {
+  min-width: 0;
+}
+
 .docs-chip-list {
   display: flex;
   flex-wrap: wrap;
@@ -1221,6 +1229,9 @@ p {
 .docs-install-chip,
 .docs-sample-chip {
   width: fit-content;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .docs-list {
@@ -1228,6 +1239,13 @@ p {
   padding-left: 1.15rem;
   display: grid;
   gap: 0.48rem;
+}
+
+.docs-list li,
+.docs-package-purpose,
+.docs-sidebar-meta p {
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .docs-list-numbered {

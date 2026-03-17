@@ -1,0 +1,150 @@
+{{> site-header viewer=viewer}}
+
+<main class="spring-like-home docs-home">
+  <section class="docs-hero">
+    <div class="hero-copy docs-hero-copy">
+      <p class="eyebrow">{{t "site.docs.cli.eyebrow"}}</p>
+      <h1>{{t "site.docs.cli.title"}}</h1>
+      <p>{{t "site.docs.cli.subtitle"}}</p>
+      <div class="hero-cta">
+        <a href="#install" class="cta-primary">{{t "site.docs.cli.openInstall"}}</a>
+        <a href="/documentation/samples" class="cta-secondary">{{t "site.docs.cli.openSamples"}}</a>
+      </div>
+      <p class="stack stack-inline">{{t "site.docs.cli.stats" commands=commandCount optionGroups=optionGroupCount}}</p>
+    </div>
+    <div class="docs-overview-grid">
+      {{#each highlights}}
+        <article class="feature-card docs-overview-card">
+          <h3>{{title}}</h3>
+          <p>{{text}}</p>
+        </article>
+      {{/each}}
+    </div>
+  </section>
+
+  <section class="docs-layout">
+    <aside class="docs-sidebar-card">
+      <p class="eyebrow">{{t "site.docs.cli.documentation"}}</p>
+      <nav class="docs-sidebar-nav" aria-label="{{t "site.docs.hub.documentationSections"}}">
+        {{#each docsPages}}
+          <a href="{{href}}"{{#if isCurrent}} class="is-current"{{/if}}>{{label}}</a>
+        {{/each}}
+      </nav>
+      <div class="docs-sidebar-meta">
+        <p>{{t "site.docs.hub.repo"}} <a href="{{repoUrl}}" target="_blank" rel="noreferrer">xtaskjs/xtask-cli</a></p>
+        <p>{{t "site.docs.cli.binary"}} {{binaryName}}</p>
+        <p>{{t "site.docs.cli.package"}} {{packageName}}</p>
+        <p>{{t "site.docs.cli.focus"}}</p>
+      </div>
+    </aside>
+
+    <div class="docs-content">
+      <section class="section docs-section" id="install">
+        <div class="docs-section-heading">
+          <p class="eyebrow">{{t "site.docs.cli.installEyebrow"}}</p>
+          <h2>{{t "site.docs.cli.installTitle"}}</h2>
+        </div>
+        <div class="docs-package-grid">
+          {{#each installDocs}}
+            <article class="feature-card docs-package-panel">
+              <h3>{{title}}</h3>
+              <p>{{text}}</p>
+              <div class="docs-code-block"><pre><code>{{command}}</code></pre></div>
+            </article>
+          {{/each}}
+        </div>
+      </section>
+
+      <section class="section docs-section" id="commands">
+        <div class="docs-section-heading">
+          <p class="eyebrow">{{t "site.docs.cli.commandsEyebrow"}}</p>
+          <h2>{{t "site.docs.cli.commandsTitle"}}</h2>
+        </div>
+        <div class="docs-package-grid">
+          {{#each commands}}
+            <article class="feature-card docs-decorator-card">
+              <div class="docs-tag-row">
+                <span class="docs-pill">{{../binaryName}}</span>
+                <span class="docs-pill">{{name}}</span>
+              </div>
+              <h3>{{name}}</h3>
+              <p>{{summary}}</p>
+              <div class="docs-code-block">
+                <div class="docs-code-header">{{t "site.docs.cli.usageLabel"}}</div>
+                <pre><code>{{usage}}</code></pre>
+              </div>
+              <h3>{{t "site.docs.cli.examplesLabel"}}</h3>
+              {{#each examples}}
+                <div class="docs-code-block">
+                  <div class="docs-code-header">{{title}}</div>
+                  <pre><code>{{command}}</code></pre>
+                </div>
+              {{/each}}
+            </article>
+          {{/each}}
+        </div>
+      </section>
+
+      <section class="section docs-section" id="options">
+        <div class="docs-section-heading">
+          <p class="eyebrow">{{t "site.docs.cli.optionsEyebrow"}}</p>
+          <h2>{{t "site.docs.cli.optionsTitle"}}</h2>
+        </div>
+        <div class="docs-api-grid">
+          {{#each optionGroups}}
+            <article class="feature-card docs-api-card">
+              <div class="docs-api-card-head">
+                <h3>{{title}}</h3>
+                <p>{{description}}</p>
+              </div>
+              <ul class="docs-api-list">
+                {{#each options}}
+                  <li>
+                    <span>{{flag}}</span>
+                    <p>{{description}}</p>
+                  </li>
+                {{/each}}
+              </ul>
+            </article>
+          {{/each}}
+        </div>
+      </section>
+
+      <section class="section docs-section" id="troubleshooting">
+        <div class="docs-section-heading">
+          <p class="eyebrow">{{t "site.docs.cli.troubleshootingEyebrow"}}</p>
+          <h2>{{t "site.docs.cli.troubleshootingTitle"}}</h2>
+        </div>
+        <div class="docs-flow-rail compact">
+          {{#each troubleshooting}}
+            <article class="docs-flow-step compact">
+              <h3>{{title}}</h3>
+              <p>{{text}}</p>
+            </article>
+          {{/each}}
+        </div>
+      </section>
+
+      <section class="section docs-section" id="notes">
+        <div class="docs-section-heading">
+          <p class="eyebrow">{{t "site.docs.cli.notesEyebrow"}}</p>
+          <h2>{{t "site.docs.cli.notesTitle"}}</h2>
+        </div>
+        <article class="feature-card">
+          <ul class="docs-list">
+            {{#each notes}}
+              <li>{{this}}</li>
+            {{/each}}
+          </ul>
+        </article>
+      </section>
+    </div>
+  </section>
+</main>
+
+<footer class="global-footer">
+  <div class="footer-wrap">
+    <p>{{t "site.docs.hub.footer"}}</p>
+    <a href="/admin/login">{{t "site.footer.adminAccess"}}</a>
+  </div>
+</footer>

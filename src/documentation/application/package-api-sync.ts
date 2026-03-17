@@ -203,6 +203,42 @@ export const packageSpecs: Readonly<Record<string, PackageSpec>> = {
       },
     ],
   },
+  cache: {
+    packageRoot: "packages/cache",
+    groups: [
+      {
+        title: "Configuration and models",
+        sourcePath: "packages/cache/src/configuration.ts",
+        preferredExports: ["configureCache", "registerCacheModel", "CacheSettings", "CacheModel"],
+      },
+      {
+        title: "Repository and services",
+        sourcePath: "packages/cache/src",
+        preferredExports: ["CacheRepository", "CacheService", "CacheAdminService", "InjectCacheService", "InjectCacheRepository"],
+      },
+      {
+        title: "HTTP caching and management",
+        sourcePath: "packages/cache/src",
+        preferredExports: [
+          "HttpCacheService",
+          "InjectHttpCacheService",
+          "CacheResponse",
+          "BrowserCache",
+          "CacheView",
+          "NoStore",
+          "NoCache",
+          "VaryBy",
+          "createCacheManagementController",
+          "InjectCacheAdminService",
+        ],
+      },
+      {
+        title: "Lifecycle surface",
+        sourcePath: "packages/cache/src/lifecycle.ts",
+        preferredExports: ["InjectCacheLifecycleManager", "initializeCacheIntegration", "shutdownCacheIntegration", "resetCacheIntegration"],
+      },
+    ],
+  },
 };
 
 export type SyncPackageApiGroupsOptions = {

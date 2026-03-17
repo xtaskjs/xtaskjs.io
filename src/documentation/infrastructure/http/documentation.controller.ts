@@ -41,6 +41,14 @@ export class DocumentationController {
     });
   }
 
+  @Get("/cli")
+  async cli(req: Request, res: Response): Promise<ReturnType<typeof view>> {
+    return view("documentation-cli", {
+      ...this.documentationService.getCliViewModel(),
+      viewer: await this.sessionViewService.getViewer(req, res),
+    });
+  }
+
   @Get("/packages/:slug")
   async packageDetail(req: Request, res: Response): Promise<ReturnType<typeof view> | void> {
     const slug = Array.isArray(req.params.slug) ? req.params.slug[0] : req.params.slug;

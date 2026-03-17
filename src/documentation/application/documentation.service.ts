@@ -4,6 +4,9 @@ import {
   InternationalizationService,
 } from "@xtaskjs/internationalization";
 import {
+  localizeCliCommandDocs,
+  localizeCliInstallDocs,
+  localizeCliOptionGroups,
   localizeDocumentationBase,
   localizeDecoratorGroups,
   localizeFlowSteps,
@@ -12,6 +15,7 @@ import {
   localizePackageDeepDive,
   localizePackageDocs,
   localizeSampleDocs,
+  localizeStringList,
 } from "./documentation-localization";
 import { generatedPackageApiGroups } from "./generated-package-api-groups";
 
@@ -60,6 +64,35 @@ type PackageApiGroup = {
   readonly title: string;
   readonly sourcePath: string;
   readonly exports: readonly string[];
+};
+
+type CliInstallDoc = {
+  readonly title: string;
+  readonly command: string;
+  readonly text: string;
+};
+
+type CliCommandExample = {
+  readonly title: string;
+  readonly command: string;
+};
+
+type CliCommandDoc = {
+  readonly name: string;
+  readonly summary: string;
+  readonly usage: string;
+  readonly examples: readonly CliCommandExample[];
+};
+
+type CliOptionDoc = {
+  readonly flag: string;
+  readonly description: string;
+};
+
+type CliOptionGroupDoc = {
+  readonly title: string;
+  readonly description: string;
+  readonly options: readonly CliOptionDoc[];
 };
 
 type PackageDoc = {
@@ -136,6 +169,20 @@ export type DocumentationArchitectureViewModel = DocumentationViewModel & {
 export type DocumentationPackagesViewModel = DocumentationViewModel & {
   readonly packageCount: number;
   readonly packages: readonly PackageDoc[];
+};
+
+export type DocumentationCliViewModel = DocumentationViewModel & {
+  readonly repoUrl: string;
+  readonly packageName: string;
+  readonly binaryName: string;
+  readonly commandCount: number;
+  readonly optionGroupCount: number;
+  readonly highlights: readonly DocsHighlight[];
+  readonly installDocs: readonly CliInstallDoc[];
+  readonly commands: readonly CliCommandDoc[];
+  readonly optionGroups: readonly CliOptionGroupDoc[];
+  readonly troubleshooting: readonly DocsFlowStep[];
+  readonly notes: readonly string[];
 };
 
 export type DocumentationPackageDetailViewModel = DocumentationViewModel & {
@@ -551,6 +598,274 @@ const packageDocs: readonly PackageDoc[] = [
       "}",
     ].join("\n"),
   },
+  {
+    id: "package-cache",
+    slug: "cache",
+    name: "@xtaskjs/cache",
+    path: "packages/cache",
+    tagline: "Memory and Redis-backed cache models, method decorators, runtime inspection, and browser cache policies.",
+    purpose:
+      "Cache adds application-level data caching and client-facing HTTP cache control to xtaskjs. It registers named cache models, exposes injectable repositories and services, layers method decorators for cache read/write behavior, and can publish browser cache headers plus operational endpoints from the same package.",
+    install: "npm install @xtaskjs/cache reflect-metadata",
+    features: [
+      "configureCache() centralizes default driver, TTL, namespace, Redis connection options, and shared HTTP cache defaults.",
+      "CacheModel(), Cacheable(), CachePut(), and CacheEvict() cover model registration plus read-through, write-through, and eviction flows.",
+      "CacheService, CacheRepository, and CacheAdminService are injectable for direct entry access, runtime inspection, and admin operations.",
+      "BrowserCache(), CacheView(), NoStore(), NoCache(), VaryBy(), and HttpCacheService handle Cache-Control, ETag, Last-Modified, and Vary headers.",
+    ],
+    integration: [
+      "Initialized automatically by @xtaskjs/core when the package is installed and configureCache()/registerCacheModel() have been called.",
+      "Supports in-memory stores by default and Redis-backed models when the redis client package is available.",
+      "Demonstrated by the 12-cache_app, 13-cache_redis_app, 14-http_cache_web_app, and 15-fastify_http_cache_web_app samples.",
+    ],
+    sample: "12-cache_app, 13-cache_redis_app, 14-http_cache_web_app, 15-fastify_http_cache_web_app",
+    exampleTitle: "Model caching plus browser cache control",
+    exampleCode: [
+      'import { Controller, Get, Param } from "@xtaskjs/common";',
+      'import { Service } from "@xtaskjs/core";',
+      'import {',
+      '  BrowserCache,',
+      '  CacheModel,',
+      '  CacheRepository,',
+      '  Cacheable,',
+      '  InjectCacheRepository,',
+      '  configureCache,',
+      '  createCacheManagementController,',
+      '} from "@xtaskjs/cache";',
+      "",
+      "configureCache({",
+      '  defaultDriver: "memory",',
+      '  defaultTtl: "45s",',
+      '  namespace: "catalog",',
+      '  httpCacheDefaults: { visibility: "public", maxAge: "2m", etag: true },',
+      "});",
+      "",
+      '@CacheModel({ name: "products", ttl: "45s" })',
+      "export class ProductCacheModel {}",
+      "",
+      "export const CacheManagementController = createCacheManagementController({",
+      '  path: "/ops/cache",',
+      "});",
+      "",
+      "@Service()",
+      "export class CatalogService {",
+      "  constructor(",
+      "    @InjectCacheRepository(ProductCacheModel)",
+      "    private readonly products: CacheRepository<any>",
+      "  ) {}",
+      "",
+      '  @Cacheable({ model: ProductCacheModel, key: (id: string) => id })',
+      "  async getProduct(id: string) {",
+      '    return { id, generatedAt: new Date().toISOString() };',
+      "  }",
+      "}",
+      "",
+      '@Controller("/products")',
+      "export class CatalogController {",
+      "  constructor(private readonly catalog: CatalogService) {}",
+      "",
+      '  @BrowserCache({ staleWhileRevalidate: "30s" })',
+      '  @Get(":id")',
+      '  show(@Param("id") id: string) {',
+      "    return this.catalog.getProduct(id);",
+      "  }",
+      "}",
+    ].join("\n"),
+  },
+];
+
+const cliHighlights: readonly DocsHighlight[] = [
+  {
+    title: "Project bootstrap",
+    text: "The console client can scaffold a fresh XTaskJS application from the official typescript-starter and optionally install dependencies with npm, pnpm, yarn, or bun.",
+  },
+  {
+    title: "Artifact generation",
+    text: "The generate command emits controllers, services, repositories, DTOs, guards, middlewares, modules, and full resources that follow the same decorator patterns used across the upstream samples.",
+  },
+  {
+    title: "Cache workflow",
+    text: "The current upstream CLI surface does not ship a dedicated cache generator, but create plus generate module/resource provide the supported starting point for wiring @xtaskjs/cache into a new or existing app.",
+  },
+  {
+    title: "Operational checks",
+    text: "The upstream README also documents npx usage, global-install troubleshooting, and guard, DTO, and CRUD behavior so teams can standardize their scaffolding workflow.",
+  },
+];
+
+const cliInstallDocs: readonly CliInstallDoc[] = [
+  {
+    title: "Global npm install",
+    command: [
+      "npm install -g @xtaskjs/cli",
+      "xtask --help",
+    ].join("\n"),
+    text: "Install the published package globally when you want a shell-wide xtask binary for repeated project scaffolding and code generation.",
+  },
+  {
+    title: "One-off execution with npx",
+    command: "npx @xtaskjs/cli --help",
+    text: "Use npx to verify the published package or run the console client without changing the current machine's global toolchain.",
+  },
+  {
+    title: "Run from source",
+    command: [
+      "git clone https://github.com/xtaskjs/xtask-cli.git",
+      "cd xtask-cli",
+      "npm install",
+      "npm run start -- --help",
+    ].join("\n"),
+    text: "Run the CLI from source while iterating on templates, generators, or release packaging.",
+  },
+  {
+    title: "Create a cache-ready application",
+    command: [
+      "xtask create cache-demo",
+      "cd cache-demo",
+      "npm install @xtaskjs/cache",
+    ].join("\n"),
+    text: "Use the verified create workflow from the CLI repo to bootstrap an app, then add the cache package before wiring cache decorators into generated code.",
+  },
+];
+
+const cliCommandDocs: readonly CliCommandDoc[] = [
+  {
+    name: "create",
+    summary: "Bootstraps a new XTaskJS application from the official typescript-starter archive and can install dependencies immediately after scaffolding.",
+    usage: "xtask create <project-name> [directory] [options]",
+    examples: [
+      {
+        title: "Scaffold a new application",
+        command: "xtask create my-api",
+      },
+      {
+        title: "Skip install and choose a package manager",
+        command: "xtask create billing-api ./services/billing --package-manager pnpm --skip-install",
+      },
+    ],
+  },
+  {
+    name: "generate",
+    summary: "Emits feature-oriented source files inside an existing XTaskJS app, supporting controller, service, repository, dto, guard, middleware, module, and resource scaffolds.",
+    usage: "xtask generate <type> <name> [options]",
+    examples: [
+      {
+        title: "Generate a controller",
+        command: "xtask generate controller users",
+      },
+      {
+        title: "Generate a CRUD resource",
+        command: "xtask generate resource billing --path src/modules --crud",
+      },
+      {
+        title: "Scaffold a cache-backed resource",
+        command: "xtask generate resource cache-entries --path src/modules --crud --with-dto",
+      },
+      {
+        title: "Generate a guarded module scaffold",
+        command: "xtask generate module reports --path src/modules --with-guard",
+      },
+    ],
+  },
+];
+
+const cliOptionGroups: readonly CliOptionGroupDoc[] = [
+  {
+    title: "Global flags",
+    description: "Applies to the top-level xtask binary regardless of subcommand.",
+    options: [
+      {
+        flag: "--help",
+        description: "Print command help and exit.",
+      },
+      {
+        flag: "--version",
+        description: "Show the installed CLI version.",
+      },
+    ],
+  },
+  {
+    title: "Project creation options",
+    description: "Controls how the create command chooses a destination directory and installs dependencies.",
+    options: [
+      {
+        flag: "-f, --force",
+        description: "Allow scaffolding into a non-empty destination directory.",
+      },
+      {
+        flag: "--skip-install",
+        description: "Download the starter but do not run the selected package manager afterward.",
+      },
+      {
+        flag: "--package-manager <manager>",
+        description: "Choose which package manager to run after scaffolding: npm, pnpm, yarn, or bun.",
+      },
+    ],
+  },
+  {
+    title: "Artifact generation options",
+    description: "Shapes where generated files are written and how much scaffold code is emitted.",
+    options: [
+      {
+        flag: "--path <directory>",
+        description: "Resolve generated output relative to a different source directory.",
+      },
+      {
+        flag: "--route <path>",
+        description: "Override the route path used by generated controllers.",
+      },
+      {
+        flag: "--flat",
+        description: "Write files directly into the target path instead of creating a feature subdirectory.",
+      },
+      {
+        flag: "--with-guard",
+        description: "Generate a guard file and wire it into module or resource controllers.",
+      },
+      {
+        flag: "--with-dto",
+        description: "For resource scaffolds, also emit a DTO file for request validation.",
+      },
+      {
+        flag: "--crud",
+        description: "For resource scaffolds, emit CRUD-style controller, service, repository, and DTO code.",
+      },
+      {
+        flag: "-f, --force",
+        description: "Overwrite existing files instead of aborting when the destination already exists.",
+      },
+    ],
+  },
+];
+
+const cliTroubleshootingFlow: readonly DocsFlowStep[] = [
+  {
+    title: "1. Check the active Node environment",
+    text: "Confirm node -v and the active npm global prefix before assuming the xtask binary is broken.",
+  },
+  {
+    title: "2. Inspect the global install",
+    text: "Run npm list -g --depth=0 @xtaskjs/cli and type -a xtask to see whether the current shell can resolve the installed package.",
+  },
+  {
+    title: "3. Reinstall for the active runtime",
+    text: "If you use nvm or multiple Node versions, reinstall @xtaskjs/cli in the active version and refresh the shell hash.",
+  },
+  {
+    title: "4. Verify with a direct invocation",
+    text: "Use xtask --help or npx @xtaskjs/cli --help to confirm the published package works before troubleshooting project-specific commands.",
+  },
+];
+
+const cliNotes: readonly string[] = [
+  "The create command downloads the starter project from xtaskjs/typescript-starter.",
+  "Supported generate types: controller, service, repository, resource, dto, guard, middleware, and module.",
+  "Resource and module scaffolds create a feature directory by default; pass --flat to write directly into the chosen path.",
+  "The --with-guard flag adds a guard file and applies @UseGuards(...) to generated module or resource controllers.",
+  "The --with-dto flag only applies to resource scaffolds, and --crud upgrades the same scaffold to CRUD-style controller, service, repository, and DTO code.",
+  "Generated DTOs assume class-validator is installed and may require class-transformer for richer validation pipelines.",
+  "The current upstream CLI surface does not ship a dedicated cache generator; scaffold a module or resource first, then add @xtaskjs/cache configuration and decorators inside the generated files.",
+  "A practical cache flow is: xtask create cache-demo, xtask generate resource cache-entries --path src/modules --crud --with-dto, then add configureCache(), CacheModel(), and cache decorators in the generated code.",
 ];
 
 const sampleDocs: readonly SampleDoc[] = [
@@ -700,6 +1015,78 @@ const sampleDocs: readonly SampleDoc[] = [
       "Start the sample to let CreateApplication() discover scheduled methods after the container boots.",
       "Open /scheduler/status to inspect job metadata, counters, failures, and recent events.",
       "Call /scheduler/run-maintenance to trigger a named job group manually and observe retry behavior.",
+    ],
+  },
+  {
+    name: "12-cache_app",
+    folder: "samples/12-cache_app",
+    stack: "node-http + cache",
+    summary: "Introduces cache models, method decorators, repository injection, and the built-in cache management controller on the default node-http adapter.",
+    endpoints: [
+      "GET /cache/products/:id",
+      "GET /cache/products/:id/inspect",
+      "GET /cache/products/:id/refresh",
+      "GET /cache/products/:id/evict",
+      "GET /ops/cache/models",
+    ],
+    flow: [
+      "Configure the cache package with memory storage defaults and register a ProductCacheModel before CreateApplication().",
+      "Call the product, refresh, and evict endpoints to observe Cacheable, CachePut, and CacheEvict behavior.",
+      "Inspect /ops/cache/models and /cache/products/:id/inspect to verify repository state and generated admin metadata.",
+    ],
+  },
+  {
+    name: "13-cache_redis_app",
+    folder: "samples/13-cache_redis_app",
+    stack: "node-http + cache + redis",
+    summary: "Switches the same caching model to Redis so the decorators and repository APIs stay the same while storage moves out of process.",
+    endpoints: [
+      "GET /cache/products/:id",
+      "GET /cache/products/:id/inspect",
+      "GET /cache/products/:id/refresh",
+      "GET /cache/products/:id/evict",
+      "GET /ops/cache/models",
+    ],
+    flow: [
+      "Configure a Redis-backed cache model or client factory before boot so the lifecycle manager can open the store.",
+      "Reuse the same service decorators and repository injection patterns from the memory sample.",
+      "Use the inspect and admin endpoints to confirm Redis-backed entries, TTL behavior, and explicit eviction paths.",
+    ],
+  },
+  {
+    name: "14-http_cache_web_app",
+    folder: "samples/14-http_cache_web_app",
+    stack: "express-http + cache",
+    summary: "Shows browser-facing cache policies on rendered pages and JSON endpoints, including ETag, Last-Modified, stale-while-revalidate, and preview no-store behavior.",
+    endpoints: [
+      "GET /",
+      "GET /articles/:slug",
+      "GET /api/articles/:slug",
+      "GET /preview",
+      "GET /ops/cache/http/routes",
+    ],
+    flow: [
+      "Define package-wide httpCacheDefaults and then override them per route with CacheView, BrowserCache, and NoStore decorators.",
+      "Request the same pages with conditional headers to observe ETag and Last-Modified handling on cached responses.",
+      "Inspect /ops/cache/http/routes to verify the effective Cache-Control policy and validators resolved for each route.",
+    ],
+  },
+  {
+    name: "15-fastify_http_cache_web_app",
+    folder: "samples/15-fastify_http_cache_web_app",
+    stack: "fastify-http + cache",
+    summary: "Ports the browser cache sample to Fastify to show that the same cache decorators and admin controller work across adapters.",
+    endpoints: [
+      "GET /",
+      "GET /articles/:slug",
+      "GET /api/articles/:slug",
+      "GET /preview",
+      "GET /ops/cache/http/routes",
+    ],
+    flow: [
+      "Boot the app through FastifyAdapter while keeping the same CacheView, BrowserCache, NoStore, and management-controller setup.",
+      "Compare the page and API endpoints with the Express version to confirm adapter-portable HTTP cache behavior.",
+      "Use the admin routes to inspect merged cache policy, validators, and route metadata under Fastify as well.",
     ],
   },
 ];
@@ -1046,6 +1433,44 @@ const packageDeepDiveDocs: Readonly<Record<string, PackageDeepDiveDoc>> = {
       },
     ],
     related: ["core", "common", "security"],
+  },
+  cache: {
+    runtimeChart: [
+      { label: "Bootstrap", score: 4 },
+      { label: "Dependency Injection", score: 4 },
+      { label: "Caching", score: 5 },
+      { label: "Operations", score: 5 },
+      { label: "HTTP Delivery", score: 4 },
+    ],
+    lifecycle: [
+      {
+        title: "Before startup",
+        text: "Configure package defaults, register cache models, and optionally export a cache management controller so storage and HTTP policy behavior are known before requests arrive.",
+      },
+      {
+        title: "During CreateApplication()",
+        text: "The cache lifecycle manager publishes CacheService, CacheAdminService, model repositories, and HttpCacheService into the container while connecting Redis-backed stores when configured.",
+      },
+      {
+        title: "During app.close()",
+        text: "Connected stores and runtime cache state are released automatically so in-memory and Redis-backed caches shut down with the rest of the application.",
+      },
+    ],
+    usage: [
+      {
+        title: "1. Configure models and defaults",
+        text: "Use configureCache() and CacheModel() to define namespace, driver selection, TTL behavior, Redis connectivity, and shared HTTP cache defaults once near app startup.",
+      },
+      {
+        title: "2. Apply method decorators and injection",
+        text: "Use Cacheable, CachePut, and CacheEvict on DI-managed services, then inject CacheRepository or CacheService when you need direct entry reads, writes, or inspection.",
+      },
+      {
+        title: "3. Expose client and operator controls",
+        text: "Apply BrowserCache, CacheView, NoStore, NoCache, and VaryBy to routes, and publish createCacheManagementController() when operators need runtime cache inspection endpoints.",
+      },
+    ],
+    related: ["core", "common", "express-http"],
   },
 };
 
@@ -1932,6 +2357,378 @@ const decoratorGroups: readonly DecoratorGroupDoc[] = [
     ],
   },
   {
+    id: "decorators-cache-runtime",
+    title: "Cache Models And Runtime Control",
+    description:
+      "Configuration, model, injector, and method decorators from @xtaskjs/cache used to register cache models, inject repositories or services, and control read/write cache behavior in DI-managed services.",
+    decorators: [
+      {
+        id: "decorator-cache-settings",
+        name: "CacheSettings",
+        packageName: "@xtaskjs/cache",
+        packagePath: "packages/cache/src/decorators.ts",
+        kind: "Class decorator",
+        targets: "class",
+        summary: "Decorator form of configureCache() for setting package-wide defaults such as driver, TTL, namespace, Redis options, and HTTP cache defaults while modules load.",
+        exampleTitle: "Decorator-based cache defaults",
+        exampleCode: [
+          'import { CacheSettings } from "@xtaskjs/cache";',
+          "",
+          "@CacheSettings({",
+          '  defaultDriver: "memory",',
+          '  defaultTtl: "30s",',
+          '  namespace: "catalog",',
+          "})",
+          "export class CacheConfiguration {}",
+        ].join("\n"),
+      },
+      {
+        id: "decorator-cache-model",
+        name: "CacheModel",
+        packageName: "@xtaskjs/cache",
+        packagePath: "packages/cache/src/decorators.ts",
+        kind: "Class decorator",
+        targets: "class",
+        summary: "Registers a named cache model with driver selection, TTL defaults, serialization hooks, and optional Redis-specific overrides.",
+        exampleTitle: "Register a cache model",
+        exampleCode: [
+          'import { CacheModel } from "@xtaskjs/cache";',
+          "",
+          '@CacheModel({ name: "products", ttl: "5m", driver: "redis" })',
+          "export class ProductCacheModel {}",
+        ].join("\n"),
+      },
+      {
+        id: "decorator-cache-injectservice",
+        name: "InjectCacheService",
+        packageName: "@xtaskjs/cache",
+        packagePath: "packages/cache/src/decorators.ts",
+        kind: "Parameter and property decorator",
+        targets: "constructor parameter or property",
+        summary: "Injects CacheService for model-level operations such as listModels(), get(), set(), remember(), delete(), and clear().",
+        exampleTitle: "Inject the cache service",
+        exampleCode: [
+          'import { Service } from "@xtaskjs/core";',
+          'import { CacheService, InjectCacheService } from "@xtaskjs/cache";',
+          "",
+          "@Service()",
+          "export class CacheInspectorService {",
+          "  constructor(",
+          "    @InjectCacheService()",
+          "    private readonly cache: CacheService",
+          "  ) {}",
+          "}",
+        ].join("\n"),
+      },
+      {
+        id: "decorator-cache-injectrepository",
+        name: "InjectCacheRepository",
+        packageName: "@xtaskjs/cache",
+        packagePath: "packages/cache/src/decorators.ts",
+        kind: "Parameter and property decorator",
+        targets: "constructor parameter or property",
+        summary: "Injects a model-scoped CacheRepository<T> so services can work directly with entries, hit metadata, and per-model TTL behavior.",
+        exampleTitle: "Inject a cache repository",
+        exampleCode: [
+          'import { Service } from "@xtaskjs/core";',
+          'import { CacheRepository, InjectCacheRepository } from "@xtaskjs/cache";',
+          'import { ProductCacheModel } from "./product-cache.model";',
+          "",
+          "@Service()",
+          "export class ProductCacheReader {",
+          "  constructor(",
+          "    @InjectCacheRepository(ProductCacheModel)",
+          "    private readonly products: CacheRepository<any>",
+          "  ) {}",
+          "}",
+        ].join("\n"),
+      },
+      {
+        id: "decorator-cache-injectlifecycle",
+        name: "InjectCacheLifecycleManager",
+        packageName: "@xtaskjs/cache",
+        packagePath: "packages/cache/src/decorators.ts",
+        kind: "Parameter and property decorator",
+        targets: "constructor parameter or property",
+        summary: "Injects the lower-level cache lifecycle manager for diagnostics, initialization checks, repository resolution, and runtime state access.",
+        exampleTitle: "Inject the cache lifecycle manager",
+        exampleCode: [
+          'import { Service } from "@xtaskjs/core";',
+          'import { InjectCacheLifecycleManager } from "@xtaskjs/cache";',
+          "",
+          "@Service()",
+          "export class CacheLifecycleDiagnosticsService {",
+          "  constructor(",
+          "    @InjectCacheLifecycleManager()",
+          "    private readonly lifecycle: any",
+          "  ) {}",
+          "}",
+        ].join("\n"),
+      },
+      {
+        id: "decorator-cache-injectadminservice",
+        name: "InjectCacheAdminService",
+        packageName: "@xtaskjs/cache",
+        packagePath: "packages/cache/src/decorators.ts",
+        kind: "Parameter and property decorator",
+        targets: "constructor parameter or property",
+        summary: "Injects CacheAdminService for runtime inspection of models, entries, and effective HTTP cache metadata resolved from decorated routes.",
+        exampleTitle: "Inject the cache admin service",
+        exampleCode: [
+          'import { Service } from "@xtaskjs/core";',
+          'import { CacheAdminService, InjectCacheAdminService } from "@xtaskjs/cache";',
+          "",
+          "@Service()",
+          "export class CacheAdminInspector {",
+          "  constructor(",
+          "    @InjectCacheAdminService()",
+          "    private readonly cacheAdmin: CacheAdminService",
+          "  ) {}",
+          "}",
+        ].join("\n"),
+      },
+      {
+        id: "decorator-cache-cacheable",
+        name: "Cacheable",
+        packageName: "@xtaskjs/cache",
+        packagePath: "packages/cache/src/decorators.ts",
+        kind: "Method decorator",
+        targets: "method",
+        summary: "Reads through the configured repository. Cache hits skip method execution, while misses store the resolved result using an optional key builder, TTL override, and unless condition.",
+        exampleTitle: "Read-through caching",
+        exampleCode: [
+          'import { Service } from "@xtaskjs/core";',
+          'import { Cacheable } from "@xtaskjs/cache";',
+          'import { ProductCacheModel } from "./product-cache.model";',
+          "",
+          "@Service()",
+          "export class ProductService {",
+          '  @Cacheable({ model: ProductCacheModel, key: (id: string) => id, ttl: "15m" })',
+          "  async getProduct(id: string) {",
+          '    return { id, generatedAt: new Date().toISOString() };',
+          "  }",
+          "}",
+        ].join("\n"),
+      },
+      {
+        id: "decorator-cache-cacheput",
+        name: "CachePut",
+        packageName: "@xtaskjs/cache",
+        packagePath: "packages/cache/src/decorators.ts",
+        kind: "Method decorator",
+        targets: "method",
+        summary: "Always runs the method and then writes the returned value into the cache, optionally guarding the write with when and overriding the stored TTL.",
+        exampleTitle: "Write-through cache refresh",
+        exampleCode: [
+          'import { Service } from "@xtaskjs/core";',
+          'import { CachePut } from "@xtaskjs/cache";',
+          'import { ProductCacheModel } from "./product-cache.model";',
+          "",
+          "@Service()",
+          "export class ProductRefreshService {",
+          '  @CachePut({ model: ProductCacheModel, key: (id: string) => id })',
+          "  async refreshProduct(id: string) {",
+          '    return { id, refreshedAt: new Date().toISOString() };',
+          "  }",
+          "}",
+        ].join("\n"),
+      },
+      {
+        id: "decorator-cache-cacheevict",
+        name: "CacheEvict",
+        packageName: "@xtaskjs/cache",
+        packagePath: "packages/cache/src/decorators.ts",
+        kind: "Method decorator",
+        targets: "method",
+        summary: "Removes one cached entry or clears an entire model before or after the wrapped method runs, with optional key resolution and conditional execution.",
+        exampleTitle: "Evict one key or a whole model",
+        exampleCode: [
+          'import { Service } from "@xtaskjs/core";',
+          'import { CacheEvict } from "@xtaskjs/cache";',
+          'import { ProductCacheModel } from "./product-cache.model";',
+          "",
+          "@Service()",
+          "export class ProductInvalidationService {",
+          '  @CacheEvict({ model: ProductCacheModel, key: (id: string) => id })',
+          "  async evictProduct(id: string) {",
+          "    return true;",
+          "  }",
+          "}",
+        ].join("\n"),
+      },
+    ],
+  },
+  {
+    id: "decorators-cache-http",
+    title: "HTTP And Browser Cache Policies",
+    description:
+      "HTTP response decorators from @xtaskjs/cache used to apply Cache-Control directives, validators, and Vary behavior to routes, plus injector access to HttpCacheService.",
+    decorators: [
+      {
+        id: "decorator-cache-injecthttpservice",
+        name: "InjectHttpCacheService",
+        packageName: "@xtaskjs/cache",
+        packagePath: "packages/cache/src/decorators.ts",
+        kind: "Parameter and property decorator",
+        targets: "constructor parameter or property",
+        summary: "Injects HttpCacheService so services or controllers can build cache headers manually, inspect policy normalization, or describe effective route behavior.",
+        exampleTitle: "Inject the HTTP cache service",
+        exampleCode: [
+          'import { Service } from "@xtaskjs/core";',
+          'import { HttpCacheService, InjectHttpCacheService } from "@xtaskjs/cache";',
+          "",
+          "@Service()",
+          "export class CacheHeaderService {",
+          "  constructor(",
+          "    @InjectHttpCacheService()",
+          "    private readonly httpCache: HttpCacheService",
+          "  ) {}",
+          "}",
+        ].join("\n"),
+      },
+      {
+        id: "decorator-cache-cacheresponse",
+        name: "CacheResponse",
+        packageName: "@xtaskjs/cache",
+        packagePath: "packages/cache/src/http-cache.decorators.ts",
+        kind: "Class and method decorator",
+        targets: "class or method",
+        summary: "Applies a full HTTP cache policy to responses, including visibility, max-age, stale directives, ETag, Last-Modified, Expires, Vary, and conditional application rules.",
+        exampleTitle: "Apply a custom HTTP cache policy",
+        exampleCode: [
+          'import { Controller, Get } from "@xtaskjs/common";',
+          'import { CacheResponse } from "@xtaskjs/cache";',
+          "",
+          '@Controller("/reports")',
+          "export class ReportsController {",
+          '  @CacheResponse({ visibility: "private", maxAge: "60s", mustRevalidate: true })',
+          '  @Get("/summary")',
+          "  summary() {",
+          '    return { ok: true };',
+          "  }",
+          "}",
+        ].join("\n"),
+      },
+      {
+        id: "decorator-cache-browsercache",
+        name: "BrowserCache / CacheHeaders",
+        packageName: "@xtaskjs/cache",
+        packagePath: "packages/cache/src/http-cache.decorators.ts",
+        kind: "Class and method decorator",
+        targets: "class or method",
+        summary: "Alias names for CacheResponse() when the intent is browser-facing cache headers rather than a generic response policy decorator.",
+        exampleTitle: "Alias for browser cache headers",
+        exampleCode: [
+          'import { Controller, Get } from "@xtaskjs/common";',
+          'import { BrowserCache } from "@xtaskjs/cache";',
+          "",
+          '@Controller("/articles")',
+          "export class ArticleController {",
+          '  @BrowserCache({ maxAge: "1m", staleWhileRevalidate: "30s" })',
+          '  @Get("/:slug")',
+          "  show() {",
+          '    return { published: true };',
+          "  }",
+          "}",
+        ].join("\n"),
+      },
+      {
+        id: "decorator-cache-cacheview",
+        name: "CacheView",
+        packageName: "@xtaskjs/cache",
+        packagePath: "packages/cache/src/http-cache.decorators.ts",
+        kind: "Class and method decorator",
+        targets: "class or method",
+        summary: "Applies the same HTTP cache policy surface as CacheResponse(), but only when the decorated route returns view(...).",
+        exampleTitle: "Cache rendered views only",
+        exampleCode: [
+          'import { Controller, Get } from "@xtaskjs/common";',
+          'import { view } from "@xtaskjs/core";',
+          'import { CacheView } from "@xtaskjs/cache";',
+          "",
+          '@Controller("/")',
+          "export class WebController {",
+          '  @CacheView({ maxAge: "10m", etag: true })',
+          '  @Get("/")',
+          "  home() {",
+          '    return view("home", { title: "Welcome" });',
+          "  }",
+          "}",
+        ].join("\n"),
+      },
+      {
+        id: "decorator-cache-nostore",
+        name: "NoStore",
+        packageName: "@xtaskjs/cache",
+        packagePath: "packages/cache/src/http-cache.decorators.ts",
+        kind: "Class and method decorator",
+        targets: "class or method",
+        summary: "Disables browser storage for sensitive responses by combining no-store, no-cache, must-revalidate, and an already-expired Expires value.",
+        exampleTitle: "Disable browser storage",
+        exampleCode: [
+          'import { Controller, Get } from "@xtaskjs/common";',
+          'import { NoStore } from "@xtaskjs/cache";',
+          "",
+          '@Controller("/drafts")',
+          "export class DraftController {",
+          '  @NoStore()',
+          '  @Get("/preview")',
+          "  preview() {",
+          '    return { draft: true };',
+          "  }",
+          "}",
+        ].join("\n"),
+      },
+      {
+        id: "decorator-cache-nocache",
+        name: "NoCache",
+        packageName: "@xtaskjs/cache",
+        packagePath: "packages/cache/src/http-cache.decorators.ts",
+        kind: "Class and method decorator",
+        targets: "class or method",
+        summary: "Forces revalidation by emitting no-cache and must-revalidate semantics while still allowing conditional requests when other validators are enabled.",
+        exampleTitle: "Force revalidation",
+        exampleCode: [
+          'import { Controller, Get } from "@xtaskjs/common";',
+          'import { NoCache } from "@xtaskjs/cache";',
+          "",
+          '@Controller("/profile")',
+          "export class ProfileController {",
+          '  @NoCache()',
+          '  @Get("/")',
+          "  show() {",
+          '    return { profile: true };',
+          "  }",
+          "}",
+        ].join("\n"),
+      },
+      {
+        id: "decorator-cache-varyby",
+        name: "VaryBy",
+        packageName: "@xtaskjs/cache",
+        packagePath: "packages/cache/src/http-cache.decorators.ts",
+        kind: "Class and method decorator",
+        targets: "class or method",
+        summary: "Appends Vary header values so downstream caches distinguish responses by headers such as Accept-Language or Authorization.",
+        exampleTitle: "Vary by request headers",
+        exampleCode: [
+          'import { Controller, Get } from "@xtaskjs/common";',
+          'import { BrowserCache, VaryBy } from "@xtaskjs/cache";',
+          "",
+          '@Controller("/catalog")',
+          "export class CatalogController {",
+          '  @BrowserCache({ maxAge: "2m" })',
+          '  @VaryBy("accept-language", "authorization")',
+          '  @Get("/")',
+          "  list() {",
+          '    return { ok: true };',
+          "  }",
+          "}",
+        ].join("\n"),
+      },
+    ],
+  },
+  {
     id: "decorators-scheduler",
     title: "Scheduler Jobs And Lifecycle",
     description:
@@ -2205,6 +3002,25 @@ export class DocumentationService {
     };
   }
 
+  getCliViewModel(): DocumentationCliViewModel {
+    const locale = this.intl.getCurrentLocale();
+
+    return {
+      ...this.getBaseViewModel("/documentation/cli"),
+      repoUrl: "https://github.com/xtaskjs/xtask-cli",
+      packageName: "@xtaskjs/cli",
+      binaryName: "xtask",
+      commandCount: cliCommandDocs.length,
+      optionGroupCount: cliOptionGroups.length,
+      highlights: localizeHighlights(locale, cliHighlights),
+      installDocs: localizeCliInstallDocs(locale, cliInstallDocs),
+      commands: localizeCliCommandDocs(locale, cliCommandDocs),
+      optionGroups: localizeCliOptionGroups(locale, cliOptionGroups),
+      troubleshooting: localizeFlowSteps(locale, cliTroubleshootingFlow),
+      notes: localizeStringList(locale, cliNotes),
+    };
+  }
+
   getPackageDetailViewModel(slug: string): DocumentationPackageDetailViewModel | undefined {
     const locale = this.intl.getCurrentLocale();
     const packages = localizePackageDocs(locale, packageDocs);
@@ -2287,6 +3103,12 @@ export class DocumentationService {
           isCurrent:
             currentHref === "/documentation/packages" ||
             currentHref.startsWith("/documentation/packages/"),
+        },
+        {
+          href: "/documentation/cli",
+          label: "CLI",
+          description: "Console client installation, command reference, and generation workflow.",
+          isCurrent: currentHref === "/documentation/cli",
         },
         {
           href: "/documentation/decorators",
