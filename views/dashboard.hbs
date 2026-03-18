@@ -26,6 +26,14 @@
           <dd>{{user.email}}</dd>
         </div>
         <div>
+          <dt>{{t "auth.dashboard.receiveNewsUpdates"}}</dt>
+          <dd>{{#if user.receiveNewsUpdates}}{{t "auth.dashboard.enabled"}}{{else}}{{t "auth.dashboard.disabled"}}{{/if}}</dd>
+        </div>
+        <div>
+          <dt>{{t "auth.dashboard.newsletterSubscription"}}</dt>
+          <dd>{{#if user.newsletterSubscribed}}{{t "auth.dashboard.subscribed"}}{{else}}{{t "auth.dashboard.notSubscribed"}}{{/if}}</dd>
+        </div>
+        <div>
           <dt>{{t "auth.dashboard.role"}}</dt>
           <dd>{{#if (eq user.role "admin")}}{{t "auth.dashboard.roleAdmin"}}{{else}}{{t "auth.dashboard.roleUser"}}{{/if}}</dd>
         </div>
@@ -46,6 +54,29 @@
           <dd>{{formatDateTime user.updatedAt}}</dd>
         </div>
       </dl>
+    </article>
+
+    <article class="admin-card dashboard-card">
+      <h2>{{t "auth.dashboard.preferencesTitle"}}</h2>
+      {{#if preferencesUpdated}}
+        <p class="form-success">{{t "auth.dashboard.preferencesUpdated"}}</p>
+      {{/if}}
+      <p class="auth-note">{{t "auth.dashboard.preferencesIntro"}}</p>
+      <form method="post" action="/dashboard/newsletter" class="admin-form dashboard-preferences-form">
+        <label class="checkbox-row" for="newsletterSubscribed">
+          <input
+            id="newsletterSubscribed"
+            name="newsletterSubscribed"
+            type="checkbox"
+            {{#if user.newsletterSubscribed}}checked{{/if}}
+          />
+          <span class="checkbox-row-copy">
+            <span>{{t "auth.dashboard.newsletterToggleLabel"}}</span>
+            <span class="checkbox-row-hint">{{t "auth.dashboard.newsletterToggleHint"}}</span>
+          </span>
+        </label>
+        <button type="submit" class="cta-primary">{{t "auth.dashboard.savePreferences"}}</button>
+      </form>
     </article>
 
     <article class="feature-card dashboard-card">

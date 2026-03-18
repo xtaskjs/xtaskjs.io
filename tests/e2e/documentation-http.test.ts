@@ -3,6 +3,12 @@ import assert from "node:assert/strict";
 import net from "node:net";
 import { execFile, spawn, type ChildProcess } from "node:child_process";
 import { promisify } from "node:util";
+import { SESSION_COOKIE_NAME } from "../../src/auth/domain/session";
+import { AppConfig } from "../../src/shared/infrastructure/config/app-config";
+
+const jsonwebtoken = require("jsonwebtoken") as {
+  sign: (payload: Record<string, unknown>, secret: string, options?: Record<string, unknown>) => string;
+};
 
 const execFileAsync = promisify(execFile);
 const { Client } = require("pg") as {
@@ -118,8 +124,16 @@ type EphemeralPostgres = {
   cleanup(): Promise<void>;
 };
 
+type EphemeralRedis = {
+  readonly host: string;
+  readonly port: number;
+  readonly url: string;
+  cleanup(): Promise<void>;
+};
+
 type RunningDocsApp = {
   readonly postgres: EphemeralPostgres;
+  readonly redis: EphemeralRedis;
   readonly publicUrl: string;
   readonly output: () => string;
   readonly exited: Promise<{ code: number | null; signal: NodeJS.Signals | null }>;
@@ -196,6 +210,78 @@ const waitForDockerPort = async (containerName: string, timeoutMs = 30000): Prom
   }
 
   throw new Error(`Timed out waiting for mapped Postgres port on container ${containerName}`);
+};
+
+const startEphemeralRedis = async (): Promise<EphemeralRedis> => {
+  const suffix = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  const containerName = `xtaskjs-docs-redis-e2e-${suffix}`;
+
+  await execFileAsync("docker", [
+    "run",
+    "--rm",
+    "-d",
+    "--name",
+    containerName,
+    "-p",
+    "127.0.0.1::6379",
+    "redis:7-alpine",
+    "redis-server",
+    "--save",
+    "",
+    "--appendonly",
+    "no",
+  ]);
+
+  try {
+    const port = await waitForRedisPort(containerName);
+    await waitForRedisConnection("127.0.0.1", port);
+
+    return {
+      host: "127.0.0.1",
+      port,
+      url: `redis://127.0.0.1:${port}`,
+      async cleanup() {
+        await execFileAsync("docker", ["rm", "-f", containerName]).catch(() => undefined);
+      },
+    };
+  } catch (error) {
+    await execFileAsync("docker", ["rm", "-f", containerName]).catch(() => undefined);
+    throw error;
+  }
+};
+
+const waitForRedisPort = async (containerName: string, timeoutMs = 30000): Promise<number> => {
+  const start = Date.now();
+
+  while (Date.now() - start < timeoutMs) {
+    try {
+      const { stdout } = await execFileAsync("docker", ["port", containerName, "6379/tcp"]);
+      const match = stdout.match(/:(\d+)\s*$/m);
+      if (match) {
+        return Number(match[1]);
+      }
+    } catch {
+      // keep polling until timeout
+    }
+
+    await wait(250);
+  }
+
+  throw new Error(`Timed out waiting for mapped Redis port on container ${containerName}`);
+};
+
+const waitForRedisConnection = async (host: string, port: number, timeoutMs = 30000): Promise<void> => {
+  const start = Date.now();
+
+  while (Date.now() - start < timeoutMs) {
+    if (await isTcpPortOpen(host, port)) {
+      return;
+    }
+
+    await wait(250);
+  }
+
+  throw new Error(`Timed out connecting to Redis at ${host}:${port}`);
 };
 
 const waitForDockerHealth = async (containerName: string, timeoutMs = 45000): Promise<void> => {
@@ -302,52 +388,63 @@ const stopProcess = async (child: ChildProcess): Promise<void> => {
 
 const startDocsApp = async (): Promise<RunningDocsApp> => {
   const postgres = await startEphemeralPostgres();
-  await waitForPostgresConnection(postgres);
+  const redis = await startEphemeralRedis();
 
-  const port = await findAvailablePort();
-  const publicUrl = `http://127.0.0.1:${port}`;
-  const child = spawn(
-    process.execPath,
-    ["--import", "tsx", "server.ts"],
-    {
-      cwd: process.cwd(),
-      env: {
-        ...process.env,
-        HOST: "127.0.0.1",
-        PORT: String(port),
-        PUBLIC_URL: publicUrl,
-        POSTGRES_HOST: postgres.host,
-        POSTGRES_PORT: String(postgres.port),
-        POSTGRES_DB: postgres.database,
-        POSTGRES_USER: postgres.username,
-        POSTGRES_PASSWORD: postgres.password,
-        MAILTRAP_SMTP_USER: process.env.MAILTRAP_SMTP_USER || "",
-        MAILTRAP_SMTP_PASS: process.env.MAILTRAP_SMTP_PASS || "",
+  try {
+    await waitForPostgresConnection(postgres);
+
+    const port = await findAvailablePort();
+    const publicUrl = `http://127.0.0.1:${port}`;
+    const child = spawn(
+      process.execPath,
+      ["--import", "tsx", "server.ts"],
+      {
+        cwd: process.cwd(),
+        env: {
+          ...process.env,
+          HOST: "127.0.0.1",
+          PORT: String(port),
+          PUBLIC_URL: publicUrl,
+          POSTGRES_HOST: postgres.host,
+          POSTGRES_PORT: String(postgres.port),
+          POSTGRES_DB: postgres.database,
+          POSTGRES_USER: postgres.username,
+          POSTGRES_PASSWORD: postgres.password,
+          REDIS_URL: redis.url,
+          MAILTRAP_SMTP_USER: process.env.MAILTRAP_SMTP_USER || "",
+          MAILTRAP_SMTP_PASS: process.env.MAILTRAP_SMTP_PASS || "",
+        },
+        stdio: ["ignore", "pipe", "pipe"],
+      }
+    );
+
+    let output = "";
+    child.stdout.on("data", (chunk) => {
+      output += String(chunk);
+    });
+    child.stderr.on("data", (chunk) => {
+      output += String(chunk);
+    });
+
+    const childExit = waitForChildExit(child);
+
+    return {
+      postgres,
+      redis,
+      publicUrl,
+      output: () => output,
+      exited: childExit,
+      async stop() {
+        await stopProcess(child);
+        await redis.cleanup();
+        await postgres.cleanup();
       },
-      stdio: ["ignore", "pipe", "pipe"],
-    }
-  );
-
-  let output = "";
-  child.stdout.on("data", (chunk) => {
-    output += String(chunk);
-  });
-  child.stderr.on("data", (chunk) => {
-    output += String(chunk);
-  });
-
-  const childExit = waitForChildExit(child);
-
-  return {
-    postgres,
-    publicUrl,
-    output: () => output,
-    exited: childExit,
-    async stop() {
-      await stopProcess(child);
-      await postgres.cleanup();
-    },
-  } satisfies RunningDocsApp;
+    } satisfies RunningDocsApp;
+  } catch (error) {
+    await redis.cleanup().catch(() => undefined);
+    await postgres.cleanup().catch(() => undefined);
+    throw error;
+  }
 };
 
 const waitForDocsPage = async (app: RunningDocsApp, path: string): Promise<void> => {
@@ -388,6 +485,10 @@ test("documentation package detail page renders generated API groups over HTTP",
   const html = await response.text();
 
   assert.equal(response.status, 200);
+  assert.match(response.headers.get("cache-control") || "", /private/);
+  assert.match(response.headers.get("vary") || "", /accept-language/i);
+  assert.match(response.headers.get("vary") || "", /cookie/i);
+  assert.ok(response.headers.get("etag"));
   assert.match(html, /@xtaskjs\/core/);
   assert.match(html, /Bootstrap and app/);
   assert.match(html, /CreateApplication/);
@@ -414,6 +515,10 @@ test("documentation CLI page renders installation and command examples over HTTP
   const html = await response.text();
 
   assert.equal(response.status, 200);
+  assert.match(response.headers.get("cache-control") || "", /private/);
+  assert.match(response.headers.get("vary") || "", /accept-language/i);
+  assert.match(response.headers.get("vary") || "", /cookie/i);
+  assert.ok(response.headers.get("etag"));
   assert.match(html, /@xtaskjs\/cli/);
   assert.match(html, /npm install -g @xtaskjs\/cli/);
   assert.match(html, /Create a cache-ready application/);
@@ -424,4 +529,149 @@ test("documentation CLI page renders installation and command examples over HTTP
   assert.match(html, /--with-guard/);
   assert.match(html, /does not ship a dedicated cache generator/);
   assert.doesNotMatch(app.output(), /Failed to start server:/);
+});
+
+test("registration stores communication preferences and dashboard can update newsletter subscription", { timeout: 240000 }, async (t) => {
+  const dockerAvailable = await isDockerAvailable();
+
+  if (!dockerAvailable) {
+    t.skip("Docker is not available for ephemeral Postgres provisioning");
+    return;
+  }
+
+  const app = await startDocsApp();
+  let client:
+    | {
+        connect(): Promise<void>;
+        query(sql: string, values?: unknown[]): Promise<unknown>;
+        end(): Promise<void>;
+      }
+    | undefined;
+
+  t.after(async () => {
+    await client?.end().catch(() => undefined);
+    await app.stop();
+  });
+
+  await waitForDocsPage(app, "/register");
+
+  const registerResponse = await fetch(`${app.publicUrl}/register`, {
+    method: "POST",
+    headers: {
+      "content-type": "application/x-www-form-urlencoded",
+    },
+    body: new URLSearchParams({
+      fullName: "Casey Newsletter",
+      username: "casey-newsletter",
+      email: "casey@example.com",
+      password: "Password123!",
+      confirmPassword: "Password123!",
+      receiveNewsUpdates: "on",
+      newsletterSubscribed: "on",
+    }),
+    redirect: "manual",
+  });
+
+  assert.equal(registerResponse.status, 302);
+  assert.match(registerResponse.headers.get("location") || "", /^\/verify-email\?email=casey%40example\.com&sent=1$/);
+
+  client = new Client({
+    host: app.postgres.host,
+    port: app.postgres.port,
+    database: app.postgres.database,
+    user: app.postgres.username,
+    password: app.postgres.password,
+    connectionTimeoutMillis: 2000,
+  });
+
+  await client.connect();
+
+  const insertedResult = (await client.query(
+    `
+      SELECT id, full_name, username, email, receive_news_updates, newsletter_subscribed
+      FROM users
+      WHERE email = $1
+      LIMIT 1
+    `,
+    ["casey@example.com"],
+  )) as {
+    rows: Array<{
+      id: number;
+      full_name: string;
+      username: string;
+      email: string;
+      receive_news_updates: boolean;
+      newsletter_subscribed: boolean;
+    }>;
+  };
+
+  const insertedUser = insertedResult.rows[0];
+  assert.ok(insertedUser);
+  assert.equal(insertedUser.receive_news_updates, true);
+  assert.equal(insertedUser.newsletter_subscribed, true);
+
+  const sessionToken = jsonwebtoken.sign(
+    {
+      sub: String(insertedUser.id),
+      id: insertedUser.id,
+      fullName: insertedUser.full_name,
+      username: insertedUser.username,
+      email: insertedUser.email,
+      role: "user",
+      roles: ["user"],
+      typ: "app-session",
+    },
+    AppConfig.security.jwtSecret,
+    {
+      algorithm: "HS256",
+      expiresIn: 60 * 60,
+      issuer: AppConfig.security.issuer,
+    },
+  );
+
+  const updateResponse = await fetch(`${app.publicUrl}/dashboard/newsletter`, {
+    method: "POST",
+    headers: {
+      "content-type": "application/x-www-form-urlencoded",
+      cookie: `${SESSION_COOKIE_NAME}=${sessionToken}`,
+    },
+    body: new URLSearchParams({}),
+    redirect: "manual",
+  });
+
+  assert.equal(updateResponse.status, 302);
+  assert.equal(updateResponse.headers.get("location"), "/dashboard?preferences=updated");
+
+  const updatedResult = (await client.query(
+    `
+      SELECT receive_news_updates, newsletter_subscribed
+      FROM users
+      WHERE id = $1
+    `,
+    [insertedUser.id],
+  )) as {
+    rows: Array<{
+      receive_news_updates: boolean;
+      newsletter_subscribed: boolean;
+    }>;
+  };
+
+  const updatedUser = updatedResult.rows[0];
+  assert.ok(updatedUser);
+  assert.equal(updatedUser.receive_news_updates, true);
+  assert.equal(updatedUser.newsletter_subscribed, false);
+
+  const dashboardResponse = await fetch(`${app.publicUrl}/dashboard?preferences=updated`, {
+    headers: {
+      cookie: `${SESSION_COOKIE_NAME}=${sessionToken}`,
+    },
+  });
+  const dashboardHtml = await dashboardResponse.text();
+
+  assert.equal(dashboardResponse.status, 200);
+  assert.match(dashboardHtml, /Communication preferences/);
+  assert.match(dashboardHtml, /Your newsletter preference was updated\./);
+  assert.match(dashboardHtml, /Latest news updates/);
+  assert.match(dashboardHtml, /Enabled/);
+  assert.match(dashboardHtml, /Not subscribed/);
 });

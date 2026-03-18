@@ -31,6 +31,32 @@
         <label for="confirmPassword">{{t "auth.register.confirmPassword"}}</label>
         <input id="confirmPassword" name="confirmPassword" type="password" autocomplete="new-password" required />
 
+        <label class="checkbox-row" for="receiveNewsUpdates">
+          <input
+            id="receiveNewsUpdates"
+            name="receiveNewsUpdates"
+            type="checkbox"
+            {{#if form.receiveNewsUpdates}}checked{{/if}}
+          />
+          <span class="checkbox-row-copy">
+            <span>{{t "auth.register.receiveNewsUpdates"}}</span>
+            <span class="checkbox-row-hint">{{t "auth.register.receiveNewsUpdatesHint"}}</span>
+          </span>
+        </label>
+
+        <label class="checkbox-row" for="newsletterSubscribed">
+          <input
+            id="newsletterSubscribed"
+            name="newsletterSubscribed"
+            type="checkbox"
+            {{#if form.newsletterSubscribed}}checked{{/if}}
+          />
+          <span class="checkbox-row-copy">
+            <span>{{t "auth.register.newsletterSubscribed"}}</span>
+            <span class="checkbox-row-hint">{{t "auth.register.newsletterSubscribedHint"}}</span>
+          </span>
+        </label>
+
         <button type="submit" class="cta-primary btn-full">{{t "auth.register.submit"}}</button>
       </form>
     </article>

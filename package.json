@@ -24,6 +24,7 @@
   "type": "commonjs",
   "dependencies": {
     "@types/geoip-lite": "^1.4.4",
+    "@xtaskjs/cache": "^1.0.0",
     "@xtaskjs/common": "^1.0.18",
     "@xtaskjs/core": "^1.0.18",
     "@xtaskjs/express-http": "^1.0.14",
@@ -45,6 +46,7 @@
     "passport-jwt": "^4.0.1",
     "passport-strategy": "^1.0.0",
     "pg": "^8.20.0",
+    "redis": "^5.11.0",
     "reflect-metadata": "^0.2.2",
     "typeorm": "^0.3.28"
   },

@@ -4,6 +4,7 @@ import { mkdir } from "fs/promises";
 import bcrypt from "bcryptjs";
 import { engine as hbsEngine } from "express-handlebars";
 import { CreateApplication, type XTaskHttpApplication } from "@xtaskjs/core";
+import { configureCache } from "@xtaskjs/cache";
 import { ExpressAdapter } from "@xtaskjs/express-http";
 import { AppConfig } from "../shared/infrastructure/config/app-config";
 import { handlebarsHelpers } from "../shared/infrastructure/http/handlebars-helpers";
@@ -85,7 +86,27 @@ const bootstrapInfrastructure = async (): Promise<void> => {
   await ensureAdminAccount();
 };
 
+const configureApplicationCache = (): void => {
+  configureCache({
+    defaultDriver: "redis",
+    defaultTtl: AppConfig.cache.documentationTtl,
+    namespace: AppConfig.cache.namespace,
+    connectOnStart: AppConfig.cache.connectOnStart,
+    httpCacheDefaults: {
+      visibility: "private",
+      maxAge: AppConfig.cache.documentationHttpMaxAge,
+      etag: true,
+      vary: ["accept-language", "cookie"],
+    },
+    redis: {
+      url: AppConfig.cache.redisUrl,
+      connectOnStart: AppConfig.cache.connectOnStart,
+    },
+  });
+};
+
 export const createWebApplication = async (): Promise<XTaskHttpApplication> => {
+  configureApplicationCache();
   await bootstrapInfrastructure();
   registerAuthMailer();
 

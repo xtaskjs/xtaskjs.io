@@ -7,6 +7,13 @@ export type AppConfiguration = {
   readonly publicUrl: string;
   readonly nodeEnv: string;
   readonly isProduction: boolean;
+  readonly cache: {
+    readonly namespace: string;
+    readonly connectOnStart: boolean;
+    readonly redisUrl: string;
+    readonly documentationTtl: string;
+    readonly documentationHttpMaxAge: string;
+  };
   readonly admin: {
     readonly username: string;
     readonly password: string;
@@ -53,6 +60,13 @@ export const AppConfig: AppConfiguration = {
   publicUrl: process.env.PUBLIC_URL || `http://127.0.0.1:${Number(process.env.PORT || 3000)}`,
   nodeEnv: process.env.NODE_ENV || "development",
   isProduction: process.env.NODE_ENV === "production",
+  cache: {
+    namespace: process.env.CACHE_NAMESPACE || "xtaskjs.io",
+    connectOnStart: process.env.CACHE_CONNECT_ON_START !== "false",
+    redisUrl: process.env.REDIS_URL || "redis://127.0.0.1:6379",
+    documentationTtl: process.env.DOCS_CACHE_TTL || "15m",
+    documentationHttpMaxAge: process.env.DOCS_HTTP_CACHE_MAX_AGE || "5m",
+  },
   admin: {
     username: process.env.ADMIN_USERNAME || "admin",
     password: process.env.ADMIN_PASSWORD || "admin123!",

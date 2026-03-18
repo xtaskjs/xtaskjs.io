@@ -10,6 +10,8 @@ type UserRow = {
   full_name: string;
   username: string;
   email: string;
+  receive_news_updates: boolean;
+  newsletter_subscribed: boolean;
   password_hash: string;
   role: UserRole;
   is_active: boolean;
@@ -32,6 +34,8 @@ const mapUserRow = (row: UserRow): User => ({
   fullName: row.full_name,
   username: row.username,
   email: row.email,
+  receiveNewsUpdates: Boolean(row.receive_news_updates),
+  newsletterSubscribed: Boolean(row.newsletter_subscribed),
   passwordHash: row.password_hash,
   role: row.role,
   isActive: Boolean(row.is_active),
@@ -68,6 +72,8 @@ const userSelect = `
     full_name,
     username,
     email,
+    receive_news_updates,
+    newsletter_subscribed,
     password_hash,
     role,
     is_active,
@@ -201,6 +207,8 @@ export class UserTypeOrmRepository implements UserRepository {
           full_name,
           username,
           email,
+          receive_news_updates,
+          newsletter_subscribed,
           password_hash,
           role,
           is_active,
@@ -215,12 +223,14 @@ export class UserTypeOrmRepository implements UserRepository {
           registration_country_code,
           registration_country_name
         )
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
         RETURNING
           id,
           full_name,
           username,
           email,
+          receive_news_updates,
+          newsletter_subscribed,
           password_hash,
           role,
           is_active,
@@ -241,6 +251,8 @@ export class UserTypeOrmRepository implements UserRepository {
         input.fullName,
         input.username,
         input.email,
+        input.receiveNewsUpdates,
+        input.newsletterSubscribed,
         input.passwordHash,
         input.role,
         input.isActive,
@@ -282,6 +294,12 @@ export class UserTypeOrmRepository implements UserRepository {
     }
     if (input.email !== undefined) {
       pushAssignment("email", input.email);
+    }
+    if (input.receiveNewsUpdates !== undefined) {
+      pushAssignment("receive_news_updates", input.receiveNewsUpdates);
+    }
+    if (input.newsletterSubscribed !== undefined) {
+      pushAssignment("newsletter_subscribed", input.newsletterSubscribed);
     }
     if (input.passwordHash !== undefined) {
       pushAssignment("password_hash", input.passwordHash);
@@ -336,6 +354,8 @@ export class UserTypeOrmRepository implements UserRepository {
           full_name,
           username,
           email,
+          receive_news_updates,
+          newsletter_subscribed,
           password_hash,
           role,
           is_active,

@@ -9,6 +9,8 @@ export const UserTypeOrmEntity = new EntitySchema<User>({
     fullName: { type: String, name: "full_name", length: 180 },
     username: { type: String, length: 60, unique: true },
     email: { type: String, length: 180, unique: true },
+    receiveNewsUpdates: { type: Boolean, name: "receive_news_updates", default: false },
+    newsletterSubscribed: { type: Boolean, name: "newsletter_subscribed", default: false },
     passwordHash: { type: String, name: "password_hash", length: 255 },
     role: { type: String, length: 20, default: "user" },
     isActive: { type: Boolean, name: "is_active", default: true },

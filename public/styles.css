@@ -219,6 +219,8 @@ body {
   background: transparent;
   font: inherit;
   cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .nav-register-btn {
@@ -466,11 +468,40 @@ p {
   background: var(--surface-soft);
 }
 
+.footer-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8rem;
+  color: var(--text-soft);
+  text-decoration: none;
+}
+
+.footer-brand:hover .footer-brand-copy {
+  color: var(--logo-blue);
+}
+
+.footer-brand-logo {
+  width: clamp(7.5rem, 16vw, 10.5rem);
+  height: auto;
+  flex: 0 0 auto;
+}
+
+.footer-brand-copy {
+  margin: 0;
+  font-family: "Questrial", sans-serif;
+  font-size: 0.95rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-soft);
+  transition: color 180ms ease;
+}
+
 .footer-wrap {
   width: min(1160px, 92vw);
   margin: 0 auto;
   padding: 1.1rem 0 1.6rem;
   display: flex;
+  align-items: center;
   justify-content: space-between;
   gap: 1rem;
   flex-wrap: wrap;
@@ -545,7 +576,7 @@ p {
   margin-top: 0.8rem;
 }
 
-.admin-form input,
+.admin-form input:not([type="checkbox"]):not([type="radio"]),
 .admin-form textarea {
   border: 1px solid rgba(31, 94, 168, 0.26);
   border-radius: 0.65rem;
@@ -555,7 +586,7 @@ p {
   background: var(--surface-strong);
 }
 
-.admin-form input:focus,
+.admin-form input:not([type="checkbox"]):not([type="radio"]):focus,
 .admin-form textarea:focus {
   outline: 2px solid rgba(31, 94, 168, 0.32);
   outline-offset: 1px;
@@ -563,10 +594,29 @@ p {
 
 .checkbox-row {
   display: inline-flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.6rem;
   font-weight: 700;
   color: var(--text-soft);
+}
+
+.checkbox-row input[type="checkbox"] {
+  width: 1rem;
+  height: 1rem;
+  margin: 0.18rem 0 0;
+  padding: 0;
+  accent-color: var(--logo-blue);
+}
+
+.checkbox-row-copy {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.checkbox-row-hint {
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--text-muted);
 }
 
 .btn-full {
@@ -729,6 +779,10 @@ p {
 .auth-aside-card,
 .dashboard-card {
   min-height: 100%;
+}
+
+.dashboard-preferences-form {
+  margin-top: 1rem;
 }
 
 .auth-note {
@@ -983,6 +1037,13 @@ p {
 
   .footer-wrap {
     padding-bottom: 1.1rem;
+    align-items: start;
+    flex-direction: column;
+  }
+
+  .footer-brand {
+    flex-direction: column;
+    align-items: start;
   }
 }
 

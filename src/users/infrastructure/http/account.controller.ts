@@ -56,6 +56,19 @@ const trimString = ({ value }: { value: unknown }): unknown =>
 const trimLowercaseString = ({ value }: { value: unknown }): unknown =>
   typeof value === "string" ? value.trim().toLowerCase() : value;
 
+const parseCheckboxValue = (value: unknown): boolean => {
+  if (Array.isArray(value)) {
+    return value.some((entry) => parseCheckboxValue(entry));
+  }
+
+  if (typeof value !== "string") {
+    return false;
+  }
+
+  const normalized = value.trim().toLowerCase();
+  return normalized === "on" || normalized === "true" || normalized === "1" || normalized === "yes";
+};
+
 class LoginPageQueryDto {
   @IsOptional()
   @IsString()
@@ -117,6 +130,26 @@ class RegisterBodyDto {
   @IsString()
   @MinLength(8)
   confirmPassword!: string;
+
+  @IsOptional()
+  @IsString()
+  receiveNewsUpdates?: string;
+
+  @IsOptional()
+  @IsString()
+  newsletterSubscribed?: string;
+}
+
+class DashboardQueryDto {
+  @IsOptional()
+  @IsString()
+  preferences?: string;
+}
+
+class DashboardNewsletterBodyDto {
+  @IsOptional()
+  @IsString()
+  newsletterSubscribed?: string;
 }
 
 class VerifyEmailQueryDto {
@@ -302,7 +335,7 @@ export class AccountController {
       viewer: null,
       hasError: query.error === "1",
       errorMessage: query.message,
-      form: { fullName: "", username: "", email: "" },
+      form: { fullName: "", username: "", email: "", receiveNewsUpdates: false, newsletterSubscribed: false },
     });
   }
 
@@ -314,8 +347,10 @@ export class AccountController {
     const email = normalizeText(body.email);
     const password = body.password;
     const confirmPassword = body.confirmPassword;
+    const receiveNewsUpdates = parseCheckboxValue(body.receiveNewsUpdates);
+    const newsletterSubscribed = parseCheckboxValue(body.newsletterSubscribed);
 
-    const form = { fullName, username, email };
+    const form = { fullName, username, email, receiveNewsUpdates, newsletterSubscribed };
 
     if (!fullName || !username || !email || !password || !confirmPassword) {
       return view(
@@ -361,7 +396,7 @@ export class AccountController {
 
     try {
       const result = await this.accountAccessService.register(
-        { fullName, username, email, password },
+        { fullName, username, email, password, receiveNewsUpdates, newsletterSubscribed },
         resolveRequestAccessLocation(req)
       );
       res.redirect(`/verify-email?email=${encodeURIComponent(result.email)}&sent=1`);
@@ -699,7 +734,11 @@ export class AccountController {
 
   @Authenticated("app-session")
   @Get("/dashboard")
-  async dashboard(@Req() req: Request, @Res() res: Response): Promise<ReturnType<typeof view> | void> {
+  async dashboard(
+    @Query() query: DashboardQueryDto,
+    @Req() req: Request,
+    @Res() res: Response
+  ): Promise<ReturnType<typeof view> | void> {
     const viewer = await this.sessionViewService.getViewer(req, res);
     const authenticatedRequest = req as AuthenticatedRequest;
     const userId = Number(authenticatedRequest.user?.id || authenticatedRequest.auth?.user?.id || 0);
@@ -717,12 +756,34 @@ export class AccountController {
         fullName: user.fullName,
         username: user.username,
         email: user.email,
+        receiveNewsUpdates: user.receiveNewsUpdates,
+        newsletterSubscribed: user.newsletterSubscribed,
         role: user.role,
         isActive: user.isActive,
         emailVerified: user.emailVerified,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
       },
+      preferencesUpdated: query.preferences === "updated",
     });
+  }
+
+  @Authenticated("app-session")
+  @Post("/dashboard/newsletter")
+  async updateDashboardNewsletter(
+    @Body() body: DashboardNewsletterBodyDto,
+    @Req() req: Request,
+    @Res() res: Response
+  ): Promise<void> {
+    const authenticatedRequest = req as AuthenticatedRequest;
+    const userId = Number(authenticatedRequest.user?.id || authenticatedRequest.auth?.user?.id || 0);
+
+    if (!Number.isFinite(userId) || userId <= 0) {
+      res.redirect("/login");
+      return;
+    }
+
+    await this.userService.updateNewsletterSubscription(userId, parseCheckboxValue(body.newsletterSubscribed));
+    res.redirect("/dashboard?preferences=updated");
   }
 }

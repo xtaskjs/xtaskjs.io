@@ -23,6 +23,8 @@ export type RegisterUserCommand = {
   readonly username: string;
   readonly email: string;
   readonly password: string;
+  readonly receiveNewsUpdates: boolean;
+  readonly newsletterSubscribed: boolean;
 };
 
 export type PendingSecurityCode = {
@@ -59,6 +61,8 @@ export class UserService {
         fullName: "Administrator",
         username,
         email,
+        receiveNewsUpdates: false,
+        newsletterSubscribed: false,
         passwordHash,
         role: "admin",
         isActive: true,
@@ -107,6 +111,8 @@ export class UserService {
       fullName: command.fullName.trim(),
       username,
       email,
+      receiveNewsUpdates: command.receiveNewsUpdates,
+      newsletterSubscribed: command.newsletterSubscribed,
       passwordHash: await bcrypt.hash(command.password, 10),
       role: "user",
       isActive: true,
@@ -271,6 +277,19 @@ export class UserService {
     }
 
     await this.repository.update(targetUserId, { isActive });
+  }
+
+  async updateNewsletterSubscription(userId: number, newsletterSubscribed: boolean): Promise<User> {
+    const user = await this.repository.findById(userId);
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    if (user.newsletterSubscribed === newsletterSubscribed) {
+      return user;
+    }
+
+    return this.repository.update(userId, { newsletterSubscribed });
   }
 
   async ensureUsernameAvailable(username: string): Promise<void> {

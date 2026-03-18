@@ -5,6 +5,8 @@ export type User = {
   readonly fullName: string;
   readonly username: string;
   readonly email: string;
+  readonly receiveNewsUpdates: boolean;
+  readonly newsletterSubscribed: boolean;
   readonly passwordHash: string;
   readonly role: UserRole;
   readonly isActive: boolean;
@@ -26,6 +28,8 @@ export type CreateUserInput = {
   readonly fullName: string;
   readonly username: string;
   readonly email: string;
+  readonly receiveNewsUpdates: boolean;
+  readonly newsletterSubscribed: boolean;
   readonly passwordHash: string;
   readonly role: UserRole;
   readonly isActive: boolean;
