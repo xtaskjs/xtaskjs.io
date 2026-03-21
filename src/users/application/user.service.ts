@@ -52,7 +52,7 @@ export class UserService {
 
   async ensureAdminAccount(): Promise<void> {
     const username = normalizeIdentity(this.config.admin.username);
-    const email = `${username}@xtaskjs.local`;
+    const email = normalizeIdentity(this.config.admin.email);
     const passwordHash = await this.resolveAdminPasswordHash();
     const existing = await this.repository.findByUsername(username);
 

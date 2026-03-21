@@ -37,6 +37,7 @@ const warnIfSmtpTlsModeLooksWrong = (
 
 const warnIfMailConfigurationLooksWrong = (): void => {
   const { defaultFrom, notificationsFrom, transportProvider, notificationsTransportProvider, smtp } = AppConfig.mail;
+  const adminEmail = AppConfig.admin.email.trim().toLowerCase();
 
   if (transportProvider === "json" && (smtp.username || smtp.password || smtp.host || smtp.port)) {
     console.warn(
@@ -72,6 +73,12 @@ const warnIfMailConfigurationLooksWrong = (): void => {
   if (notificationsTransportProvider === "smtp" && notificationsFrom !== smtp.username) {
     console.warn(
       `[auth-mailer] MAIL_NOTIFICATIONS_FROM is ${notificationsFrom} while SMTP authenticates as ${smtp.username}. Some providers reject sender addresses that do not match the authenticated mailbox or an allowed alias.`,
+    );
+  }
+
+  if ((transportProvider === "smtp" || notificationsTransportProvider === "smtp") && adminEmail.endsWith(".local")) {
+    console.warn(
+      `[auth-mailer] ADMIN_EMAIL resolves to ${adminEmail}. Local-only domains are not routable and will cause login verification emails to be rejected by external SMTP providers.`,
     );
   }
 };

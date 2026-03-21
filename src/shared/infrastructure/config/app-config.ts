@@ -27,6 +27,7 @@ export type AppConfiguration = {
   };
   readonly admin: {
     readonly username: string;
+    readonly email: string;
     readonly password: string;
     readonly passwordHash?: string;
   };
@@ -125,6 +126,12 @@ const notificationsMailTransportProvider = resolveMailTransportProvider(
   },
 );
 
+const adminUsername = trimEnvWithFallback(process.env.ADMIN_USERNAME, "admin");
+const adminEmail =
+  trimOptionalEnv(process.env.ADMIN_EMAIL) ||
+  trimOptionalEnv(process.env.MAIL_SMTP_USER) ||
+  `${adminUsername.trim().toLowerCase()}@xtaskjs.local`;
+
 export const AppConfig: AppConfiguration = {
   host: process.env.HOST || "0.0.0.0",
   port: Number(process.env.PORT || 3000),
@@ -145,7 +152,8 @@ export const AppConfig: AppConfiguration = {
     documentationHttpMaxAge: process.env.DOCS_HTTP_CACHE_MAX_AGE || "5m",
   },
   admin: {
-    username: process.env.ADMIN_USERNAME || "admin",
+    username: adminUsername,
+    email: adminEmail,
     password: process.env.ADMIN_PASSWORD || "admin123!",
     passwordHash: process.env.ADMIN_PASSWORD_HASH,
   },

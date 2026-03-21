@@ -32,7 +32,7 @@ const ensureAdminAccount = async (): Promise<void> => {
   const dataSource = getAppDataSource();
   const users = dataSource.getRepository("User");
   const username = normalizeIdentity(AppConfig.admin.username);
-  const email = `${username}@xtaskjs.local`;
+  const email = normalizeIdentity(AppConfig.admin.email);
   const passwordHash = await resolveAdminPasswordHash();
   const existing = await users.findOne({ where: { username } });
 
