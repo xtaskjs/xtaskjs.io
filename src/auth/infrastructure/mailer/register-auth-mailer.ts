@@ -1,11 +1,11 @@
 import { join } from "path";
 import {
-  createMailtrapTransportOptions,
   registerHandlebarsTemplateRenderer,
   registerMailerTemplate,
   registerMailerTransport,
 } from "@xtaskjs/mailer";
 import { AppConfig } from "../../../shared/infrastructure/config/app-config";
+import { createMailTransport } from "../../../shared/infrastructure/config/mail-transport-config";
 
 type GlobalMailerState = typeof globalThis & {
   __xtaskjsAuthMailerRegistered?: boolean;
@@ -13,20 +13,67 @@ type GlobalMailerState = typeof globalThis & {
 
 const globalMailerState = globalThis as GlobalMailerState;
 
-const resolveTransport = () => {
-  if (AppConfig.mail.mailtrapUser && AppConfig.mail.mailtrapPassword) {
-    return createMailtrapTransportOptions({
-      username: AppConfig.mail.mailtrapUser,
-      password: AppConfig.mail.mailtrapPassword,
-      host: AppConfig.mail.mailtrapHost,
-      port: AppConfig.mail.mailtrapPort,
-      secure: AppConfig.mail.mailtrapSecure,
-    });
+const warnIfSmtpTlsModeLooksWrong = (
+  provider: string,
+  smtp: typeof AppConfig.mail.smtp,
+  transportLabel: string,
+): void => {
+  if (provider !== "smtp") {
+    return;
   }
 
-  return {
-    jsonTransport: true,
-  };
+  if (smtp.port === 465 && !smtp.secure) {
+    console.warn(
+      `[auth-mailer] ${transportLabel} uses SMTP on port 465 but MAIL_SMTP_SECURE is false. Port 465 expects implicit TLS, so secure should be true.`,
+    );
+  }
+
+  if (smtp.port === 587 && smtp.secure) {
+    console.warn(
+      `[auth-mailer] ${transportLabel} uses SMTP on port 587 but MAIL_SMTP_SECURE is true. Port 587 expects STARTTLS, so secure should usually be false.`,
+    );
+  }
+};
+
+const warnIfMailConfigurationLooksWrong = (): void => {
+  const { defaultFrom, notificationsFrom, transportProvider, notificationsTransportProvider, smtp } = AppConfig.mail;
+
+  if (transportProvider === "json" && (smtp.username || smtp.password || smtp.host || smtp.port)) {
+    console.warn(
+      "[auth-mailer] MAIL_TRANSPORT_PROVIDER is set to json, so SMTP settings are being ignored and emails will only be generated as previews.",
+    );
+  }
+
+  if (notificationsTransportProvider === "json" && (smtp.username || smtp.password || smtp.host || smtp.port)) {
+    console.warn(
+      "[auth-mailer] MAIL_NOTIFICATIONS_TRANSPORT_PROVIDER is set to json, so notification emails will not use SMTP.",
+    );
+  }
+
+  warnIfSmtpTlsModeLooksWrong(transportProvider, smtp, "Default transport");
+  warnIfSmtpTlsModeLooksWrong(notificationsTransportProvider, smtp, "Notification transport");
+
+  if (transportProvider === "smtp" && !smtp.host) {
+    console.warn("[auth-mailer] MAIL_TRANSPORT_PROVIDER is smtp but MAIL_SMTP_HOST is not configured.");
+  }
+
+  if (transportProvider === "smtp" && (!smtp.username || !smtp.password)) {
+    console.warn(
+      "[auth-mailer] MAIL_TRANSPORT_PROVIDER is smtp but SMTP credentials are incomplete. The transport will fall back to JSON previews.",
+    );
+  }
+
+  if (transportProvider === "smtp" && defaultFrom !== smtp.username) {
+    console.warn(
+      `[auth-mailer] MAIL_FROM is ${defaultFrom} while SMTP authenticates as ${smtp.username}. Some providers reject sender addresses that do not match the authenticated mailbox or an allowed alias.`,
+    );
+  }
+
+  if (notificationsTransportProvider === "smtp" && notificationsFrom !== smtp.username) {
+    console.warn(
+      `[auth-mailer] MAIL_NOTIFICATIONS_FROM is ${notificationsFrom} while SMTP authenticates as ${smtp.username}. Some providers reject sender addresses that do not match the authenticated mailbox or an allowed alias.`,
+    );
+  }
 };
 
 export const registerAuthMailer = (): void => {
@@ -34,12 +81,18 @@ export const registerAuthMailer = (): void => {
     return;
   }
 
+  warnIfMailConfigurationLooksWrong();
+
   registerMailerTransport({
     name: "default",
     defaults: {
       from: AppConfig.mail.defaultFrom,
     },
-    transport: resolveTransport(),
+    transport: createMailTransport({
+      provider: AppConfig.mail.transportProvider,
+      mailtrap: AppConfig.mail.mailtrap,
+      smtp: AppConfig.mail.smtp,
+    }),
     verifyOnStart: false,
   });
 
@@ -48,9 +101,11 @@ export const registerAuthMailer = (): void => {
     defaults: {
       from: AppConfig.mail.notificationsFrom,
     },
-    transport: {
-      jsonTransport: true,
-    },
+    transport: createMailTransport({
+      provider: AppConfig.mail.notificationsTransportProvider,
+      mailtrap: AppConfig.mail.mailtrap,
+      smtp: AppConfig.mail.smtp,
+    }),
     verifyOnStart: false,
   });
 

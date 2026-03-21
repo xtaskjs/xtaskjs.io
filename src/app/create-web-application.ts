@@ -1,6 +1,8 @@
 import express from "express";
 import path from "path";
 import { mkdir } from "fs/promises";
+import { readFileSync } from "fs";
+import { createServer as createHttpsServer, type Server as HttpsServer } from "https";
 import bcrypt from "bcryptjs";
 import { engine as hbsEngine } from "express-handlebars";
 import { CreateApplication, type XTaskHttpApplication } from "@xtaskjs/core";
@@ -105,6 +107,72 @@ const configureApplicationCache = (): void => {
   });
 };
 
+type ListenableAdapter = ExpressAdapter & {
+  listen: (options: { host: string; port: number }) => Promise<void>;
+  close: () => Promise<void>;
+};
+
+const resolveHttpsCredentials = (): { key: Buffer; cert: Buffer; ca?: Buffer } => {
+  const { keyPath, certPath, caPath } = AppConfig.ssl;
+
+  if (!keyPath) {
+    throw new Error("SSL is enabled but SSL_KEY_PATH is not configured");
+  }
+
+  if (!certPath) {
+    throw new Error("SSL is enabled but SSL_CERT_PATH is not configured");
+  }
+
+  return {
+    key: readFileSync(keyPath),
+    cert: readFileSync(certPath),
+    ca: caPath ? readFileSync(caPath) : undefined,
+  };
+};
+
+const enableHttpsListener = (adapter: ListenableAdapter, expressApp: express.Express): void => {
+  const credentials = resolveHttpsCredentials();
+  let httpsServer: HttpsServer | undefined;
+
+  adapter.listen = async ({ host, port }): Promise<void> => {
+    await new Promise<void>((resolve, reject) => {
+      const server = createHttpsServer(credentials, expressApp);
+      const cleanupErrorHandler = (): void => {
+        server.off("error", onError);
+      };
+      const onError = (error: Error): void => {
+        cleanupErrorHandler();
+        reject(error);
+      };
+
+      server.once("error", onError);
+      server.listen(port, host, () => {
+        cleanupErrorHandler();
+        httpsServer = server;
+        resolve();
+      });
+    });
+  };
+
+  adapter.close = async (): Promise<void> => {
+    if (!httpsServer) {
+      return;
+    }
+
+    await new Promise<void>((resolve, reject) => {
+      httpsServer?.close((error) => {
+        if (error) {
+          reject(error);
+          return;
+        }
+
+        resolve();
+      });
+    });
+    httpsServer = undefined;
+  };
+};
+
 export const createWebApplication = async (): Promise<XTaskHttpApplication> => {
   configureApplicationCache();
   await bootstrapInfrastructure();
@@ -134,6 +202,10 @@ export const createWebApplication = async (): Promise<XTaskHttpApplication> => {
   expressApp.use(attachInternationalizationRequestState);
   expressApp.use("/admin/news", newsUpload.single("image"));
   expressApp.use(attachHtmlValidationErrorHandler);
+
+  if (AppConfig.ssl.enabled) {
+    enableHttpsListener(adapter as ListenableAdapter, expressApp);
+  }
 
   return CreateApplication({
     adapter,

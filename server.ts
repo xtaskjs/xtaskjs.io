@@ -7,7 +7,8 @@ dotenv.config();
 
 async function startServer(): Promise<void> {
   const application = await createWebApplication();
-  console.log(`[xtaskjs] running on http://${AppConfig.host}:${AppConfig.port}`);
+  const protocol = AppConfig.ssl.enabled ? "https" : "http";
+  console.log(`[xtaskjs] running on ${protocol}://${AppConfig.host}:${AppConfig.port}`);
 
   const shutdown = async (): Promise<void> => {
     await application.close();

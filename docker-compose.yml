@@ -4,7 +4,7 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "80:3000"
+      - "${APP_PORT_MAPPING:-80:3000}"
     environment:
       PORT: 3000
       POSTGRES_HOST: db
@@ -20,17 +20,29 @@ services:
       ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin123!}
       PUBLIC_URL: ${PUBLIC_URL:-http://127.0.0.1:80}
+      SSL_ENABLED: ${SSL_ENABLED:-false}
+      SSL_KEY_PATH: ${SSL_KEY_PATH:-/app/certs/www.xtaskjs.io_private_key.key}
+      SSL_CERT_PATH: ${SSL_CERT_PATH:-}
+      SSL_CA_PATH: ${SSL_CA_PATH:-}
       MAIL_FROM: ${MAIL_FROM:-hello@xtaskjs.dev}
       MAIL_NOTIFICATIONS_FROM: ${MAIL_NOTIFICATIONS_FROM:-alerts@xtaskjs.dev}
       MAIL_SUPPORT_TO: ${MAIL_SUPPORT_TO:-support@xtaskjs.dev}
       MAIL_NOTIFICATIONS_TO: ${MAIL_NOTIFICATIONS_TO:-ops@xtaskjs.dev}
+      MAIL_TRANSPORT_PROVIDER: ${MAIL_TRANSPORT_PROVIDER:-json}
+      MAIL_NOTIFICATIONS_TRANSPORT_PROVIDER: ${MAIL_NOTIFICATIONS_TRANSPORT_PROVIDER:-json}
       MAILTRAP_SMTP_USER: ${MAILTRAP_SMTP_USER:-}
       MAILTRAP_SMTP_PASS: ${MAILTRAP_SMTP_PASS:-}
       MAILTRAP_SMTP_HOST: ${MAILTRAP_SMTP_HOST:-sandbox.smtp.mailtrap.io}
       MAILTRAP_SMTP_PORT: ${MAILTRAP_SMTP_PORT:-2525}
       MAILTRAP_SMTP_SECURE: ${MAILTRAP_SMTP_SECURE:-false}
+      MAIL_SMTP_USER: ${MAIL_SMTP_USER:-}
+      MAIL_SMTP_PASS: ${MAIL_SMTP_PASS:-}
+      MAIL_SMTP_HOST: ${MAIL_SMTP_HOST:-smtp.example.com}
+      MAIL_SMTP_PORT: ${MAIL_SMTP_PORT:-587}
+      MAIL_SMTP_SECURE: ${MAIL_SMTP_SECURE:-false}
     volumes:
       - uploads_data:/app/public/uploads
+      - ${SSL_CERTS_DIR:-../certificado_xtaskjs.io}:/app/certs:ro
     depends_on:
       db:
         condition: service_healthy

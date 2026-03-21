@@ -1,5 +1,10 @@
 import "dotenv/config";
 import path from "path";
+import {
+  resolveMailTransportProvider,
+  type MailTransportAccountConfig,
+  type MailTransportProvider,
+} from "./mail-transport-config";
 
 export type AppConfiguration = {
   readonly host: string;
@@ -7,6 +12,12 @@ export type AppConfiguration = {
   readonly publicUrl: string;
   readonly nodeEnv: string;
   readonly isProduction: boolean;
+  readonly ssl: {
+    readonly enabled: boolean;
+    readonly keyPath?: string;
+    readonly certPath?: string;
+    readonly caPath?: string;
+  };
   readonly cache: {
     readonly namespace: string;
     readonly connectOnStart: boolean;
@@ -28,11 +39,10 @@ export type AppConfiguration = {
     readonly notificationsFrom: string;
     readonly supportEmail: string;
     readonly notificationsTo: string;
-    readonly mailtrapUser?: string;
-    readonly mailtrapPassword?: string;
-    readonly mailtrapHost?: string;
-    readonly mailtrapPort?: number;
-    readonly mailtrapSecure: boolean;
+    readonly transportProvider: MailTransportProvider;
+    readonly notificationsTransportProvider: MailTransportProvider;
+    readonly mailtrap: MailTransportAccountConfig;
+    readonly smtp: MailTransportAccountConfig;
   };
   readonly database: {
     readonly type: "postgres";
@@ -53,13 +63,80 @@ export type AppConfiguration = {
 };
 
 const root = process.cwd();
+const trimOptionalEnv = (value: string | undefined): string | undefined => {
+  const normalized = value?.trim();
+  return normalized ? normalized : undefined;
+};
+
+const sslKeyPath = trimOptionalEnv(process.env.SSL_KEY_PATH);
+const sslCertPath = trimOptionalEnv(process.env.SSL_CERT_PATH);
+const sslCaPath = trimOptionalEnv(process.env.SSL_CA_PATH);
+const trimEnvWithFallback = (value: string | undefined, fallback: string): string =>
+  trimOptionalEnv(value) || fallback;
+const parseOptionalNumberEnv = (value: string | undefined): number | undefined => {
+  const normalized = trimOptionalEnv(value);
+
+  if (!normalized) {
+    return undefined;
+  }
+
+  const parsed = Number(normalized);
+  return Number.isFinite(parsed) ? parsed : undefined;
+};
+const parseBooleanEnv = (value: string | undefined, fallback = false): boolean => {
+  const normalized = trimOptionalEnv(value)?.toLowerCase();
+
+  if (!normalized) {
+    return fallback;
+  }
+
+  return normalized === "true";
+};
+
+const mailtrapAccount: MailTransportAccountConfig = {
+  username: trimOptionalEnv(process.env.MAILTRAP_SMTP_USER),
+  password: trimOptionalEnv(process.env.MAILTRAP_SMTP_PASS),
+  host: trimOptionalEnv(process.env.MAILTRAP_SMTP_HOST),
+  port: parseOptionalNumberEnv(process.env.MAILTRAP_SMTP_PORT),
+  secure: parseBooleanEnv(process.env.MAILTRAP_SMTP_SECURE),
+};
+
+const smtpAccount: MailTransportAccountConfig = {
+  username: trimOptionalEnv(process.env.MAIL_SMTP_USER),
+  password: trimOptionalEnv(process.env.MAIL_SMTP_PASS),
+  host: trimOptionalEnv(process.env.MAIL_SMTP_HOST),
+  port: parseOptionalNumberEnv(process.env.MAIL_SMTP_PORT),
+  secure: parseBooleanEnv(process.env.MAIL_SMTP_SECURE),
+};
+
+const mailTransportProvider = resolveMailTransportProvider(
+  trimOptionalEnv(process.env.MAIL_TRANSPORT_PROVIDER),
+  {
+    mailtrap: mailtrapAccount,
+    smtp: smtpAccount,
+  },
+);
+
+const notificationsMailTransportProvider = resolveMailTransportProvider(
+  trimOptionalEnv(process.env.MAIL_NOTIFICATIONS_TRANSPORT_PROVIDER) || "json",
+  {
+    mailtrap: mailtrapAccount,
+    smtp: smtpAccount,
+  },
+);
 
 export const AppConfig: AppConfiguration = {
   host: process.env.HOST || "0.0.0.0",
   port: Number(process.env.PORT || 3000),
-  publicUrl: process.env.PUBLIC_URL || `http://127.0.0.1:${Number(process.env.PORT || 3000)}`,
+  publicUrl: trimEnvWithFallback(process.env.PUBLIC_URL, `http://127.0.0.1:${Number(process.env.PORT || 3000)}`),
   nodeEnv: process.env.NODE_ENV || "development",
   isProduction: process.env.NODE_ENV === "production",
+  ssl: {
+    enabled: process.env.SSL_ENABLED === "true",
+    keyPath: sslKeyPath,
+    certPath: sslCertPath,
+    caPath: sslCaPath,
+  },
   cache: {
     namespace: process.env.CACHE_NAMESPACE || "xtaskjs.io",
     connectOnStart: process.env.CACHE_CONNECT_ON_START !== "false",
@@ -77,15 +154,14 @@ export const AppConfig: AppConfiguration = {
     issuer: process.env.JWT_ISSUER || "xtaskjs.io",
   },
   mail: {
-    defaultFrom: process.env.MAIL_FROM || "hello@xtaskjs.dev",
-    notificationsFrom: process.env.MAIL_NOTIFICATIONS_FROM || "alerts@xtaskjs.dev",
-    supportEmail: process.env.MAIL_SUPPORT_TO || "support@xtaskjs.dev",
-    notificationsTo: process.env.MAIL_NOTIFICATIONS_TO || "ops@xtaskjs.dev",
-    mailtrapUser: process.env.MAILTRAP_SMTP_USER,
-    mailtrapPassword: process.env.MAILTRAP_SMTP_PASS,
-    mailtrapHost: process.env.MAILTRAP_SMTP_HOST,
-    mailtrapPort: process.env.MAILTRAP_SMTP_PORT ? Number(process.env.MAILTRAP_SMTP_PORT) : undefined,
-    mailtrapSecure: process.env.MAILTRAP_SMTP_SECURE === "true",
+    defaultFrom: trimEnvWithFallback(process.env.MAIL_FROM, "hello@xtaskjs.dev"),
+    notificationsFrom: trimEnvWithFallback(process.env.MAIL_NOTIFICATIONS_FROM, "alerts@xtaskjs.dev"),
+    supportEmail: trimEnvWithFallback(process.env.MAIL_SUPPORT_TO, "support@xtaskjs.dev"),
+    notificationsTo: trimEnvWithFallback(process.env.MAIL_NOTIFICATIONS_TO, "ops@xtaskjs.dev"),
+    transportProvider: mailTransportProvider,
+    notificationsTransportProvider: notificationsMailTransportProvider,
+    mailtrap: mailtrapAccount,
+    smtp: smtpAccount,
   },
   database: {
     type: "postgres",
