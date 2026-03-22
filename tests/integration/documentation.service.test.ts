@@ -65,6 +65,23 @@ test("DocumentationService returns cache package detail with cache-specific API 
   ]);
 });
 
+test("DocumentationService returns queues package detail with queue-specific API groups and sample links", () => {
+  const service = createService("en-US");
+  const detail = service.getPackageDetailViewModel("queues");
+
+  assert.ok(detail);
+  assert.equal(detail?.apiGroups.length, 3);
+  assert.deepEqual(detail?.apiGroups.map((group) => group.title), [
+    "Configuration and transports",
+    "Decorators and injectors",
+    "Runtime service and lifecycle",
+  ]);
+  assert.deepEqual(detail?.sampleLinks.map((entry) => entry.name), [
+    "16-queues_memory_app",
+    "17-queues_rabbitmq_app",
+  ]);
+});
+
 test("DocumentationService returns CLI docs with command and option groups", () => {
   const service = createService("en-US");
   const cli = service.getCliViewModel();
@@ -103,6 +120,26 @@ test("DocumentationService exposes cache decorators in the catalog", () => {
   );
   assert.equal(
     decorators.decoratorGroups.some((group) => group.id === "decorators-cache-http"),
+    true
+  );
+});
+
+test("DocumentationService exposes queue samples and decorators in the catalog", () => {
+  const service = createService("en-US");
+  const samples = service.getSamplesViewModel();
+  const decorators = service.getDecoratorsViewModel();
+
+  assert.equal(
+    samples.samples.some((sample) => sample.name === "16-queues_memory_app"),
+    true
+  );
+  assert.equal(
+    samples.samples.some((sample) => sample.name === "17-queues_rabbitmq_app"),
+    true
+  );
+  assert.equal(decorators.packageCoverage.includes("@xtaskjs/queues"), true);
+  assert.equal(
+    decorators.decoratorGroups.some((group) => group.id === "decorators-queues"),
     true
   );
 });

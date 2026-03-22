@@ -394,6 +394,20 @@ export class AccountController {
       );
     }
 
+    if (!newsletterSubscribed) {
+      return view(
+        "register",
+        {
+          titleKey: "auth.register.metaTitle",
+          viewer: null,
+          hasError: true,
+          errorMessageKey: "auth.register.privacyConsentRequired",
+          form,
+        },
+        400
+      );
+    }
+
     try {
       const result = await this.accountAccessService.register(
         { fullName, username, email, password, receiveNewsUpdates, newsletterSubscribed },

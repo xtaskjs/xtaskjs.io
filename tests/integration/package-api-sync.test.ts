@@ -33,11 +33,19 @@ test("syncPackageApiGroups generates API groups from a workspace fixture", async
       "ManyToOne",
       "Repository",
     ]);
+    assert.deepEqual(result.generatedGroups.queues[0]?.exports, [
+      "configureQueues",
+      "registerQueueTransport",
+      "registerInMemoryQueueTransport",
+      "createRabbitMqTransport",
+      "createMqttTransport",
+    ]);
 
     const written = await readFile(outputFilePath, "utf8");
     assert.match(written, /generatedPackageApiGroups/);
     assert.match(written, /CreateApplication/);
     assert.match(written, /InjectSchedulerService/);
+    assert.match(written, /QueueHandler/);
   } finally {
     await fixture.cleanup();
     await rm(tempDir, { recursive: true, force: true });

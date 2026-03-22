@@ -43,6 +43,14 @@ export class PublicSiteController {
     });
   }
 
+  @Get("/privacy")
+  async privacy(req: Request, res: Response): Promise<ReturnType<typeof view>> {
+    return view("privacy", {
+      titleKey: "site.privacy.metaTitle",
+      viewer: await this.sessionViewService.getViewer(req, res),
+    });
+  }
+
   @Get("/health")
   health(): { status: string } {
     return { status: "ok" };

@@ -1,0 +1,151 @@
+{{> site-header viewer=viewer}}
+
+<main class="spring-like-home docs-home">
+  <section class="docs-hero">
+    <div class="hero-copy docs-hero-copy">
+      <p class="eyebrow">{{t "site.privacy.eyebrow"}}</p>
+      <h1>{{t "site.privacy.title"}}</h1>
+      <p>{{t "site.privacy.subtitle"}}</p>
+      <div class="hero-cta">
+        <a href="#cookies" class="cta-primary">{{t "site.privacy.cookies.title"}}</a>
+        <a href="/documentation" class="cta-secondary">{{t "site.privacy.contact.docsLinkLabel"}}</a>
+      </div>
+    </div>
+    <div class="policy-summary-grid">
+      <article class="feature-card policy-section-card">
+        <h3>{{t "site.privacy.highlights.cookiesTitle"}}</h3>
+        <p>{{t "site.privacy.highlights.cookiesBody"}}</p>
+      </article>
+      <article class="feature-card policy-section-card">
+        <h3>{{t "site.privacy.highlights.accountTitle"}}</h3>
+        <p>{{t "site.privacy.highlights.accountBody"}}</p>
+      </article>
+      <article class="feature-card policy-section-card">
+        <h3>{{t "site.privacy.highlights.securityTitle"}}</h3>
+        <p>{{t "site.privacy.highlights.securityBody"}}</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="docs-layout">
+    <aside class="docs-sidebar-card">
+      <p class="eyebrow">{{t "site.privacy.onThisPage"}}</p>
+      <nav class="docs-sidebar-nav" aria-label="{{t "site.privacy.sectionsLabel"}}">
+        <a href="#overview">{{t "site.privacy.overview.title"}}</a>
+        <a href="#cookies">{{t "site.privacy.cookies.title"}}</a>
+        <a href="#account">{{t "site.privacy.account.title"}}</a>
+        <a href="#security">{{t "site.privacy.security.title"}}</a>
+        <a href="#usage">{{t "site.privacy.usage.title"}}</a>
+        <a href="#contact">{{t "site.privacy.contact.title"}}</a>
+      </nav>
+    </aside>
+
+    <div class="docs-content">
+      <section class="section docs-section" id="overview">
+        <div class="docs-section-heading">
+          <p class="eyebrow">{{t "site.privacy.overview.eyebrow"}}</p>
+          <h2>{{t "site.privacy.overview.title"}}</h2>
+        </div>
+        <article class="feature-card policy-section-card">
+          <ul class="docs-list">
+            <li>{{t "site.privacy.overview.points.one"}}</li>
+            <li>{{t "site.privacy.overview.points.two"}}</li>
+            <li>{{t "site.privacy.overview.points.three"}}</li>
+          </ul>
+        </article>
+      </section>
+
+      <section class="section docs-section" id="cookies">
+        <div class="docs-section-heading">
+          <p class="eyebrow">{{t "site.privacy.cookies.eyebrow"}}</p>
+          <h2>{{t "site.privacy.cookies.title"}}</h2>
+        </div>
+        <div class="docs-two-column">
+          <article class="feature-card policy-section-card">
+            <p>{{t "site.privacy.cookies.intro"}}</p>
+            <ul class="docs-list">
+              <li><strong>{{t "site.cookies.items.session.name"}}</strong>: {{t "site.cookies.items.session.description"}}</li>
+              <li><strong>{{t "site.cookies.items.challenge.name"}}</strong>: {{t "site.cookies.items.challenge.description"}}</li>
+              <li><strong>{{t "site.cookies.items.locale.name"}}</strong>: {{t "site.cookies.items.locale.description"}}</li>
+            </ul>
+          </article>
+          <article class="feature-card policy-section-card">
+            <h3>{{t "site.privacy.cookies.themeTitle"}}</h3>
+            <p>{{t "site.privacy.cookies.themeBody"}}</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section docs-section" id="account">
+        <div class="docs-section-heading">
+          <p class="eyebrow">{{t "site.privacy.account.eyebrow"}}</p>
+          <h2>{{t "site.privacy.account.title"}}</h2>
+        </div>
+        <article class="feature-card policy-section-card">
+          <p>{{t "site.privacy.account.intro"}}</p>
+          <ul class="docs-list">
+            <li>{{t "site.privacy.account.items.one"}}</li>
+            <li>{{t "site.privacy.account.items.two"}}</li>
+            <li>{{t "site.privacy.account.items.three"}}</li>
+            <li>{{t "site.privacy.account.items.four"}}</li>
+          </ul>
+        </article>
+      </section>
+
+      <section class="section docs-section" id="security">
+        <div class="docs-section-heading">
+          <p class="eyebrow">{{t "site.privacy.security.eyebrow"}}</p>
+          <h2>{{t "site.privacy.security.title"}}</h2>
+        </div>
+        <article class="feature-card policy-section-card">
+          <p>{{t "site.privacy.security.intro"}}</p>
+          <ul class="docs-list">
+            <li>{{t "site.privacy.security.items.one"}}</li>
+            <li>{{t "site.privacy.security.items.two"}}</li>
+            <li>{{t "site.privacy.security.items.three"}}</li>
+          </ul>
+        </article>
+      </section>
+
+      <section class="section docs-section" id="usage">
+        <div class="docs-section-heading">
+          <p class="eyebrow">{{t "site.privacy.usage.eyebrow"}}</p>
+          <h2>{{t "site.privacy.usage.title"}}</h2>
+        </div>
+        <article class="feature-card policy-section-card">
+          <ul class="docs-list docs-list-numbered">
+            <li>{{t "site.privacy.usage.items.one"}}</li>
+            <li>{{t "site.privacy.usage.items.two"}}</li>
+            <li>{{t "site.privacy.usage.items.three"}}</li>
+            <li>{{t "site.privacy.usage.items.four"}}</li>
+          </ul>
+        </article>
+      </section>
+
+      <section class="section docs-section" id="contact">
+        <div class="docs-section-heading">
+          <p class="eyebrow">{{t "site.privacy.contact.eyebrow"}}</p>
+          <h2>{{t "site.privacy.contact.title"}}</h2>
+        </div>
+        <div class="policy-contact-grid">
+          <article class="feature-card policy-contact-card">
+            <p class="policy-note">{{t "site.privacy.contact.body"}}</p>
+          </article>
+          <article class="feature-card policy-contact-card">
+            <a href="/privacy#cookies" class="cta-secondary inline-btn">{{t "site.privacy.contact.cookieLinkLabel"}}</a>
+            <a href="/documentation" class="cta-secondary inline-btn">{{t "site.privacy.contact.docsLinkLabel"}}</a>
+          </article>
+        </div>
+      </section>
+    </div>
+  </section>
+</main>
+
+<footer class="global-footer">
+  <div class="footer-wrap">
+    <a href="/" class="footer-brand" aria-label="xTaskjs home">
+      <img src="/logo.svg" alt="xTaskjs logo" class="footer-brand-logo" />
+      <p class="footer-brand-copy">{{t "site.footer.builtWith"}}</p>
+    </a>
+  </div>
+</footer>

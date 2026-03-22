@@ -675,3 +675,39 @@ test("registration stores communication preferences and dashboard can update new
   assert.match(dashboardHtml, /Enabled/);
   assert.match(dashboardHtml, /Not subscribed/);
 });
+
+test("registration requires privacy consent before creating an account", { timeout: 240000 }, async (t) => {
+  const dockerAvailable = await isDockerAvailable();
+
+  if (!dockerAvailable) {
+    t.skip("Docker is not available for ephemeral Postgres provisioning");
+    return;
+  }
+
+  const app = await startDocsApp();
+  t.after(async () => {
+    await app.stop();
+  });
+
+  await waitForDocsPage(app, "/register");
+
+  const registerResponse = await fetch(`${app.publicUrl}/register`, {
+    method: "POST",
+    headers: {
+      "content-type": "application/x-www-form-urlencoded",
+    },
+    body: new URLSearchParams({
+      fullName: "Privacy Missing",
+      username: "privacy-missing",
+      email: "privacy-missing@example.com",
+      password: "Password123!",
+      confirmPassword: "Password123!",
+      receiveNewsUpdates: "on",
+    }),
+  });
+  const html = await registerResponse.text();
+
+  assert.equal(registerResponse.status, 400);
+  assert.match(html, /You must accept the Privacy Policy to create an account\./);
+  assert.match(html, /href="\/privacy"/);
+});

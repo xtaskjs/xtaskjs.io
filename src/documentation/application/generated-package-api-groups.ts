@@ -343,5 +343,41 @@ export const generatedPackageApiGroups: Readonly<Record<string, readonly { reado
         "resetCacheIntegration"
       ]
     }
+  ],
+  "queues": [
+    {
+      "title": "Configuration and transports",
+      "sourcePath": "packages/queues/src",
+      "exports": [
+        "configureQueues",
+        "registerQueueTransport",
+        "registerInMemoryQueueTransport",
+        "createRabbitMqTransport",
+        "createMqttTransport"
+      ]
+    },
+    {
+      "title": "Decorators and injectors",
+      "sourcePath": "packages/queues/src",
+      "exports": [
+        "QueueHandler",
+        "QueueSubscribe",
+        "QueuePattern",
+        "PublishToQueue",
+        "InjectQueueService",
+        "InjectQueueTransport"
+      ]
+    },
+    {
+      "title": "Runtime service and lifecycle",
+      "sourcePath": "packages/queues/src",
+      "exports": [
+        "QueueService",
+        "initializeQueueIntegration",
+        "shutdownQueueIntegration",
+        "getQueueServiceToken",
+        "getQueueTransportToken"
+      ]
+    }
   ]
 };

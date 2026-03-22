@@ -49,11 +49,16 @@
             id="newsletterSubscribed"
             name="newsletterSubscribed"
             type="checkbox"
+            required
             {{#if form.newsletterSubscribed}}checked{{/if}}
           />
           <span class="checkbox-row-copy">
-            <span>{{t "auth.register.newsletterSubscribed"}}</span>
-            <span class="checkbox-row-hint">{{t "auth.register.newsletterSubscribedHint"}}</span>
+            <span>
+              {{t "auth.register.newsletterConsentPrefix"}}
+              <a href="/privacy" target="_blank" rel="noreferrer">{{t "auth.register.privacyPolicyLinkLabel"}}</a>
+              {{t "auth.register.newsletterConsentSuffix"}}
+            </span>
+            <span class="checkbox-row-hint">{{t "auth.register.newsletterConsentHint"}}</span>
           </span>
         </label>
 

@@ -239,6 +239,45 @@ export const packageSpecs: Readonly<Record<string, PackageSpec>> = {
       },
     ],
   },
+  queues: {
+    packageRoot: "packages/queues",
+    groups: [
+      {
+        title: "Configuration and transports",
+        sourcePath: "packages/queues/src",
+        preferredExports: [
+          "configureQueues",
+          "registerQueueTransport",
+          "registerInMemoryQueueTransport",
+          "createRabbitMqTransport",
+          "createMqttTransport",
+        ],
+      },
+      {
+        title: "Decorators and injectors",
+        sourcePath: "packages/queues/src",
+        preferredExports: [
+          "QueueHandler",
+          "QueueSubscribe",
+          "QueuePattern",
+          "PublishToQueue",
+          "InjectQueueService",
+          "InjectQueueTransport",
+        ],
+      },
+      {
+        title: "Runtime service and lifecycle",
+        sourcePath: "packages/queues/src",
+        preferredExports: [
+          "QueueService",
+          "initializeQueueIntegration",
+          "shutdownQueueIntegration",
+          "getQueueServiceToken",
+          "getQueueTransportToken",
+        ],
+      },
+    ],
+  },
 };
 
 export type SyncPackageApiGroupsOptions = {

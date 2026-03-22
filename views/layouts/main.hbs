@@ -14,6 +14,73 @@
   </head>
   <body>
     {{{body}}}
+    <section
+      class="cookie-consent"
+      id="cookie-consent"
+      role="dialog"
+      aria-live="polite"
+      aria-labelledby="cookie-consent-title"
+      aria-describedby="cookie-consent-description"
+      hidden
+    >
+      <div class="cookie-consent__panel">
+        <div class="cookie-consent__copy">
+          <p class="cookie-consent__eyebrow">{{t "site.cookies.eyebrow"}}</p>
+          <h2 class="cookie-consent__title" id="cookie-consent-title">{{t "site.cookies.title"}}</h2>
+          <p class="cookie-consent__description" id="cookie-consent-description">{{t "site.cookies.description"}}</p>
+          <div class="cookie-consent__preferences" id="cookie-consent-preferences" hidden>
+            <p class="cookie-consent__preferences-title">{{t "site.cookies.preferencesTitle"}}</p>
+            <div class="cookie-consent__preference-item">
+              <div>
+                <strong>{{t "site.cookies.essentialLabel"}}</strong>
+                <p>{{t "site.cookies.essentialDescription"}}</p>
+              </div>
+              <span class="cookie-consent__status cookie-consent__status-required">{{t "site.cookies.required"}}</span>
+            </div>
+            <div class="cookie-consent__preference-item">
+              <div>
+                <strong>{{t "site.cookies.optionalLabel"}}</strong>
+                <p>{{t "site.cookies.optionalDescription"}}</p>
+              </div>
+              <span class="cookie-consent__status">{{t "site.cookies.noneInUse"}}</span>
+            </div>
+            <ul class="cookie-consent__list">
+              <li>
+                <strong>{{t "site.cookies.items.session.name"}}</strong>
+                <span>{{t "site.cookies.items.session.description"}}</span>
+              </li>
+              <li>
+                <strong>{{t "site.cookies.items.challenge.name"}}</strong>
+                <span>{{t "site.cookies.items.challenge.description"}}</span>
+              </li>
+              <li>
+                <strong>{{t "site.cookies.items.locale.name"}}</strong>
+                <span>{{t "site.cookies.items.locale.description"}}</span>
+              </li>
+            </ul>
+          </div>
+          <p class="cookie-consent__note">{{t "site.cookies.note"}}</p>
+          <a href="/privacy" class="cookie-consent__policy-link">{{t "site.cookies.policyLink"}}</a>
+        </div>
+        <div class="cookie-consent__actions">
+          <button
+            type="button"
+            class="cta-secondary cookie-consent__manage"
+            data-cookie-consent-customize
+            aria-expanded="false"
+            aria-controls="cookie-consent-preferences"
+          >
+            {{t "site.cookies.customize"}}
+          </button>
+          <button type="button" class="cta-secondary cookie-consent__essential" data-cookie-consent-essential>
+            {{t "site.cookies.essentialOnly"}}
+          </button>
+          <button type="button" class="cta-primary cookie-consent__accept" data-cookie-consent-accept>
+            {{t "site.cookies.accept"}}
+          </button>
+        </div>
+      </div>
+    </section>
     <script src="/nav.js" defer></script>
   </body>
 </html>

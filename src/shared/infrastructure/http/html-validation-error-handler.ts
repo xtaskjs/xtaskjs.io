@@ -172,6 +172,8 @@ const renderValidationView = async (
           fullName: toNormalizedText(body.fullName),
           username: toNormalizedText(body.username),
           email: toNormalizedText(body.email),
+          receiveNewsUpdates: toBoolean(body.receiveNewsUpdates),
+          newsletterSubscribed: toBoolean(body.newsletterSubscribed),
         },
       });
       return true;
