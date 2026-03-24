@@ -14,12 +14,12 @@ export class InfrastructureLifecycle {
   private readonly config = AppConfig;
   private readonly dataSource: DataSource = getAppDataSource();
 
-  @OnEvent("environmentPrepared", 100)
+  @OnEvent("serverStarted", 200)
   async ensureDirectories(): Promise<void> {
     await mkdir(this.config.paths.uploads, { recursive: true });
   }
 
-  @OnEvent("contextPrepared", 100)
+  @OnEvent("serverStarted", 100)
   async initializeDataSource(): Promise<void> {
     if (!this.dataSource.isInitialized) {
       await this.dataSource.initialize();

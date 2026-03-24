@@ -38,6 +38,14 @@ const publishedAtFormatter = new Intl.DateTimeFormat("en-US", {
 
 const fallbackPackages: readonly ProjectPackageViewModel[] = [
   {
+    name: "@xtaskjs/cache",
+    latestVersion: "Unavailable",
+    publishedAt: null,
+    publishedAtLabel: "npm data unavailable",
+    description: "Memory and Redis-backed cache models, method decorators, runtime inspection, and browser cache policies.",
+    npmUrl: "https://www.npmjs.com/package/@xtaskjs/cache",
+  },
+  {
     name: "@xtaskjs/common",
     latestVersion: "Unavailable",
     publishedAt: null,
@@ -70,12 +78,36 @@ const fallbackPackages: readonly ProjectPackageViewModel[] = [
     npmUrl: "https://www.npmjs.com/package/@xtaskjs/fastify-http",
   },
   {
+    name: "@xtaskjs/internationalization",
+    latestVersion: "Unavailable",
+    publishedAt: null,
+    publishedAtLabel: "npm data unavailable",
+    description: "Request-aware translations, locale fallback, namespace loading, and DI-friendly formatting services.",
+    npmUrl: "https://www.npmjs.com/package/@xtaskjs/internationalization",
+  },
+  {
     name: "@xtaskjs/mailer",
     latestVersion: "Unavailable",
     publishedAt: null,
     publishedAtLabel: "npm data unavailable",
     description: "Mailer integration with named transports, template rendering, and DI-friendly delivery services.",
     npmUrl: "https://www.npmjs.com/package/@xtaskjs/mailer",
+  },
+  {
+    name: "@xtaskjs/queues",
+    latestVersion: "Unavailable",
+    publishedAt: null,
+    publishedAtLabel: "npm data unavailable",
+    description: "Transport-agnostic queue handlers, broker helpers, publish decorators, and lifecycle-managed consumers.",
+    npmUrl: "https://www.npmjs.com/package/@xtaskjs/queues",
+  },
+  {
+    name: "@xtaskjs/scheduler",
+    latestVersion: "Unavailable",
+    publishedAt: null,
+    publishedAtLabel: "npm data unavailable",
+    description: "Cron, interval, and timeout decorators with lifecycle-managed job discovery and control.",
+    npmUrl: "https://www.npmjs.com/package/@xtaskjs/scheduler",
   },
   {
     name: "@xtaskjs/security",
@@ -92,6 +124,14 @@ const fallbackPackages: readonly ProjectPackageViewModel[] = [
     publishedAtLabel: "npm data unavailable",
     description: "TypeORM integration with datasource lifecycle and repository helpers.",
     npmUrl: "https://www.npmjs.com/package/@xtaskjs/typeorm",
+  },
+  {
+    name: "@xtaskjs/value-objects",
+    latestVersion: "Unavailable",
+    publishedAt: null,
+    publishedAtLabel: "npm data unavailable",
+    description: "Value object primitives, conversion helpers, DTO decorators, and DI factory integration helpers.",
+    npmUrl: "https://www.npmjs.com/package/@xtaskjs/value-objects",
   },
 ];
 

@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import { AutoWired, Service } from "@xtaskjs/core";
 import { AppConfig } from "../../shared/infrastructure/config/app-config";
+import { EmailAddress } from "../../shared/domain/value-objects/email-address";
 import { USER_LOGIN_EVENT_REPOSITORY, USER_REPOSITORY } from "../../shared/infrastructure/config/app-tokens";
 import type { AccessLocationSnapshot } from "../domain/access-location";
 import type { UserLoginEvent } from "../domain/user-login-event";
@@ -21,7 +22,7 @@ export type SessionPrincipal = {
 export type RegisterUserCommand = {
   readonly fullName: string;
   readonly username: string;
-  readonly email: string;
+  readonly email: string | EmailAddress;
   readonly password: string;
   readonly receiveNewsUpdates: boolean;
   readonly newsletterSubscribed: boolean;
@@ -52,7 +53,7 @@ export class UserService {
 
   async ensureAdminAccount(): Promise<void> {
     const username = normalizeIdentity(this.config.admin.username);
-    const email = normalizeIdentity(this.config.admin.email);
+    const email = this.normalizeEmail(this.config.admin.email);
     const passwordHash = await this.resolveAdminPasswordHash();
     const existing = await this.repository.findByUsername(username);
 
@@ -102,7 +103,7 @@ export class UserService {
     accessLocation?: AccessLocationSnapshot
   ): Promise<User> {
     const username = normalizeIdentity(command.username);
-    const email = normalizeIdentity(command.email);
+    const email = this.normalizeEmail(command.email);
 
     await this.ensureUsernameAvailable(username);
     await this.ensureEmailAvailable(email);
@@ -209,8 +210,8 @@ export class UserService {
     return this.repository.findById(id);
   }
 
-  async getByEmail(email: string): Promise<User | null> {
-    return this.repository.findByEmail(normalizeIdentity(email));
+  async getByEmail(email: string | EmailAddress): Promise<User | null> {
+    return this.repository.findByEmail(this.normalizeEmail(email));
   }
 
   async getByIdentifier(identifier: string): Promise<User | null> {
@@ -299,8 +300,8 @@ export class UserService {
     }
   }
 
-  async ensureEmailAvailable(email: string): Promise<void> {
-    const existing = await this.repository.findByEmail(email);
+  async ensureEmailAvailable(email: string | EmailAddress): Promise<void> {
+    const existing = await this.repository.findByEmail(this.normalizeEmail(email));
     if (existing) {
       throw new Error("That email address is already registered");
     }
@@ -377,5 +378,9 @@ export class UserService {
     }
 
     return bcrypt.hash(this.config.admin.password, 10);
+  }
+
+  private normalizeEmail(email: string | EmailAddress): string {
+    return EmailAddress.from(email).value;
   }
 }

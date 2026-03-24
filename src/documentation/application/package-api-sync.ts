@@ -278,6 +278,66 @@ export const packageSpecs: Readonly<Record<string, PackageSpec>> = {
       },
     ],
   },
+  "value-objects": {
+    packageRoot: "packages/value-objects",
+    groups: [
+      {
+        title: "Types and contracts",
+        sourcePath: "packages/value-objects/src/types.ts",
+        preferredExports: [
+          "JsonValue",
+          "ValueObjectLike",
+          "ValueObjectStaticFactory",
+          "ValueObjectFactory",
+          "TransformValueObjectOptions",
+          "ValueObjectFactoryProviderOptions",
+        ],
+      },
+      {
+        title: "Conversion helpers",
+        sourcePath: "packages/value-objects/src/converters.ts",
+        preferredExports: [
+          "isValueObject",
+          "unwrapValue",
+          "parseJsonValue",
+          "looksLikeJsonString",
+          "toPlainValue",
+          "toSerializableValue",
+          "toJsonString",
+        ],
+      },
+      {
+        title: "Base value objects",
+        sourcePath: "packages/value-objects/src/value-object.ts",
+        preferredExports: [
+          "ValueObject",
+          "StringValueObject",
+          "NumberValueObject",
+          "BooleanValueObject",
+          "BigIntValueObject",
+          "DateValueObject",
+          "JsonValueObject",
+        ],
+      },
+      {
+        title: "Factory helpers",
+        sourcePath: "packages/value-objects/src/factories.ts",
+        preferredExports: [
+          "createValueObjectFactory",
+          "InjectableValueObjectFactory",
+          "ValueObjectFactoryFor",
+          "fromPlainValue",
+          "fromJsonValue",
+          "fromAutoValue",
+        ],
+      },
+      {
+        title: "DTO decorators",
+        sourcePath: "packages/value-objects/src/decorators.ts",
+        preferredExports: ["TransformValueObject"],
+      },
+    ],
+  },
 };
 
 export type SyncPackageApiGroupsOptions = {

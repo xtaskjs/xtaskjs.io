@@ -27,6 +27,7 @@ test("docs sync CLI happy path writes a generated package API module", async () 
     assert.match(written, /generatedPackageApiGroups/);
     assert.match(written, /registerMailerTransport/);
     assert.match(written, /registerQueueTransport/);
+    assert.match(written, /TransformValueObject/);
   } finally {
     await fixture.cleanup();
     await rm(tempDir, { recursive: true, force: true });

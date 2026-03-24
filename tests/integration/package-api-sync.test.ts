@@ -40,12 +40,22 @@ test("syncPackageApiGroups generates API groups from a workspace fixture", async
       "createRabbitMqTransport",
       "createMqttTransport",
     ]);
+    assert.deepEqual(result.generatedGroups["value-objects"][2]?.exports, [
+      "ValueObject",
+      "StringValueObject",
+      "NumberValueObject",
+      "BooleanValueObject",
+      "BigIntValueObject",
+      "DateValueObject",
+      "JsonValueObject",
+    ]);
 
     const written = await readFile(outputFilePath, "utf8");
     assert.match(written, /generatedPackageApiGroups/);
     assert.match(written, /CreateApplication/);
     assert.match(written, /InjectSchedulerService/);
     assert.match(written, /QueueHandler/);
+    assert.match(written, /TransformValueObject/);
   } finally {
     await fixture.cleanup();
     await rm(tempDir, { recursive: true, force: true });

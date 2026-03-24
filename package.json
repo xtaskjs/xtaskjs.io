@@ -32,6 +32,7 @@
     "@xtaskjs/mailer": "^1.0.1",
     "@xtaskjs/security": "^1.0.2",
     "@xtaskjs/typeorm": "^1.0.5",
+    "@xtaskjs/value-objects": "^1.0.1",
     "bcryptjs": "^3.0.3",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.2",

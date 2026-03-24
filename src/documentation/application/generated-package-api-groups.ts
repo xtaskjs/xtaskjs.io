@@ -379,5 +379,64 @@ export const generatedPackageApiGroups: Readonly<Record<string, readonly { reado
         "getQueueTransportToken"
       ]
     }
+  ],
+  "value-objects": [
+    {
+      "title": "Types and contracts",
+      "sourcePath": "packages/value-objects/src/types.ts",
+      "exports": [
+        "JsonValue",
+        "ValueObjectLike",
+        "ValueObjectStaticFactory",
+        "ValueObjectFactory",
+        "TransformValueObjectOptions",
+        "ValueObjectFactoryProviderOptions"
+      ]
+    },
+    {
+      "title": "Conversion helpers",
+      "sourcePath": "packages/value-objects/src/converters.ts",
+      "exports": [
+        "isValueObject",
+        "unwrapValue",
+        "parseJsonValue",
+        "looksLikeJsonString",
+        "toPlainValue",
+        "toSerializableValue",
+        "toJsonString"
+      ]
+    },
+    {
+      "title": "Base value objects",
+      "sourcePath": "packages/value-objects/src/value-object.ts",
+      "exports": [
+        "ValueObject",
+        "StringValueObject",
+        "NumberValueObject",
+        "BooleanValueObject",
+        "BigIntValueObject",
+        "DateValueObject",
+        "JsonValueObject"
+      ]
+    },
+    {
+      "title": "Factory helpers",
+      "sourcePath": "packages/value-objects/src/factories.ts",
+      "exports": [
+        "createValueObjectFactory",
+        "InjectableValueObjectFactory",
+        "ValueObjectFactoryFor",
+        "fromPlainValue",
+        "fromJsonValue",
+        "fromAutoValue"
+      ]
+    },
+    {
+      "title": "DTO decorators",
+      "sourcePath": "packages/value-objects/src/decorators.ts",
+      "exports": [
+        "TransformValueObject"
+      ]
+    }
   ]
 };

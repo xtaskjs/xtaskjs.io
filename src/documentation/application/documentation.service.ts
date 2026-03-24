@@ -283,6 +283,58 @@ const packageDocs: readonly PackageDoc[] = [
     ].join("\n"),
   },
   {
+    id: "package-value-objects",
+    slug: "value-objects",
+    name: "@xtaskjs/value-objects",
+    path: "packages/value-objects",
+    tagline: "Value object primitives, conversion helpers, DTO decorators, and DI factory integration helpers.",
+    purpose:
+      "Value objects gives xtaskjs projects a consistent way to model domain primitives and structured payload wrappers. It standardizes conversion from raw input, JSON strings, and serialized payloads while optionally bridging DTO transformation and DI-managed factory creation.",
+    install: "npm install @xtaskjs/value-objects reflect-metadata",
+    features: [
+      "Base classes cover string, number, boolean, bigint, date, and JSON-backed value objects.",
+      "Conversion helpers normalize raw values, JSON strings, and serialized payloads into predictable wrappers.",
+      "TransformValueObject() plugs value objects into class-transformer DTO pipelines.",
+      "createValueObjectFactory(), InjectableValueObjectFactory, and ValueObjectFactoryFor() support container-managed creation flows.",
+    ],
+    integration: [
+      "Fits naturally with @xtaskjs/common ValidationPipe once DTOs are transformed through class-transformer.",
+      "Can register DI-friendly factories through @xtaskjs/core when value object creation belongs in services.",
+      "Useful in HTTP DTOs, domain models, and persistence boundaries where primitive normalization must stay explicit.",
+    ],
+    sample: "Package README examples and package tests currently provide the primary reference.",
+    exampleTitle: "DTO transformation plus DI factory registration",
+    exampleCode: [
+      'import { plainToInstance } from "class-transformer";',
+      'import {',
+      '  InjectableValueObjectFactory,',
+      '  StringValueObject,',
+      '  TransformValueObject,',
+      '  ValueObjectFactoryFor,',
+      '} from "@xtaskjs/value-objects";',
+      "",
+      "class EmailAddress extends StringValueObject {",
+      "  constructor(value: string) {",
+      "    const normalized = value.trim().toLowerCase();",
+      '    if (!normalized.includes("@")) {',
+      '      throw new Error("Invalid email address");',
+      "    }",
+      "    super(normalized);",
+      "  }",
+      "}",
+      "",
+      "class CreateUserDto {",
+      "  @TransformValueObject(EmailAddress)",
+      "  email!: EmailAddress;",
+      "}",
+      "",
+      "@ValueObjectFactoryFor(EmailAddress)",
+      "class EmailAddressFactory extends InjectableValueObjectFactory<EmailAddress> {}",
+      "",
+      'const dto = plainToInstance(CreateUserDto, { email: "USER@Example.com" });',
+    ].join("\n"),
+  },
+  {
     id: "package-express",
     slug: "express-http",
     name: "@xtaskjs/express-http",
@@ -1627,6 +1679,44 @@ const packageDeepDiveDocs: Readonly<Record<string, PackageDeepDiveDoc>> = {
     ],
     related: ["core", "common", "scheduler"],
   },
+  "value-objects": {
+    runtimeChart: [
+      { label: "Domain modeling", score: 5 },
+      { label: "Serialization", score: 5 },
+      { label: "DTO pipelines", score: 4 },
+      { label: "Dependency Injection", score: 4 },
+      { label: "Integrations", score: 3 },
+    ],
+    lifecycle: [
+      {
+        title: "Before startup",
+        text: "Import reflect-metadata before defining value objects that rely on decorator-driven DTO or DI integrations.",
+      },
+      {
+        title: "During CreateApplication()",
+        text: "The package itself does not register a lifecycle manager, but ValueObjectFactoryFor() can register DI-ready factories through @xtaskjs/core during module loading.",
+      },
+      {
+        title: "During app.close()",
+        text: "Value objects are pure wrappers with no owned resources, so shutdown usually means letting container-managed factories disappear with the rest of the app.",
+      },
+    ],
+    usage: [
+      {
+        title: "1. Define value object classes",
+        text: "Extend StringValueObject, NumberValueObject, DateValueObject, or JsonValueObject and normalize invariants inside the constructor.",
+      },
+      {
+        title: "2. Transform DTO input",
+        text: "Use TransformValueObject() on DTO fields when request payloads should become domain-friendly wrappers during class-transformer conversion.",
+      },
+      {
+        title: "3. Add factories when needed",
+        text: "Create ad hoc factories with createValueObjectFactory() or register InjectableValueObjectFactory implementations when services should resolve them from the container.",
+      },
+    ],
+    related: ["common", "core", "typeorm"],
+  },
 };
 
 const decoratorGroups: readonly DecoratorGroupDoc[] = [
@@ -2527,6 +2617,41 @@ const decoratorGroups: readonly DecoratorGroupDoc[] = [
     ],
   },
   {
+    id: "decorators-value-objects",
+    title: "Value Objects And DTO Transformation",
+    description:
+      "DTO-oriented decorators from @xtaskjs/value-objects that turn raw request fields into normalized domain wrappers before controllers and services consume them.",
+    decorators: [
+      {
+        id: "decorator-value-objects-transform",
+        name: "TransformValueObject",
+        packageName: "@xtaskjs/value-objects",
+        packagePath: "packages/value-objects/src/decorators.ts",
+        kind: "Property decorator",
+        targets: "class property",
+        summary: "Transforms raw DTO input into a value object instance during class-transformer conversion so downstream code receives a validated wrapper instead of a primitive.",
+        exampleTitle: "Normalize DTO email input",
+        exampleCode: [
+          'import { plainToInstance } from "class-transformer";',
+          'import { StringValueObject, TransformValueObject } from "@xtaskjs/value-objects";',
+          "",
+          "class EmailAddress extends StringValueObject {",
+          "  constructor(value: string) {",
+          "    super(value.trim().toLowerCase());",
+          "  }",
+          "}",
+          "",
+          "class CreateUserDto {",
+          "  @TransformValueObject(EmailAddress)",
+          "  email!: EmailAddress;",
+          "}",
+          "",
+          'const dto = plainToInstance(CreateUserDto, { email: " USER@Example.com " });',
+        ].join("\n"),
+      },
+    ],
+  },
+  {
     id: "decorators-cache-runtime",
     title: "Cache Models And Runtime Control",
     description:
@@ -3395,7 +3520,7 @@ export class DocumentationService {
         {
           href: "/documentation/packages",
           label: "Packages",
-          description: "Detailed reference for core, common, adapters, TypeORM, security, mailer, internationalization, scheduler, cache, and queues.",
+          description: "Detailed reference for core, common, adapters, TypeORM, security, mailer, internationalization, scheduler, cache, queues, and value objects.",
           isCurrent:
             currentHref === "/documentation/packages" ||
             currentHref.startsWith("/documentation/packages/"),

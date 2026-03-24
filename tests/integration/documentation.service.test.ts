@@ -82,6 +82,22 @@ test("DocumentationService returns queues package detail with queue-specific API
   ]);
 });
 
+test("DocumentationService returns value-objects package detail with package-specific API groups and no sample links", () => {
+  const service = createService("en-US");
+  const detail = service.getPackageDetailViewModel("value-objects");
+
+  assert.ok(detail);
+  assert.equal(detail?.apiGroups.length, 5);
+  assert.deepEqual(detail?.apiGroups.map((group) => group.title), [
+    "Types and contracts",
+    "Conversion helpers",
+    "Base value objects",
+    "Factory helpers",
+    "DTO decorators",
+  ]);
+  assert.deepEqual(detail?.sampleLinks, []);
+});
+
 test("DocumentationService returns CLI docs with command and option groups", () => {
   const service = createService("en-US");
   const cli = service.getCliViewModel();
@@ -122,6 +138,19 @@ test("DocumentationService exposes cache decorators in the catalog", () => {
     decorators.decoratorGroups.some((group) => group.id === "decorators-cache-http"),
     true
   );
+});
+
+test("DocumentationService exposes value-object decorators in the catalog", () => {
+  const service = createService("en-US");
+  const decorators = service.getDecoratorsViewModel();
+  const valueObjectGroup = decorators.decoratorGroups.find(
+    (group) => group.id === "decorators-value-objects"
+  );
+
+  assert.equal(decorators.packageCoverage.includes("@xtaskjs/value-objects"), true);
+  assert.ok(valueObjectGroup);
+  assert.equal(valueObjectGroup?.decorators[0]?.name, "TransformValueObject");
+  assert.match(valueObjectGroup?.decorators[0]?.exampleCode || "", /@TransformValueObject\(EmailAddress\)/);
 });
 
 test("DocumentationService exposes queue samples and decorators in the catalog", () => {
