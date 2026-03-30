@@ -1,14 +1,23 @@
 import { AutoWired, Service } from "@xtaskjs/core";
 import type { Request, Response } from "express";
 import { Body, Controller, Get, Post, Query, Req, Res } from "@xtaskjs/common";
+import { CommandBus, InjectCommandBus, InjectQueryBus, QueryBus } from "@xtaskjs/cqrs";
 import { view } from "@xtaskjs/express-http";
 import { Authenticated, Roles } from "@xtaskjs/security";
 import { Transform } from "class-transformer";
 import { IsBoolean, IsInt, IsNotEmpty, IsOptional, IsString, Min } from "class-validator";
-import { NewsService } from "../../application/news.service";
+import {
+  CreateNewsItemCommand,
+  DeleteNewsItemCommand,
+  GetAdminNewsPageQuery,
+  GetNewsByIdQuery,
+  type GetNewsPageResult,
+  UpdateNewsItemCommand,
+} from "../../application/cqrs/news.messages";
 import { normalizeText, toNewsViewModel } from "../../../shared/infrastructure/http/view-helpers";
 import { UploadsService } from "../../../shared/infrastructure/http/uploads.service";
 import { SessionViewService } from "../../../auth/application/session-view.service";
+import type { News } from "../../domain/news";
 
 const PAGE_SIZE = 8;
 
@@ -94,8 +103,11 @@ const buildPages = (total: number, pageSize: number, currentPage: number) => {
 @Authenticated("app-session")
 @Roles("admin")
 export class AdminNewsController {
-  @AutoWired({ qualifier: NewsService.name })
-  private readonly newsService!: NewsService;
+  @InjectQueryBus()
+  private readonly queryBus!: QueryBus;
+
+  @InjectCommandBus()
+  private readonly commandBus!: CommandBus;
 
   @AutoWired({ qualifier: UploadsService.name })
   private readonly uploadsService!: UploadsService;
@@ -112,7 +124,9 @@ export class AdminNewsController {
     const search = normalizeText(query.q);
     const page = Math.max(1, query.page ?? 1);
 
-    const result = await this.newsService.getAdminPage({ search, page, pageSize: PAGE_SIZE });
+    const result = await this.queryBus.execute<GetNewsPageResult>(
+      new GetAdminNewsPageQuery(search, page, PAGE_SIZE)
+    );
     const pagination = buildPages(result.total, PAGE_SIZE, page);
 
     return view("admin-news-list", {
@@ -163,7 +177,9 @@ export class AdminNewsController {
     }
 
     const imageUrl = this.uploadsService.toImageUrl(req.file);
-    await this.newsService.create({ title, summary, content, imageUrl, isPublished });
+    await this.commandBus.execute(
+      new CreateNewsItemCommand(title, summary, content, imageUrl, isPublished)
+    );
     res.redirect("/admin/news?message=created");
   }
 
@@ -173,7 +189,7 @@ export class AdminNewsController {
     @Req() req: Request,
     @Res() res: Response
   ): Promise<ReturnType<typeof view> | void> {
-    const news = await this.newsService.getById(query.id);
+    const news = await this.queryBus.execute<News | null>(new GetNewsByIdQuery(query.id));
 
     if (!news) {
       res.status(404).send("News not found");
@@ -217,13 +233,15 @@ export class AdminNewsController {
     const imageUrl = this.uploadsService.toOptionalImageUrl(req.file);
     const removeImage = body.removeImage ?? false;
 
-    await this.newsService.update({ id, title, summary, content, imageUrl, removeImage, isPublished });
+    await this.commandBus.execute(
+      new UpdateNewsItemCommand(id, title, summary, content, imageUrl, removeImage, isPublished)
+    );
     res.redirect("/admin/news?message=updated");
   }
 
   @Post("/delete")
   async delete(@Body() body: DeleteNewsBodyDto, @Res() res: Response): Promise<void> {
-    await this.newsService.delete(body.id);
+    await this.commandBus.execute(new DeleteNewsItemCommand(body.id));
     res.redirect("/admin/news?message=deleted");
   }
 }

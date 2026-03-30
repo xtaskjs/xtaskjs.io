@@ -82,6 +82,23 @@ test("DocumentationService returns queues package detail with queue-specific API
   ]);
 });
 
+test("DocumentationService returns CQRS package detail with package-specific API groups and sample links", () => {
+  const service = createService("en-US");
+  const detail = service.getPackageDetailViewModel("cqrs");
+
+  assert.ok(detail);
+  assert.equal(detail?.apiGroups.length, 3);
+  assert.deepEqual(detail?.apiGroups.map((group) => group.title), [
+    "Configuration and buses",
+    "Handlers, injectors, and idempotency",
+    "Lifecycle, tokens, and types",
+  ]);
+  assert.deepEqual(detail?.sampleLinks.map((entry) => entry.name), [
+    "19-cqrs_app",
+    "20-cqrs_postgres_replication_app",
+  ]);
+});
+
 test("DocumentationService returns value-objects package detail with package-specific API groups and no sample links", () => {
   const service = createService("en-US");
   const detail = service.getPackageDetailViewModel("value-objects");
@@ -169,6 +186,26 @@ test("DocumentationService exposes queue samples and decorators in the catalog",
   assert.equal(decorators.packageCoverage.includes("@xtaskjs/queues"), true);
   assert.equal(
     decorators.decoratorGroups.some((group) => group.id === "decorators-queues"),
+    true
+  );
+});
+
+test("DocumentationService exposes CQRS samples and decorators in the catalog", () => {
+  const service = createService("en-US");
+  const samples = service.getSamplesViewModel();
+  const decorators = service.getDecoratorsViewModel();
+
+  assert.equal(
+    samples.samples.some((sample) => sample.name === "19-cqrs_app"),
+    true
+  );
+  assert.equal(
+    samples.samples.some((sample) => sample.name === "20-cqrs_postgres_replication_app"),
+    true
+  );
+  assert.equal(decorators.packageCoverage.includes("@xtaskjs/cqrs"), true);
+  assert.equal(
+    decorators.decoratorGroups.some((group) => group.id === "decorators-cqrs"),
     true
   );
 });

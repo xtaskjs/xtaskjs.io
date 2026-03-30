@@ -11,6 +11,8 @@ import { handlebarsHelpers } from "../shared/infrastructure/http/handlebars-help
 import { attachHtmlValidationErrorHandler } from "../shared/infrastructure/http/html-validation-error-handler";
 import { attachInternationalizationRequestState } from "../shared/infrastructure/http/internationalization-request.middleware";
 import { createMulterUpload } from "../shared/infrastructure/http/multer.factory";
+import "../shared/infrastructure/typeorm/site.typeorm";
+import "../shared/infrastructure/cqrs/site.cqrs";
 import "../auth/infrastructure/security/admin-jwt-security.strategy";
 import { registerAuthMailer } from "../auth/infrastructure/mailer/register-auth-mailer";
 import "../shared/infrastructure/internationalization/site.internationalization";

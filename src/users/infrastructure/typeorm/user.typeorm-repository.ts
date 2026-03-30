@@ -94,7 +94,9 @@ const userSelect = `
 
 @Service({ name: USER_REPOSITORY })
 export class UserTypeOrmRepository implements UserRepository {
-  private readonly dataSource: DataSource = getAppDataSource();
+  private get dataSource(): DataSource {
+    return getAppDataSource();
+  }
 
   async findById(id: number): Promise<User | null> {
     const rows = await this.dataSource.query(

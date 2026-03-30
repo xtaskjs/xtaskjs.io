@@ -62,6 +62,14 @@ const fallbackPackages: readonly ProjectPackageViewModel[] = [
     npmUrl: "https://www.npmjs.com/package/@xtaskjs/core",
   },
   {
+    name: "@xtaskjs/cqrs",
+    latestVersion: "Unavailable",
+    publishedAt: null,
+    publishedAtLabel: "npm data unavailable",
+    description: "Command, query, and event buses with handler decorators, datasource aliases, and lifecycle-managed container bindings.",
+    npmUrl: "https://www.npmjs.com/package/@xtaskjs/cqrs",
+  },
+  {
     name: "@xtaskjs/express-http",
     latestVersion: "Unavailable",
     publishedAt: null,

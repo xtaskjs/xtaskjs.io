@@ -33,7 +33,10 @@ const mapUserLoginEventRow = (row: UserLoginEventRow): UserLoginEvent => ({
 
 @Service({ name: USER_LOGIN_EVENT_REPOSITORY })
 export class UserLoginEventTypeOrmRepository implements UserLoginEventRepository {
-  private readonly dataSource: DataSource = getAppDataSource();
+  private get dataSource(): DataSource {
+    return getAppDataSource();
+  }
+
   private readonly selectClause = `
     SELECT
       id,

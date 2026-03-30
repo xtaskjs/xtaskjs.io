@@ -9,15 +9,25 @@ test("createWebApplication includes the infrastructure lifecycle bootstrap modul
 
   assert.match(
     source,
+    /import\s+"\.\.\/shared\/infrastructure\/typeorm\/site\.typeorm";/,
+  );
+  assert.match(
+    source,
+    /import\s+"\.\.\/shared\/infrastructure\/cqrs\/site\.cqrs";/,
+  );
+  assert.match(
+    source,
     /import\s+"\.\.\/shared\/infrastructure\/lifecycle\/infrastructure\.lifecycle";/,
   );
 });
 
-test("InfrastructureLifecycle uses serverStarted hooks for datasource bootstrap", async () => {
+test("InfrastructureLifecycle uses serverStarted hooks for persistence bootstrap", async () => {
   const filePath = path.join(process.cwd(), "src/shared/infrastructure/lifecycle/infrastructure.lifecycle.ts");
   const source = await readFile(filePath, "utf8");
 
   assert.match(source, /@OnEvent\("serverStarted", 200\)/);
   assert.match(source, /@OnEvent\("serverStarted", 100\)/);
+  assert.match(source, /runMigrations\(\)/);
+  assert.doesNotMatch(source, /@OnEvent\("stopping", 100\)/);
   assert.doesNotMatch(source, /@OnEvent\("contextPrepared"/);
 });

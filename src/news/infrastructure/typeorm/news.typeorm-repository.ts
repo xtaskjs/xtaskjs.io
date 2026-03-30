@@ -31,7 +31,9 @@ const mapNewsRow = (row: NewsRow): News => ({
 
 @Service({ name: NEWS_REPOSITORY })
 export class NewsTypeOrmRepository implements NewsRepository {
-  private readonly dataSource: DataSource = getAppDataSource();
+  private get dataSource(): DataSource {
+    return getAppDataSource();
+  }
 
   async findById(id: number): Promise<News | null> {
     const rows = await this.dataSource.query(

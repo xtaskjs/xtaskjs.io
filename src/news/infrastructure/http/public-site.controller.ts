@@ -1,17 +1,19 @@
 import { AutoWired, Service } from "@xtaskjs/core";
 import type { Request, Response } from "express";
 import { Controller, Get } from "@xtaskjs/common";
+import { InjectQueryBus, QueryBus } from "@xtaskjs/cqrs";
 import { view } from "@xtaskjs/express-http";
-import { NewsService } from "../../application/news.service";
+import { GetAllPublishedNewsQuery, GetLatestPublishedNewsQuery } from "../../application/cqrs/news.messages";
 import { toNewsViewModel } from "../../../shared/infrastructure/http/view-helpers";
 import { SessionViewService } from "../../../auth/application/session-view.service";
 import { NpmPackageCatalogService } from "../../../packages/application/npm-package-catalog.service";
+import type { News } from "../../domain/news";
 
 @Service()
 @Controller()
 export class PublicSiteController {
-  @AutoWired({ qualifier: NewsService.name })
-  private readonly newsService!: NewsService;
+  @InjectQueryBus()
+  private readonly queryBus!: QueryBus;
 
   @AutoWired({ qualifier: SessionViewService.name })
   private readonly sessionViewService!: SessionViewService;
@@ -21,7 +23,7 @@ export class PublicSiteController {
 
   @Get("/")
   async home(req: Request, res: Response): Promise<ReturnType<typeof view>> {
-    const latestNews = await this.newsService.getLatestPublished(3);
+    const latestNews = await this.queryBus.execute<News[]>(new GetLatestPublishedNewsQuery(3));
     const projectPackages = await this.npmPackageCatalogService.listPublishedPackages();
 
     return view("home", {
@@ -34,7 +36,7 @@ export class PublicSiteController {
 
   @Get("/news")
   async news(req: Request, res: Response): Promise<ReturnType<typeof view>> {
-    const allNews = await this.newsService.getAllPublished();
+    const allNews = await this.queryBus.execute<News[]>(new GetAllPublishedNewsQuery());
 
     return view("news", {
       titleKey: "site.news.metaTitle",

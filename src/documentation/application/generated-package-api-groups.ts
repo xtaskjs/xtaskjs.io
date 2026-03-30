@@ -171,6 +171,70 @@ export const generatedPackageApiGroups: Readonly<Record<string, readonly { reado
       ]
     }
   ],
+  "cqrs": [
+    {
+      "title": "Configuration and buses",
+      "sourcePath": "packages/cqrs/src",
+      "exports": [
+        "configureCqrs",
+        "Cqrs",
+        "CommandBus",
+        "QueryBus",
+        "EventBus"
+      ]
+    },
+    {
+      "title": "Handlers, injectors, and idempotency",
+      "sourcePath": "packages/cqrs/src",
+      "exports": [
+        "CommandHandler",
+        "QueryHandler",
+        "EventHandler",
+        "ProcessManager",
+        "Saga",
+        "ProjectionRebuilder",
+        "IdempotentCommand",
+        "InjectCommandBus",
+        "InjectQueryBus",
+        "InjectEventBus",
+        "InjectIdempotencyStore",
+        "InjectCqrsLifecycleManager",
+        "InjectReadDataSource",
+        "InjectWriteDataSource",
+        "InjectReadRepository",
+        "InjectWriteRepository"
+      ]
+    },
+    {
+      "title": "Lifecycle, tokens, and types",
+      "sourcePath": "packages/cqrs/src",
+      "exports": [
+        "CqrsLifecycleManager",
+        "initializeCqrsIntegration",
+        "shutdownCqrsIntegration",
+        "resetCqrsIntegration",
+        "getCqrsLifecycleManager",
+        "getCommandBusToken",
+        "getQueryBusToken",
+        "getEventBusToken",
+        "getIdempotencyStoreToken",
+        "getReadDataSourceToken",
+        "getWriteDataSourceToken",
+        "getReadRepositoryToken",
+        "getWriteRepositoryToken",
+        "ICommandHandler",
+        "IQueryHandler",
+        "IEventHandler",
+        "IProcessManager",
+        "ISaga",
+        "IProjectionRebuilder",
+        "ProcessManagerContext",
+        "ProjectionRebuildContext",
+        "IIdempotencyStore",
+        "CqrsOptions"
+      ]
+    }
+  ],
   "security": [
     {
       "title": "Route decorators",

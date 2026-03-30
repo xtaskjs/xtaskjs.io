@@ -1,12 +1,14 @@
 import { AutoWired, Service } from "@xtaskjs/core";
 import type { Request, Response } from "express";
 import { Body, Controller, Get, Post, Query, Req, Res } from "@xtaskjs/common";
+import { CommandBus, InjectCommandBus } from "@xtaskjs/cqrs";
 import { view } from "@xtaskjs/express-http";
 import { AllowAnonymous, Authenticated } from "@xtaskjs/security";
 import { Transform } from "class-transformer";
 import { IsEmail, IsInt, IsNotEmpty, IsOptional, IsString, Min, MinLength } from "class-validator";
 import { SessionViewService } from "../../../auth/application/session-view.service";
 import { AccountAccessService } from "../../../auth/application/account-access.service";
+import { RegisterAccountCommand, type RegisterAccountResult } from "../../../auth/application/cqrs/account-registration.messages";
 import { SessionTokenService } from "../../../auth/application/admin-session-token.service";
 import {
   LOGIN_CHALLENGE_COOKIE_NAME,
@@ -255,6 +257,9 @@ export class AccountController {
   @AutoWired({ qualifier: AccountAccessService.name })
   private readonly accountAccessService!: AccountAccessService;
 
+  @InjectCommandBus()
+  private readonly commandBus!: CommandBus;
+
   @AutoWired({ qualifier: SessionTokenService.name })
   private readonly tokenService!: SessionTokenService;
 
@@ -409,9 +414,16 @@ export class AccountController {
     }
 
     try {
-      const result = await this.accountAccessService.register(
-        { fullName, username, email, password, receiveNewsUpdates, newsletterSubscribed },
-        resolveRequestAccessLocation(req)
+      const result = await this.commandBus.execute<RegisterAccountResult>(
+        new RegisterAccountCommand(
+          fullName,
+          username,
+          email,
+          password,
+          receiveNewsUpdates,
+          newsletterSubscribed,
+          resolveRequestAccessLocation(req)
+        )
       );
       res.redirect(`/verify-email?email=${encodeURIComponent(result.email)}&sent=1`);
       return;
