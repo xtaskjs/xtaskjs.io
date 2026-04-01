@@ -235,6 +235,49 @@ export const generatedPackageApiGroups: Readonly<Record<string, readonly { reado
       ]
     }
   ],
+  "event-source": [
+    {
+      "title": "Configuration and publishers",
+      "sourcePath": "packages/event-source/src",
+      "exports": [
+        "EventSource",
+        "configureEventSource",
+        "createQueueEventPublisher",
+        "QueueEventPublisher",
+        "createTypeOrmEventStore",
+        "TypeOrmEventStore"
+      ]
+    },
+    {
+      "title": "Aggregates and repositories",
+      "sourcePath": "packages/event-source/src",
+      "exports": [
+        "EventSourcedAggregate",
+        "ApplyEvent",
+        "EventSourcedAggregateRoot",
+        "EventSourceRepository",
+        "InjectEventSourceRepository"
+      ]
+    },
+    {
+      "title": "Subscribers and lifecycle",
+      "sourcePath": "packages/event-source/src",
+      "exports": [
+        "EventSourceSubscriber",
+        "StoredEventSubscriber",
+        "InjectEventStore",
+        "InjectEventSourceBus",
+        "InjectEventPublisher",
+        "InjectEventSourceLifecycleManager",
+        "EventSourceLifecycleManager",
+        "initializeEventSourceIntegration",
+        "shutdownEventSourceIntegration",
+        "getEventSourceLifecycleManager",
+        "InMemoryEventStore",
+        "EventSourceBus"
+      ]
+    }
+  ],
   "security": [
     {
       "title": "Route decorators",

@@ -99,6 +99,21 @@ test("DocumentationService returns CQRS package detail with package-specific API
   ]);
 });
 
+test("DocumentationService returns event-source package detail with package-specific API groups and no sample links", () => {
+  const service = createService("en-US");
+  const detail = service.getPackageDetailViewModel("event-source");
+
+  assert.ok(detail);
+  assert.equal(detail?.apiGroups.length, 3);
+  assert.deepEqual(detail?.apiGroups.map((group) => group.title), [
+    "Configuration and publishers",
+    "Aggregates and repositories",
+    "Subscribers and lifecycle",
+  ]);
+  assert.deepEqual(detail?.sampleLinks, []);
+  assert.equal(detail?.relatedPackages.map((entry) => entry.name).includes("@xtaskjs/cqrs"), true);
+});
+
 test("DocumentationService returns value-objects package detail with package-specific API groups and no sample links", () => {
   const service = createService("en-US");
   const detail = service.getPackageDetailViewModel("value-objects");
@@ -206,6 +221,25 @@ test("DocumentationService exposes CQRS samples and decorators in the catalog", 
   assert.equal(decorators.packageCoverage.includes("@xtaskjs/cqrs"), true);
   assert.equal(
     decorators.decoratorGroups.some((group) => group.id === "decorators-cqrs"),
+    true
+  );
+});
+
+test("DocumentationService exposes event-source decorators in the catalog", () => {
+  const service = createService("en-US");
+  const decorators = service.getDecoratorsViewModel();
+  const eventSourceGroup = decorators.decoratorGroups.find(
+    (group) => group.id === "decorators-event-source"
+  );
+
+  assert.equal(decorators.packageCoverage.includes("@xtaskjs/event-source"), true);
+  assert.ok(eventSourceGroup);
+  assert.equal(
+    eventSourceGroup?.decorators.some((decorator) => decorator.name === "EventSourcedAggregate"),
+    true
+  );
+  assert.equal(
+    eventSourceGroup?.decorators.some((decorator) => decorator.name === "InjectEventSourceRepository"),
     true
   );
 });

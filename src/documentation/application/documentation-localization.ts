@@ -115,7 +115,7 @@ const esTranslations: Record<string, string> = {
   Samples: "Ejemplos",
   "Hub with summary, quick start, and section entry points.": "Centro con resumen, inicio rápido y puntos de entrada a cada sección.",
   "Boot lifecycle, request pipeline, and security flow diagrams.": "Ciclo de arranque, canalización de peticiones y diagramas del flujo de seguridad.",
-  "Detailed reference for core, common, adapters, TypeORM, security, mailer, internationalization, scheduler, cache, queues, and value objects.": "Referencia detallada de core, common, adaptadores, TypeORM, security, mailer, internationalization, scheduler, cache, queues y value objects.",
+  "Detailed reference for core, common, adapters, TypeORM, CQRS, event source, security, mailer, internationalization, scheduler, cache, queues, and value objects.": "Referencia detallada de core, common, adaptadores, TypeORM, CQRS, event source, security, mailer, internationalization, scheduler, cache, queues y value objects.",
   "Console client installation, command reference, and generation workflow.": "Instalación del cliente de consola, referencia de comandos y flujo de generación.",
   "Decorator catalog organized by type and package, with examples.": "Catálogo de decoradores organizado por tipo y paquete, con ejemplos.",
   "Official sample applications and how to use them.": "Aplicaciones de ejemplo oficiales y cómo utilizarlas.",

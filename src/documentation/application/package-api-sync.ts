@@ -184,6 +184,52 @@ export const packageSpecs: Readonly<Record<string, PackageSpec>> = {
       },
     ],
   },
+  "event-source": {
+    packageRoot: "packages/event-source",
+    groups: [
+      {
+        title: "Configuration and publishers",
+        sourcePath: "packages/event-source/src",
+        preferredExports: [
+          "EventSource",
+          "configureEventSource",
+          "createQueueEventPublisher",
+          "QueueEventPublisher",
+          "createTypeOrmEventStore",
+          "TypeOrmEventStore",
+        ],
+      },
+      {
+        title: "Aggregates and repositories",
+        sourcePath: "packages/event-source/src",
+        preferredExports: [
+          "EventSourcedAggregate",
+          "ApplyEvent",
+          "EventSourcedAggregateRoot",
+          "EventSourceRepository",
+          "InjectEventSourceRepository",
+        ],
+      },
+      {
+        title: "Subscribers and lifecycle",
+        sourcePath: "packages/event-source/src",
+        preferredExports: [
+          "EventSourceSubscriber",
+          "StoredEventSubscriber",
+          "InjectEventStore",
+          "InjectEventSourceBus",
+          "InjectEventPublisher",
+          "InjectEventSourceLifecycleManager",
+          "EventSourceLifecycleManager",
+          "initializeEventSourceIntegration",
+          "shutdownEventSourceIntegration",
+          "getEventSourceLifecycleManager",
+          "InMemoryEventStore",
+          "EventSourceBus",
+        ],
+      },
+    ],
+  },
   security: {
     packageRoot: "packages/security",
     groups: [
