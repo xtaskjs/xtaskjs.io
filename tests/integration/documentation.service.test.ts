@@ -99,7 +99,7 @@ test("DocumentationService returns CQRS package detail with package-specific API
   ]);
 });
 
-test("DocumentationService returns event-source package detail with package-specific API groups and no sample links", () => {
+test("DocumentationService returns event-source package detail with package-specific API groups and sample links", () => {
   const service = createService("en-US");
   const detail = service.getPackageDetailViewModel("event-source");
 
@@ -110,7 +110,10 @@ test("DocumentationService returns event-source package detail with package-spec
     "Aggregates and repositories",
     "Subscribers and lifecycle",
   ]);
-  assert.deepEqual(detail?.sampleLinks, []);
+  assert.deepEqual(detail?.sampleLinks.map((entry) => entry.name), [
+    "21-event_source_rabbitmq_app",
+    "22-event_source_cqrs_app",
+  ]);
   assert.equal(detail?.relatedPackages.map((entry) => entry.name).includes("@xtaskjs/cqrs"), true);
 });
 
@@ -240,6 +243,20 @@ test("DocumentationService exposes event-source decorators in the catalog", () =
   );
   assert.equal(
     eventSourceGroup?.decorators.some((decorator) => decorator.name === "InjectEventSourceRepository"),
+    true
+  );
+});
+
+test("DocumentationService exposes event-source samples in the catalog", () => {
+  const service = createService("en-US");
+  const samples = service.getSamplesViewModel();
+
+  assert.equal(
+    samples.samples.some((sample) => sample.name === "21-event_source_rabbitmq_app"),
+    true
+  );
+  assert.equal(
+    samples.samples.some((sample) => sample.name === "22-event_source_cqrs_app"),
     true
   );
 });
