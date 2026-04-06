@@ -2,6 +2,8 @@ import bcrypt from "bcryptjs";
 import { randomInt } from "crypto";
 import { AutoWired, Service } from "@xtaskjs/core";
 import { AuthMailerService } from "./auth-mailer.service";
+import { PlainPassword } from "../../shared/domain/value-objects/plain-password";
+import { SecurityCode } from "../../shared/domain/value-objects/security-code";
 import type { AccessLocationSnapshot } from "../../users/domain/access-location";
 import { UserService, type PendingSecurityCode, type RegisterUserCommand, type SessionPrincipal } from "../../users/application/user.service";
 
@@ -57,6 +59,7 @@ export class AccountAccessService {
   }
 
   async verifyEmail(email: string, code: string): Promise<boolean> {
+    const normalizedCode = SecurityCode.from(code);
     const user = await this.userService.getByEmail(email);
     if (!user || !user.isActive) {
       return false;
@@ -70,7 +73,7 @@ export class AccountAccessService {
       return false;
     }
 
-    const matches = await bcrypt.compare(code, user.emailVerificationCodeHash);
+    const matches = await bcrypt.compare(normalizedCode.value, user.emailVerificationCodeHash);
     if (!matches) {
       return false;
     }
@@ -136,12 +139,13 @@ export class AccountAccessService {
     code: string,
     accessLocation?: AccessLocationSnapshot
   ): Promise<SessionPrincipal | null> {
+    const normalizedCode = SecurityCode.from(code);
     const user = await this.userService.getById(userId);
     if (!user || !user.isActive || !user.twoFactorCodeHash || isExpired(user.twoFactorExpiresAt)) {
       return null;
     }
 
-    const matches = await bcrypt.compare(code, user.twoFactorCodeHash);
+    const matches = await bcrypt.compare(normalizedCode.value, user.twoFactorCodeHash);
     if (!matches) {
       return null;
     }
@@ -165,22 +169,24 @@ export class AccountAccessService {
   }
 
   async resetPassword(email: string, code: string, password: string): Promise<boolean> {
+    const normalizedCode = SecurityCode.from(code);
+    const normalizedPassword = PlainPassword.from(password);
     const user = await this.userService.getByEmail(email);
     if (!user || !user.isActive || !user.passwordResetCodeHash || isExpired(user.passwordResetExpiresAt)) {
       return false;
     }
 
-    const matches = await bcrypt.compare(code, user.passwordResetCodeHash);
+    const matches = await bcrypt.compare(normalizedCode.value, user.passwordResetCodeHash);
     if (!matches) {
       return false;
     }
 
-    await this.userService.setPassword(user.id, password);
+    await this.userService.setPassword(user.id, normalizedPassword.value);
     return true;
   }
 
   private async createPendingCode(ttlMs: number): Promise<PendingSecurityCode & { plain: string }> {
-    const plain = createCode();
+    const plain = SecurityCode.from(createCode()).value;
     return {
       plain,
       hash: await bcrypt.hash(plain, 10),

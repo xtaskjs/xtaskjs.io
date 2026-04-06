@@ -1,4 +1,5 @@
 import { registerTypeOrmDataSource } from "@xtaskjs/typeorm";
-import { createAppDataSourceOptions } from "../../../data-source";
+import { createAppReadDataSourceOptions, createAppWriteDataSourceOptions } from "../../../data-source";
 
-registerTypeOrmDataSource(createAppDataSourceOptions());
+registerTypeOrmDataSource(createAppWriteDataSourceOptions());
+registerTypeOrmDataSource(createAppReadDataSourceOptions());

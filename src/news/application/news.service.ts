@@ -1,6 +1,9 @@
 import { AutoWired, Service } from "@xtaskjs/core";
 import type { News, CreateNewsInput, UpdateNewsInput } from "../domain/news";
 import type { NewsPage, NewsRepository } from "../domain/news.repository";
+import { QueryCacheInvalidationService } from "../../shared/application/query-cache-invalidation.service";
+import { NewsSlug } from "../../shared/domain/value-objects/news-slug";
+import { QueryPageNumber, QueryPageSize } from "../../shared/domain/value-objects/query-pagination";
 import { NEWS_REPOSITORY } from "../../shared/infrastructure/config/app-tokens";
 
 export type CreateNewsCommand = {
@@ -27,24 +30,18 @@ export type AdminListQuery = {
   readonly pageSize: number;
 };
 
-const slugify = (text: string): string =>
-  text
-    .normalize("NFKD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 70);
-
 @Service()
 export class NewsService {
   @AutoWired({ qualifier: NEWS_REPOSITORY })
   private readonly repository!: NewsRepository;
 
+  @AutoWired({ qualifier: QueryCacheInvalidationService.name })
+  private readonly queryCacheInvalidation!: QueryCacheInvalidationService;
+
   async getLatestPublished(limit: number): Promise<News[]> {
     const { items } = await this.repository.findList({
       publishedOnly: true,
-      take: limit,
+      take: QueryPageSize.from(limit).value,
     });
     return items;
   }
@@ -55,14 +52,16 @@ export class NewsService {
   }
 
   async getAdminPage(query: AdminListQuery): Promise<NewsPage & { totalPages: number }> {
-    const skip = (query.page - 1) * query.pageSize;
-    const page = await this.repository.findList({
+    const currentPage = QueryPageNumber.from(query.page);
+    const currentPageSize = QueryPageSize.from(query.pageSize);
+    const skip = (currentPage.value - 1) * currentPageSize.value;
+    const result = await this.repository.findList({
       search: query.search || undefined,
       skip,
-      take: query.pageSize,
+      take: currentPageSize.value,
     });
-    const totalPages = Math.ceil(page.total / query.pageSize);
-    return { ...page, totalPages };
+    const totalPages = Math.ceil(result.total / currentPageSize.value);
+    return { ...result, totalPages };
   }
 
   async getById(id: number): Promise<News | null> {
@@ -70,10 +69,12 @@ export class NewsService {
   }
 
   async create(command: CreateNewsCommand): Promise<News> {
-    const baseSlug = slugify(command.title) || `news-${Date.now()}`;
+    const baseSlug = NewsSlug.fromTitle(command.title).value || `news-${Date.now()}`;
     const uniqueSlug = await this.resolveUniqueSlug(baseSlug);
     const input: CreateNewsInput = { ...command, slug: uniqueSlug };
-    return this.repository.create(input);
+    const created = await this.repository.create(input);
+    await this.queryCacheInvalidation.clearNewsQueries();
+    return created;
   }
 
   async update(command: UpdateNewsCommand): Promise<News> {
@@ -82,7 +83,7 @@ export class NewsService {
       throw new Error(`News item ${command.id} not found`);
     }
 
-    const baseSlug = slugify(command.title) || `news-${Date.now()}`;
+    const baseSlug = NewsSlug.fromTitle(command.title).value || `news-${Date.now()}`;
     const uniqueSlug = await this.resolveUniqueSlug(baseSlug, command.id);
 
     const resolvedImageUrl = command.removeImage
@@ -100,11 +101,14 @@ export class NewsService {
       isPublished: command.isPublished,
     };
 
-    return this.repository.update(command.id, input);
+    const updated = await this.repository.update(command.id, input);
+    await this.queryCacheInvalidation.clearNewsQueries();
+    return updated;
   }
 
   async delete(id: number): Promise<void> {
-    return this.repository.delete(id);
+    await this.repository.delete(id);
+    await this.queryCacheInvalidation.clearNewsQueries();
   }
 
   private async resolveUniqueSlug(base: string, currentId?: number): Promise<string> {
@@ -117,7 +121,7 @@ export class NewsService {
         return candidate;
       }
       suffix += 1;
-      candidate = `${base}-${suffix}`;
+      candidate = NewsSlug.fromTitle(`${base}-${suffix}`).value;
     }
   }
 }

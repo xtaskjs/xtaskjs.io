@@ -1,6 +1,7 @@
 import { CommandHandler, ICommandHandler, IQueryHandler, QueryHandler } from "@xtaskjs/cqrs";
 import { AutoWired, Service } from "@xtaskjs/core";
 import type { News } from "../../domain/news";
+import { NewsReadService } from "../news-read.service";
 import { NewsService } from "../news.service";
 import {
   CreateNewsItemCommand,
@@ -17,33 +18,33 @@ import {
 @Service()
 @QueryHandler(GetLatestPublishedNewsQuery)
 export class GetLatestPublishedNewsHandler implements IQueryHandler<GetLatestPublishedNewsQuery, News[]> {
-  @AutoWired({ qualifier: NewsService.name })
-  private readonly newsService!: NewsService;
+  @AutoWired({ qualifier: NewsReadService.name })
+  private readonly newsReadService!: NewsReadService;
 
   async execute(query: GetLatestPublishedNewsQuery): Promise<News[]> {
-    return this.newsService.getLatestPublished(query.limit);
+    return this.newsReadService.getLatestPublished(query.limit);
   }
 }
 
 @Service()
 @QueryHandler(GetAllPublishedNewsQuery)
 export class GetAllPublishedNewsHandler implements IQueryHandler<GetAllPublishedNewsQuery, News[]> {
-  @AutoWired({ qualifier: NewsService.name })
-  private readonly newsService!: NewsService;
+  @AutoWired({ qualifier: NewsReadService.name })
+  private readonly newsReadService!: NewsReadService;
 
   async execute(): Promise<News[]> {
-    return this.newsService.getAllPublished();
+    return this.newsReadService.getAllPublished();
   }
 }
 
 @Service()
 @QueryHandler(GetAdminNewsPageQuery)
 export class GetAdminNewsPageHandler implements IQueryHandler<GetAdminNewsPageQuery, GetNewsPageResult> {
-  @AutoWired({ qualifier: NewsService.name })
-  private readonly newsService!: NewsService;
+  @AutoWired({ qualifier: NewsReadService.name })
+  private readonly newsReadService!: NewsReadService;
 
   async execute(query: GetAdminNewsPageQuery): Promise<GetNewsPageResult> {
-    return this.newsService.getAdminPage({
+    return this.newsReadService.getAdminPage({
       search: query.search,
       page: query.page,
       pageSize: query.pageSize,
@@ -54,11 +55,11 @@ export class GetAdminNewsPageHandler implements IQueryHandler<GetAdminNewsPageQu
 @Service()
 @QueryHandler(GetNewsByIdQuery)
 export class GetNewsByIdHandler implements IQueryHandler<GetNewsByIdQuery, GetNewsByIdResult> {
-  @AutoWired({ qualifier: NewsService.name })
-  private readonly newsService!: NewsService;
+  @AutoWired({ qualifier: NewsReadService.name })
+  private readonly newsReadService!: NewsReadService;
 
   async execute(query: GetNewsByIdQuery): Promise<GetNewsByIdResult> {
-    return this.newsService.getById(query.id);
+    return this.newsReadService.getById(query.id);
   }
 }
 

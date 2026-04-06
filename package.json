@@ -28,6 +28,7 @@
     "@xtaskjs/common": "^1.0.18",
     "@xtaskjs/core": "^1.0.18",
     "@xtaskjs/cqrs": "^1.1.1",
+    "@xtaskjs/event-source": "^1.0.1",
     "@xtaskjs/express-http": "^1.0.14",
     "@xtaskjs/internationalization": "^1.0.0",
     "@xtaskjs/mailer": "^1.0.1",

@@ -10,20 +10,29 @@ import { UserLoginEventTypeOrmEntity } from "./users/infrastructure/typeorm/user
 
 dotenv.config();
 
+type DatabaseConnectionConfig = AppConfiguration["database"]["write"];
+
 type GlobalDataSourceState = typeof globalThis & {
-  __xtaskjsAppDataSource?: DataSource;
+  __xtaskjsWriteDataSource?: DataSource;
+  __xtaskjsReadDataSource?: DataSource;
 };
 
 const globalDataSourceState = globalThis as GlobalDataSourceState;
 
-export const APP_TYPEORM_DATA_SOURCE_NAME = "default";
+export const APP_TYPEORM_WRITE_DATA_SOURCE_NAME = "default";
+export const APP_TYPEORM_READ_DATA_SOURCE_NAME = "read-replica";
+export const APP_TYPEORM_DATA_SOURCE_NAME = APP_TYPEORM_WRITE_DATA_SOURCE_NAME;
 
-export const createAppDataSourceOptions = (
-  databaseConfig: AppConfiguration["database"] = AppConfig.database
+const entityClasses = [NewsTypeOrmEntity, UserTypeOrmEntity, UserLoginEventTypeOrmEntity];
+
+const createNamedDataSourceOptions = (
+  name: string,
+  databaseConfig: DatabaseConnectionConfig,
+  initializeOnServerStart = true
 ): XTaskTypeOrmDataSourceOptions => {
   return {
-    name: APP_TYPEORM_DATA_SOURCE_NAME,
-    initializeOnServerStart: true,
+    name,
+    initializeOnServerStart,
     type: databaseConfig.type,
     host: databaseConfig.host,
     port: databaseConfig.port,
@@ -31,35 +40,76 @@ export const createAppDataSourceOptions = (
     password: databaseConfig.password,
     database: databaseConfig.database,
     synchronize: databaseConfig.synchronize,
-    entities: [NewsTypeOrmEntity, UserTypeOrmEntity, UserLoginEventTypeOrmEntity],
+    entities: entityClasses,
     migrations: ["src/migrations/*.ts"],
     logging: databaseConfig.logging,
   };
 };
 
-export const createAppDataSource = (databaseConfig: AppConfiguration["database"] = AppConfig.database): DataSource => {
-  return new DataSource(createAppDataSourceOptions(databaseConfig));
+export const createAppWriteDataSourceOptions = (
+  databaseConfig: DatabaseConnectionConfig = AppConfig.database.write
+): XTaskTypeOrmDataSourceOptions => {
+  return createNamedDataSourceOptions(APP_TYPEORM_WRITE_DATA_SOURCE_NAME, databaseConfig);
 };
 
-const resolveTypeOrmManagedDataSource = (): DataSource | null => {
+export const createAppReadDataSourceOptions = (
+  databaseConfig: DatabaseConnectionConfig = AppConfig.database.read
+): XTaskTypeOrmDataSourceOptions => {
+  return createNamedDataSourceOptions(APP_TYPEORM_READ_DATA_SOURCE_NAME, databaseConfig);
+};
+
+export const createAppDataSourceOptions = createAppWriteDataSourceOptions;
+
+export const createAppWriteDataSource = (databaseConfig: DatabaseConnectionConfig = AppConfig.database.write): DataSource => {
+  return new DataSource(createAppWriteDataSourceOptions(databaseConfig));
+};
+
+export const createAppReadDataSource = (databaseConfig: DatabaseConnectionConfig = AppConfig.database.read): DataSource => {
+  return new DataSource(createAppReadDataSourceOptions(databaseConfig));
+};
+
+export const createAppDataSource = createAppWriteDataSource;
+
+const resolveTypeOrmManagedDataSource = (name: string): DataSource | null => {
   try {
-    const dataSource = getTypeOrmLifecycleManager().getDataSource(APP_TYPEORM_DATA_SOURCE_NAME);
-    globalDataSourceState.__xtaskjsAppDataSource = dataSource;
+    const dataSource = getTypeOrmLifecycleManager().getDataSource(name);
+
+    if (name === APP_TYPEORM_READ_DATA_SOURCE_NAME) {
+      globalDataSourceState.__xtaskjsReadDataSource = dataSource;
+    } else {
+      globalDataSourceState.__xtaskjsWriteDataSource = dataSource;
+    }
+
     return dataSource;
   } catch {
     return null;
   }
 };
 
-export const getAppDataSource = (): DataSource => {
-  const managedDataSource = resolveTypeOrmManagedDataSource();
+export const getAppWriteDataSource = (): DataSource => {
+  const managedDataSource = resolveTypeOrmManagedDataSource(APP_TYPEORM_WRITE_DATA_SOURCE_NAME);
   if (managedDataSource) {
     return managedDataSource;
   }
 
-  if (!globalDataSourceState.__xtaskjsAppDataSource) {
-    globalDataSourceState.__xtaskjsAppDataSource = createAppDataSource(AppConfig.database);
+  if (!globalDataSourceState.__xtaskjsWriteDataSource) {
+    globalDataSourceState.__xtaskjsWriteDataSource = createAppWriteDataSource(AppConfig.database.write);
   }
 
-  return globalDataSourceState.__xtaskjsAppDataSource;
+  return globalDataSourceState.__xtaskjsWriteDataSource;
 };
+
+export const getAppReadDataSource = (): DataSource => {
+  const managedDataSource = resolveTypeOrmManagedDataSource(APP_TYPEORM_READ_DATA_SOURCE_NAME);
+  if (managedDataSource) {
+    return managedDataSource;
+  }
+
+  if (!globalDataSourceState.__xtaskjsReadDataSource) {
+    globalDataSourceState.__xtaskjsReadDataSource = createAppReadDataSource(AppConfig.database.read);
+  }
+
+  return globalDataSourceState.__xtaskjsReadDataSource;
+};
+
+export const getAppDataSource = getAppWriteDataSource;

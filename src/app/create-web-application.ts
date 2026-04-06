@@ -13,6 +13,7 @@ import { attachInternationalizationRequestState } from "../shared/infrastructure
 import { createMulterUpload } from "../shared/infrastructure/http/multer.factory";
 import "../shared/infrastructure/typeorm/site.typeorm";
 import "../shared/infrastructure/cqrs/site.cqrs";
+import "../shared/infrastructure/event-source/site.event-source";
 import "../auth/infrastructure/security/admin-jwt-security.strategy";
 import { registerAuthMailer } from "../auth/infrastructure/mailer/register-auth-mailer";
 import "../shared/infrastructure/internationalization/site.internationalization";

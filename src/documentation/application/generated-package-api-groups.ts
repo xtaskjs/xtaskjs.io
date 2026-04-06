@@ -487,6 +487,50 @@ export const generatedPackageApiGroups: Readonly<Record<string, readonly { reado
       ]
     }
   ],
+  "socket-io": [
+    {
+      "title": "Configuration and tokens",
+      "sourcePath": "packages/socket-io/src",
+      "exports": [
+        "configureSocketIo",
+        "getSocketIoConfiguration",
+        "getSocketIoLifecycleToken",
+        "getSocketIoServiceToken",
+        "getSocketIoServerToken",
+        "getSocketIoNamespaceToken"
+      ]
+    },
+    {
+      "title": "Gateways and injectors",
+      "sourcePath": "packages/socket-io/src/decorators.ts",
+      "exports": [
+        "SocketGateway",
+        "OnSocketConnection",
+        "OnSocketDisconnect",
+        "OnSocketEvent",
+        "SubscribeMessage",
+        "InjectSocketService",
+        "InjectSocketLifecycleManager",
+        "InjectSocketServer",
+        "InjectSocketNamespace"
+      ]
+    },
+    {
+      "title": "Runtime service and types",
+      "sourcePath": "packages/socket-io/src",
+      "exports": [
+        "SocketIoService",
+        "SocketIoLifecycleManager",
+        "initializeSocketIoIntegration",
+        "shutdownSocketIoIntegration",
+        "getSocketIoLifecycleManager",
+        "resetSocketIoIntegration",
+        "SocketHandlerContext",
+        "SocketGatewaySummary",
+        "SocketEmitOptions"
+      ]
+    }
+  ],
   "value-objects": [
     {
       "title": "Types and contracts",

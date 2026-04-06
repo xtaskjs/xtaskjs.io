@@ -2,7 +2,7 @@ import { createAppDataSource } from "./data-source";
 import { AppConfig } from "./shared/infrastructure/config/app-config";
 
 async function runMigrations(): Promise<void> {
-  const dataSource = createAppDataSource(AppConfig.database);
+  const dataSource = createAppDataSource(AppConfig.database.write);
   console.log("[migrate] Connecting to database...");
   await dataSource.initialize();
   console.log("[migrate] Running pending migrations...");

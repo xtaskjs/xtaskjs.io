@@ -3,7 +3,7 @@ import { mkdir } from "fs/promises";
 import { OnEvent } from "@xtaskjs/common";
 import { AppConfig } from "../config/app-config";
 import { UserService } from "../../../users/application/user.service";
-import { getAppDataSource } from "../../../data-source";
+import { getAppReadDataSource, getAppWriteDataSource } from "../../../data-source";
 
 @Service()
 export class InfrastructureLifecycle {
@@ -19,13 +19,18 @@ export class InfrastructureLifecycle {
 
   @OnEvent("serverStarted", 100)
   async initializePersistence(): Promise<void> {
-    const dataSource = getAppDataSource();
+    const writeDataSource = getAppWriteDataSource();
+    const readDataSource = getAppReadDataSource();
 
-    if (!dataSource.isInitialized) {
-      await dataSource.initialize();
+    if (!writeDataSource.isInitialized) {
+      await writeDataSource.initialize();
     }
 
-    await dataSource.runMigrations();
+    if (!readDataSource.isInitialized) {
+      await readDataSource.initialize();
+    }
+
+    await writeDataSource.runMigrations();
     await this.userService.ensureAdminAccount();
   }
 }

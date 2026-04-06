@@ -17,6 +17,10 @@ test("createWebApplication includes the infrastructure lifecycle bootstrap modul
   );
   assert.match(
     source,
+    /import\s+"\.\.\/shared\/infrastructure\/event-source\/site\.event-source";/,
+  );
+  assert.match(
+    source,
     /import\s+"\.\.\/shared\/infrastructure\/lifecycle\/infrastructure\.lifecycle";/,
   );
 });

@@ -1,5 +1,6 @@
 import { CommandHandler, ICommandHandler, IQueryHandler, QueryHandler } from "@xtaskjs/cqrs";
 import { AutoWired, Service } from "@xtaskjs/core";
+import { AdminUsersReadService } from "../admin-users-read.service";
 import { UserService } from "../user.service";
 import {
   type AdminUserDetailResult,
@@ -13,45 +14,22 @@ import {
 @Service()
 @QueryHandler(GetAdminUserDetailQuery)
 export class GetAdminUserDetailHandler implements IQueryHandler<GetAdminUserDetailQuery, AdminUserDetailResult> {
-  @AutoWired({ qualifier: UserService.name })
-  private readonly userService!: UserService;
+  @AutoWired({ qualifier: AdminUsersReadService.name })
+  private readonly adminUsersReadService!: AdminUsersReadService;
 
   async execute(query: GetAdminUserDetailQuery): Promise<AdminUserDetailResult> {
-    const user = await this.userService.getById(query.userId);
-    if (!user) {
-      throw new Error("User not found");
-    }
-
-    const loginHistory = await this.userService.getLoginHistoryPage(query.userId, query.page, query.pageSize);
-
-    return {
-      user,
-      loginHistory,
-    };
+    return this.adminUsersReadService.getAdminUserDetail(query.userId, query.page, query.pageSize);
   }
 }
 
 @Service()
 @QueryHandler(ListAdminUsersQuery)
 export class ListAdminUsersHandler implements IQueryHandler<ListAdminUsersQuery, ListAdminUsersResult> {
-  @AutoWired({ qualifier: UserService.name })
-  private readonly userService!: UserService;
+  @AutoWired({ qualifier: AdminUsersReadService.name })
+  private readonly adminUsersReadService!: AdminUsersReadService;
 
   async execute(query: ListAdminUsersQuery): Promise<ListAdminUsersResult> {
-    const page = await this.userService.getAdminPage({
-      search: query.search,
-      page: query.page,
-      pageSize: query.pageSize,
-    });
-    const recentLoginEvents = await this.userService.getRecentLoginEventsByUserIds(
-      page.items.map((user) => user.id),
-      3
-    );
-
-    return {
-      ...page,
-      recentLoginEvents,
-    };
+    return this.adminUsersReadService.listAdminUsers(query.search, query.page, query.pageSize);
   }
 }
 

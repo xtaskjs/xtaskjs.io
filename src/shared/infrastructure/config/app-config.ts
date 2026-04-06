@@ -23,6 +23,7 @@ export type AppConfiguration = {
     readonly connectOnStart: boolean;
     readonly redisUrl: string;
     readonly documentationTtl: string;
+    readonly queryTtl: string;
     readonly documentationHttpMaxAge: string;
   };
   readonly admin: {
@@ -46,14 +47,26 @@ export type AppConfiguration = {
     readonly smtp: MailTransportAccountConfig;
   };
   readonly database: {
-    readonly type: "postgres";
-    readonly host: string;
-    readonly port: number;
-    readonly username: string;
-    readonly password: string;
-    readonly database: string;
-    readonly synchronize: boolean;
-    readonly logging: boolean;
+    readonly write: {
+      readonly type: "postgres";
+      readonly host: string;
+      readonly port: number;
+      readonly username: string;
+      readonly password: string;
+      readonly database: string;
+      readonly synchronize: boolean;
+      readonly logging: boolean;
+    };
+    readonly read: {
+      readonly type: "postgres";
+      readonly host: string;
+      readonly port: number;
+      readonly username: string;
+      readonly password: string;
+      readonly database: string;
+      readonly synchronize: boolean;
+      readonly logging: boolean;
+    };
   };
   readonly paths: {
     readonly root: string;
@@ -149,6 +162,7 @@ export const AppConfig: AppConfiguration = {
     connectOnStart: process.env.CACHE_CONNECT_ON_START !== "false",
     redisUrl: process.env.REDIS_URL || "redis://127.0.0.1:6379",
     documentationTtl: process.env.DOCS_CACHE_TTL || "15m",
+    queryTtl: process.env.QUERY_CACHE_TTL || "2m",
     documentationHttpMaxAge: process.env.DOCS_HTTP_CACHE_MAX_AGE || "5m",
   },
   admin: {
@@ -172,14 +186,26 @@ export const AppConfig: AppConfiguration = {
     smtp: smtpAccount,
   },
   database: {
-    type: "postgres",
-    host: process.env.POSTGRES_HOST || "localhost",
-    port: Number(process.env.POSTGRES_PORT || 5432),
-    username: process.env.POSTGRES_USER || "xtask",
-    password: process.env.POSTGRES_PASSWORD || "xtask",
-    database: process.env.POSTGRES_DB || "xtaskjs",
-    synchronize: false,
-    logging: false,
+    write: {
+      type: "postgres",
+      host: process.env.POSTGRES_HOST || "localhost",
+      port: Number(process.env.POSTGRES_PORT || 5432),
+      username: process.env.POSTGRES_USER || "xtask",
+      password: process.env.POSTGRES_PASSWORD || "xtask",
+      database: process.env.POSTGRES_DB || "xtaskjs",
+      synchronize: false,
+      logging: false,
+    },
+    read: {
+      type: "postgres",
+      host: process.env.READ_POSTGRES_HOST || process.env.POSTGRES_HOST || "localhost",
+      port: Number(process.env.READ_POSTGRES_PORT || process.env.POSTGRES_PORT || 5432),
+      username: process.env.READ_POSTGRES_USER || process.env.POSTGRES_USER || "xtask",
+      password: process.env.READ_POSTGRES_PASSWORD || process.env.POSTGRES_PASSWORD || "xtask",
+      database: process.env.READ_POSTGRES_DB || process.env.POSTGRES_DB || "xtaskjs",
+      synchronize: false,
+      logging: false,
+    },
   },
   paths: {
     root,
