@@ -160,6 +160,7 @@ export type DocumentationArchitectureViewModel = DocumentationViewModel & {
   readonly bootstrapFlow: readonly DocsFlowStep[];
   readonly requestFlow: readonly DocsFlowStep[];
   readonly securityFlow: readonly DocsFlowStep[];
+  readonly performanceFlow: readonly DocsFlowStep[];
   readonly quickStart: {
     readonly install: string;
     readonly bootstrap: string;
@@ -977,6 +978,59 @@ const packageDocs: readonly PackageDoc[] = [
     ].join("\n"),
   },
   {
+    id: "package-throttler",
+    slug: "throttler",
+    name: "@xtaskjs/throttler",
+    path: "packages/throttler",
+    tagline: "Per-endpoint and global rate limiting with memory or Redis backing and custom key generators.",
+    purpose:
+      "Throttler integrates rate limiting into the xtask route pipeline. It limits requests per time window using configurable storage backends, supports custom key generators for IP, user, or API-key-based identification, and applies limits globally or per-method through decorators.",
+    install: "npm install @xtaskjs/throttler",
+    features: [
+      "configureThrottler() sets global defaults with memory or Redis driver, TTL, and request limit.",
+      "@Throttle(limit, ttl) decorator applies per-endpoint limits overriding global defaults.",
+      "keyGenerator option accepts request and context to compute any throttle key (IP, user ID, API key).",
+      "TTL format supports 500ms, 30s, 5m, 1h, 1d shorthand strings.",
+    ],
+    integration: [
+      "Initialized automatically by @xtaskjs/core when the package is installed and configureThrottler() has been called.",
+      "Applies before controller handlers so rate checking runs consistently regardless of framework adapter.",
+      "Demonstrated by the 24-throttler_app sample with global and per-endpoint throttle policies.",
+    ],
+    sample: "24-throttler_app",
+    exampleTitle: "Global config plus per-endpoint override",
+    exampleCode: [
+      'import { Controller, Get } from "@xtaskjs/common";',
+      'import { Throttle, configureThrottler } from "@xtaskjs/throttler";',
+      "",
+      "configureThrottler({",
+      '  driver: "memory",',
+      '  ttl: "1m",',
+      "  limit: 100,",
+      "});",
+      "",
+      '@Controller("/items")',
+      "export class ItemsController {",
+      '  @Get("/")',
+      '  @Throttle(10, "30s")',
+      "  list() {",
+      "    return [];",
+      "  }",
+      "",
+      '  @Get("/heavy")',
+      '  @Throttle(2, "1m")',
+      "  heavy() {",
+      '    return { ok: true };',
+      "  }",
+      "",
+      '  @Get("/open")',
+      "  open() {",
+      '    return { ok: true };',
+      "  }",
+      "}",
+    ].join("\n"),
+  },
+  {
     id: "package-socket-io",
     slug: "socket-io",
     name: "@xtaskjs/socket-io",
@@ -1578,6 +1632,25 @@ const sampleDocs: readonly SampleDoc[] = [
       "Call /socket/announce/:message to publish a server.announcement event from an HTTP controller through InjectSocketService().",
     ],
   },
+  {
+    name: "24-throttler_app",
+    folder: "samples/24-throttler_app",
+    stack: "node-http + throttler",
+    summary: "node-http application demonstrating global and per-endpoint rate limiting using configureThrottler and @Throttle decorators with memory storage.",
+    endpoints: [
+      "GET /health",
+      "GET /items (throttled: 10 req / 30s)",
+      "GET /items/heavy (throttled: 2 req / 1m)",
+      "GET /items/open (no throttle)",
+    ],
+    flow: [
+      "configureThrottler() registers global 100 req/min default with memory driver.",
+      "Request arrives at a throttled endpoint.",
+      "Throttler extracts the key (IP by default) and checks the counter in the store.",
+      "Within limit: request proceeds normally to the controller handler.",
+      "Over limit: 429 Too Many Requests is returned with a Retry-After header.",
+    ],
+  },
 ];
 
 const packageDeepDiveDocs: Readonly<Record<string, PackageDeepDiveDoc>> = {
@@ -2074,6 +2147,44 @@ const packageDeepDiveDocs: Readonly<Record<string, PackageDeepDiveDoc>> = {
       },
     ],
     related: ["core", "common", "scheduler"],
+  },
+  throttler: {
+    runtimeChart: [
+      { label: "Bootstrap", score: 3 },
+      { label: "HTTP Delivery", score: 5 },
+      { label: "Security", score: 5 },
+      { label: "Operations", score: 4 },
+      { label: "Integrations", score: 4 },
+    ],
+    lifecycle: [
+      {
+        title: "Before startup",
+        text: "Call configureThrottler() with driver, TTL, limit, and optional key generator settings so defaults are ready before the pipeline executes.",
+      },
+      {
+        title: "During CreateApplication()",
+        text: "The throttler lifecycle registers the rate-limit middleware into the route pipeline so every decorated or globally configured endpoint is checked automatically.",
+      },
+      {
+        title: "During app.close()",
+        text: "Connected Redis stores and in-memory counters are released together with the application lifecycle.",
+      },
+    ],
+    usage: [
+      {
+        title: "1. Set global defaults",
+        text: "Call configureThrottler() near app startup with your preferred driver, default TTL, and request limit so all routes inherit a baseline policy.",
+      },
+      {
+        title: "2. Override per endpoint",
+        text: "Apply @Throttle(limit, ttl) to individual controller methods when specific routes need stricter or more lenient limits than the global default.",
+      },
+      {
+        title: "3. Customize the throttle key",
+        text: "Provide a keyGenerator function to throttle by user ID, API key, or any other request-derived value instead of the default IP-based identification.",
+      },
+    ],
+    related: ["core", "common", "security"],
   },
   "socket-io": {
     runtimeChart: [
@@ -4552,6 +4663,28 @@ export class DocumentationService {
         {
           title: "Context enrichment",
           text: "Successful authentication populates req.user, req.auth, response locals, and route execution context.",
+        },
+      ]),
+      performanceFlow: localizeFlowSteps(locale, [
+        {
+          title: "Cache Manifest",
+          text: "On first boot the kernel scans src/ and writes .xtask-manifest.json. Subsequent starts load the manifest directly, skipping the filesystem scan entirely and reducing startup time by 40–60%.",
+        },
+        {
+          title: "Prebuilt Manifest",
+          text: "Running npm run build generates .xtask-manifest.prebuilt.json at compile time. Production starts load this file first, giving the fastest possible boot without any scanning.",
+        },
+        {
+          title: "Pool Imports Async",
+          text: "Discovered files are imported through a bounded semaphore pool. XTASK_IMPORT_CONCURRENCY (default 10) limits parallel imports to prevent filesystem saturation. Tune to 16–24 for larger apps.",
+        },
+        {
+          title: "Lazy DI Resolution",
+          text: "Constructor-injected dependencies are wrapped in transparent proxies and only instantiated on first access. Startup avoids creating services that are never called, reducing boot time for optional integrations.",
+        },
+        {
+          title: "Hot Manifest Watcher",
+          text: "In development, a file watcher applies incremental manifest updates. Changed files are re-imported and re-registered in the container without restarting the process.",
         },
       ]),
     };

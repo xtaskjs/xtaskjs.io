@@ -23,6 +23,10 @@
       <article class="feature-card docs-overview-card">
         <h3>{{t "site.docs.architecture.securityLayering"}}</h3>
         <p>{{t "site.docs.architecture.securityLayeringText"}}</p>
+            <article class="feature-card docs-overview-card">
+              <h3>{{t "site.docs.architecture.performanceOverview"}}</h3>
+              <p>{{t "site.docs.architecture.performanceOverviewText"}}</p>
+            </article>
       </article>
     </div>
   </section>
@@ -101,6 +105,35 @@
             {{/each}}
           </div>
         </article>
+      </section>
+
+      <section class="section docs-section" id="performance">
+        <div class="docs-section-heading">
+          <p class="eyebrow">{{t "site.docs.architecture.performanceEyebrow"}}</p>
+          <h2>{{t "site.docs.architecture.performanceTitle"}}</h2>
+          <p class="docs-section-intro">{{t "site.docs.architecture.performanceIntro"}}</p>
+        </div>
+        <div class="docs-flow-rail">
+          {{#each performanceFlow}}
+            <article class="docs-flow-step">
+              <h3>{{title}}</h3>
+              <p>{{text}}</p>
+            </article>
+          {{/each}}
+        </div>
+        <div class="docs-two-column">
+          <article class="feature-card">
+            <h3>{{t "site.docs.architecture.manifestDevTitle"}}</h3>
+            <div class="docs-code-block"><pre><code>XTASK_IMPORT_CONCURRENCY=16 npm run dev</code></pre></div>
+            <p>{{t "site.docs.architecture.manifestDevText"}}</p>
+          </article>
+          <article class="feature-card">
+            <h3>{{t "site.docs.architecture.manifestProdTitle"}}</h3>
+            <div class="docs-code-block"><pre><code>npm run build
+npm start</code></pre></div>
+            <p>{{t "site.docs.architecture.manifestProdText"}}</p>
+          </article>
+        </div>
       </section>
     </div>
   </section>
