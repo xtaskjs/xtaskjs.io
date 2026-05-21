@@ -10,6 +10,125 @@ Esta documentación cubre los nuevos packages introducidos recientemente en xTas
 
 ---
 
+## @xtaskjs/typeorm (Migrations y Seeders en bootstrap)
+
+### Descripción
+
+El paquete de TypeORM ahora cubre registro y ejecución de migrations y seeders durante el arranque, además de la inyección de datasource y repositories.
+
+Funcionalidad principal:
+- Registro de datasource con `runMigrationsOnServerStart` y `runSeedersOnServerStart`.
+- Registro declarativo con decoradores `TypeOrmMigration` y `TypeOrmSeeder`.
+- Ejecución ordenada de seeders por `order`.
+- Integración de ciclo de vida: inicializa en `CreateApplication()` y destruye conexiones en `app.close()`.
+
+### Configuración recomendada
+
+```typescript
+import {
+  DataSource,
+  MigrationInterface,
+  QueryRunner,
+  TypeOrmDataSource,
+  TypeOrmMigration,
+  TypeOrmSeeder,
+} from "@xtaskjs/typeorm";
+
+@TypeOrmDataSource({
+  name: "default",
+  type: "postgres",
+  host: process.env.POSTGRES_HOST,
+  port: Number(process.env.POSTGRES_PORT || 5432),
+  username: process.env.POSTGRES_USER,
+  password: process.env.POSTGRES_PASSWORD,
+  database: process.env.POSTGRES_DB,
+  synchronize: false,
+  runMigrationsOnServerStart: true,
+  runSeedersOnServerStart: true,
+})
+export class DatabaseConfig {}
+
+@TypeOrmMigration({ dataSourceName: "default" })
+export class CreateUsersTable1700000000000 implements MigrationInterface {
+  async up(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query("CREATE TABLE IF NOT EXISTS users (id SERIAL PRIMARY KEY, name VARCHAR(120) NOT NULL)");
+  }
+
+  async down(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query("DROP TABLE IF EXISTS users");
+  }
+}
+
+@TypeOrmSeeder({ dataSourceName: "default", order: 1 })
+export class DefaultUsersSeeder {
+  async run(dataSource: DataSource): Promise<void> {
+    await dataSource.query("INSERT INTO users (name) VALUES ('Ada Lovelace')");
+  }
+}
+```
+
+Notas:
+- Usa sufijo de timestamp en clases de migration para compatibilidad de TypeORM.
+- Evita `synchronize: true` en producción cuando ya usas migrations.
+- Si ejecutas migraciones en un runner externo, no cierres la integración TypeORM si la app seguirá usando el datasource.
+
+### Decoradores de TypeORM a cubrir
+
+- `TypeOrmDataSource`
+- `InjectDataSource`
+- `InjectRepository`
+- `TypeOrmMigration`
+- `TypeOrmSeeder`
+
+---
+
+## Observabilidad: logs a disco y correlation id
+
+### Logs persistidos en disco
+
+xTaskJS permite persistir logs en archivo configurando el logger de aplicación:
+
+```typescript
+await CreateApplication({
+  logger: {
+    appName: "xtaskjs.io",
+    useColors: process.env.NODE_ENV !== "production",
+    file: {
+      enabled: true,
+      path: process.env.LOG_FILE_PATH || "./var/log/xtaskjs.io.log",
+    },
+  },
+});
+```
+
+Variables útiles:
+- `LOG_FILE_PATH`: ruta del archivo o carpeta de logs.
+- `LOG_USE_COLORS`: habilita o deshabilita ANSI en consola.
+- `LOG_APP_NAME`: nombre mostrado en cada línea de log.
+
+### Correlation id por request
+
+Para trazabilidad HTTP, usa un middleware que lea o genere el id y lo reexponga en respuesta:
+
+```typescript
+app.use((req, res, next) => {
+  const headerName = (process.env.LOG_CORRELATION_HEADER || "x-correlation-id").toLowerCase();
+  const incoming = String(req.headers[headerName] || "").trim();
+  const correlationId = incoming || crypto.randomUUID();
+
+  req.headers[headerName] = correlationId;
+  res.setHeader(headerName, correlationId);
+  next();
+});
+```
+
+Recomendaciones:
+- Propaga el mismo `x-correlation-id` en llamadas internas HTTP.
+- Incluye el id en logs de request/response para poder seguir una operación extremo a extremo.
+- Mantén el nombre del header configurable con `LOG_CORRELATION_HEADER`.
+
+---
+
 ## @xtaskjs/throttler
 
 ### ⚡ Descripción

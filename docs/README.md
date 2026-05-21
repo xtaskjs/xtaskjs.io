@@ -22,6 +22,8 @@ Bienvenido a la documentación completa de la actualización a xTaskJS v1.0.28+.
 │   ├── @xtaskjs/throttler (Rate Limiting)
 │   ├── @xtaskjs/socket-io (Real-time)
 │   ├── @xtaskjs/scheduler (Task Scheduling)
+│   ├── @xtaskjs/typeorm (Migrations + Seeders en bootstrap)
+│   ├── Observabilidad (logs a disco + correlation id)
 │   ├── @xtaskjs/queues (Mejorado)
 │   ├── @xtaskjs/event-source (Mejorado)
 │   ├── @xtaskjs/cache (Mejorado)
@@ -142,6 +144,12 @@ Bienvenido a la documentación completa de la actualización a xTaskJS v1.0.28+.
 
 **Async messaging / Queues:**
 → [NUEVOS_PACKAGES.md - Queues](NUEVOS_PACKAGES.md#xtaskjsqueues-mejorado) + [EJEMPLOS_SAMPLES.md - Samples 16-17](EJEMPLOS_SAMPLES.md#-queues--messaging)
+
+**TypeORM con migrations y seeders:**
+→ [NUEVOS_PACKAGES.md - TypeORM](NUEVOS_PACKAGES.md#xtaskjstypeorm-migrations-y-seeders-en-bootstrap) + [EJEMPLOS_SAMPLES.md - Sample 04](EJEMPLOS_SAMPLES.md#04-typeorm_app)
+
+**Logs en disco y correlation id:**
+→ [NUEVOS_PACKAGES.md - Observabilidad](NUEVOS_PACKAGES.md#observabilidad-logs-a-disco-y-correlation-id)
 
 ### "Quiero ejecutar un ejemplo específico"
 → [EJEMPLOS_SAMPLES.md](EJEMPLOS_SAMPLES.md) - Busca el número

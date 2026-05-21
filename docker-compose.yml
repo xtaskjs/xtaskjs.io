@@ -45,8 +45,10 @@ services:
       MAIL_SMTP_HOST: ${MAIL_SMTP_HOST:-smtp.example.com}
       MAIL_SMTP_PORT: ${MAIL_SMTP_PORT:-587}
       MAIL_SMTP_SECURE: ${MAIL_SMTP_SECURE:-false}
+      LOG_FILE_PATH: ${LOG_FILE_PATH:-/app/var/log/xtaskjs.io.log}
     volumes:
       - uploads_data:/app/public/uploads
+      - ./var:/app/var
       - ${SSL_CERTS_DIR:-../certificado_xtaskjs.io}:/app/certs:ro
     depends_on:
       db:

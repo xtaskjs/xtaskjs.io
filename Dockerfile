@@ -8,7 +8,7 @@ RUN npm i
 
 COPY . .
 
-RUN mkdir -p public/uploads && chmod +x docker-entrypoint.sh
+RUN mkdir -p public/uploads var/log && chmod +x docker-entrypoint.sh
 
 ENV NODE_ENV=production
 EXPOSE 3000

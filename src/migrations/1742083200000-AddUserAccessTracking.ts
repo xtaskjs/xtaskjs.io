@@ -1,5 +1,6 @@
-import { MigrationInterface, QueryRunner, Table, TableColumn } from "typeorm";
+import { MigrationInterface, QueryRunner, Table, TableColumn, TypeOrmMigration } from "@xtaskjs/typeorm";
 
+@TypeOrmMigration({ dataSourceName: "default" })
 export class AddUserAccessTracking1742083200000 implements MigrationInterface {
   name = "AddUserAccessTracking1742083200000";
 

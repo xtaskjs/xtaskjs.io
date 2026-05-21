@@ -535,7 +535,12 @@ test("documentation CLI page renders installation and command examples over HTTP
   assert.match(html, /xtask create &lt;project-name&gt; \[directory\] \[options\]/);
   assert.match(html, /xtask generate resource billing --path src\/modules --crud/);
   assert.match(html, /xtask generate resource cache-entries --path src\/modules --crud --with-dto/);
+  assert.match(html, /xtask cache &lt;subcommand&gt; \[options\]/);
+  assert.match(html, /xtask cache http-route --method GET --path \/articles\/landing/);
+  assert.match(html, /xtask add \[modules\.\.\.\] \[options\]/);
+  assert.match(html, /xtask add --list core cache socket-io/);
   assert.match(html, /--package-manager &lt;manager&gt;/);
+  assert.match(html, /--management-path &lt;path&gt;/);
   assert.match(html, /--with-guard/);
   assert.match(html, /does not ship a dedicated cache generator/);
   assert.doesNotMatch(app.output(), /Failed to start server:/);

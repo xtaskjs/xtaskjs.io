@@ -21,7 +21,9 @@ export const generatedPackageApiGroups: Readonly<Record<string, readonly { reado
         "Controller",
         "Repository",
         "AutoWired",
-        "Qualifier"
+        "Qualifier",
+        "PostConstruct",
+        "PreDestroy"
       ]
     },
     {
@@ -48,6 +50,11 @@ export const generatedPackageApiGroups: Readonly<Record<string, readonly { reado
         "Post",
         "Patch",
         "Delete",
+        "Body",
+        "Param",
+        "Query",
+        "Req",
+        "Res",
         "UseGuards",
         "UseMiddlewares",
         "UsePipes"
@@ -146,7 +153,9 @@ export const generatedPackageApiGroups: Readonly<Record<string, readonly { reado
         "registerTypeOrmDataSource",
         "TypeOrmDataSource",
         "InjectDataSource",
-        "InjectRepository"
+        "InjectRepository",
+        "TypeOrmMigration",
+        "TypeOrmSeeder"
       ]
     },
     {
@@ -359,6 +368,7 @@ export const generatedPackageApiGroups: Readonly<Record<string, readonly { reado
       "exports": [
         "InternationalizationService",
         "InjectInternationalizationService",
+        "InjectI18nService",
         "runWithInternationalizationContext"
       ]
     },
@@ -368,6 +378,7 @@ export const generatedPackageApiGroups: Readonly<Record<string, readonly { reado
       "exports": [
         "registerInternationalizationFormatter",
         "InjectInternationalizationLifecycleManager",
+        "InjectI18nLifecycleManager",
         "initializeInternationalizationIntegration",
         "shutdownInternationalizationIntegration"
       ]
@@ -399,6 +410,17 @@ export const generatedPackageApiGroups: Readonly<Record<string, readonly { reado
         "InjectSchedulerLifecycleManager",
         "initializeSchedulerIntegration",
         "shutdownSchedulerIntegration"
+      ]
+    }
+  ],
+  "throttler": [
+    {
+      "title": "Rate limit decorators",
+      "sourcePath": "packages/throttler/src/decorators.ts",
+      "exports": [
+        "Throttle",
+        "InjectThrottlerService",
+        "InjectThrottlerLifecycleManager"
       ]
     }
   ],
@@ -472,6 +494,7 @@ export const generatedPackageApiGroups: Readonly<Record<string, readonly { reado
         "QueuePattern",
         "PublishToQueue",
         "InjectQueueService",
+        "InjectQueueLifecycleManager",
         "InjectQueueTransport"
       ]
     },

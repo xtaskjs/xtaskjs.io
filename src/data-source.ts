@@ -7,6 +7,12 @@ import type { AppConfiguration } from "./shared/infrastructure/config/app-config
 import { AppConfig } from "./shared/infrastructure/config/app-config";
 import { UserTypeOrmEntity } from "./users/infrastructure/typeorm/user.typeorm-entity";
 import { UserLoginEventTypeOrmEntity } from "./users/infrastructure/typeorm/user-login-event.typeorm-entity";
+import { CreateNewsTable1741737600000 } from "./migrations/1741737600000-CreateNewsTable";
+import { CreateUsersTable1741824000000 } from "./migrations/1741824000000-CreateUsersTable";
+import { AddUserSecurityColumns1741996800000 } from "./migrations/1741996800000-AddUserSecurityColumns";
+import { AddUserAccessTracking1742083200000 } from "./migrations/1742083200000-AddUserAccessTracking";
+import { AddUserCommunicationPreferences1773792000000 } from "./migrations/1773792000000-AddUserCommunicationPreferences";
+import { CreateUserAccountEventStoreTable1773878400000 } from "./migrations/1773878400000-CreateUserAccountEventStoreTable";
 
 dotenv.config();
 
@@ -24,11 +30,21 @@ export const APP_TYPEORM_READ_DATA_SOURCE_NAME = "read-replica";
 export const APP_TYPEORM_DATA_SOURCE_NAME = APP_TYPEORM_WRITE_DATA_SOURCE_NAME;
 
 const entityClasses = [NewsTypeOrmEntity, UserTypeOrmEntity, UserLoginEventTypeOrmEntity];
+const migrationClasses = [
+  CreateNewsTable1741737600000,
+  CreateUsersTable1741824000000,
+  AddUserSecurityColumns1741996800000,
+  AddUserAccessTracking1742083200000,
+  AddUserCommunicationPreferences1773792000000,
+  CreateUserAccountEventStoreTable1773878400000,
+];
 
 const createNamedDataSourceOptions = (
   name: string,
   databaseConfig: DatabaseConnectionConfig,
-  initializeOnServerStart = true
+  initializeOnServerStart = true,
+  runMigrationsOnServerStart = false,
+  runSeedersOnServerStart = false
 ): XTaskTypeOrmDataSourceOptions => {
   return {
     name,
@@ -41,15 +57,23 @@ const createNamedDataSourceOptions = (
     database: databaseConfig.database,
     synchronize: databaseConfig.synchronize,
     entities: entityClasses,
-    migrations: ["src/migrations/*.ts"],
+    migrations: migrationClasses,
     logging: databaseConfig.logging,
+    runMigrationsOnServerStart,
+    runSeedersOnServerStart,
   };
 };
 
 export const createAppWriteDataSourceOptions = (
   databaseConfig: DatabaseConnectionConfig = AppConfig.database.write
 ): XTaskTypeOrmDataSourceOptions => {
-  return createNamedDataSourceOptions(APP_TYPEORM_WRITE_DATA_SOURCE_NAME, databaseConfig);
+  return createNamedDataSourceOptions(
+    APP_TYPEORM_WRITE_DATA_SOURCE_NAME,
+    databaseConfig,
+    true,
+    true,
+    true
+  );
 };
 
 export const createAppReadDataSourceOptions = (

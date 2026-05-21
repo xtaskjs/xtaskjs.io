@@ -11,6 +11,7 @@ import { handlebarsHelpers } from "../shared/infrastructure/http/handlebars-help
 import { attachHtmlValidationErrorHandler } from "../shared/infrastructure/http/html-validation-error-handler";
 import { attachInternationalizationRequestState } from "../shared/infrastructure/http/internationalization-request.middleware";
 import { createMulterUpload } from "../shared/infrastructure/http/multer.factory";
+import { attachRequestCorrelationAndLogging } from "../shared/infrastructure/http/request-correlation-logger.middleware";
 import "../shared/infrastructure/typeorm/site.typeorm";
 import "../shared/infrastructure/cqrs/site.cqrs";
 import "../shared/infrastructure/event-source/site.event-source";
@@ -129,6 +130,7 @@ export const createWebApplication = async (): Promise<XTaskHttpApplication> => {
   expressApp.use(express.static(AppConfig.paths.public, { index: false }));
   expressApp.use(express.json());
   expressApp.use(express.urlencoded({ extended: true }));
+  expressApp.use(attachRequestCorrelationAndLogging);
   expressApp.use(attachInternationalizationRequestState);
   expressApp.use("/admin/news", newsUpload.single("image"));
   expressApp.use(attachHtmlValidationErrorHandler);
@@ -139,6 +141,14 @@ export const createWebApplication = async (): Promise<XTaskHttpApplication> => {
 
   return CreateApplication({
     adapter,
+    logger: {
+      appName: AppConfig.logging.appName,
+      useColors: AppConfig.logging.useColors,
+      file: {
+        enabled: true,
+        path: AppConfig.logging.filePath,
+      },
+    },
     autoListen: true,
     server: {
       host: AppConfig.host,

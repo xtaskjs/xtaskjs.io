@@ -26,6 +26,13 @@ export type AppConfiguration = {
     readonly queryTtl: string;
     readonly documentationHttpMaxAge: string;
   };
+  readonly logging: {
+    readonly appName: string;
+    readonly useColors: boolean;
+    readonly filePath: string;
+    readonly correlationHeaderName: string;
+    readonly requestLogEnabled: boolean;
+  };
   readonly admin: {
     readonly username: string;
     readonly email: string;
@@ -70,6 +77,8 @@ export type AppConfiguration = {
   };
   readonly paths: {
     readonly root: string;
+    readonly var: string;
+    readonly logs: string;
     readonly public: string;
     readonly uploads: string;
     readonly views: string;
@@ -165,6 +174,13 @@ export const AppConfig: AppConfiguration = {
     queryTtl: process.env.QUERY_CACHE_TTL || "2m",
     documentationHttpMaxAge: process.env.DOCS_HTTP_CACHE_MAX_AGE || "5m",
   },
+  logging: {
+    appName: trimEnvWithFallback(process.env.LOG_APP_NAME, "xtaskjs.io"),
+    useColors: parseBooleanEnv(process.env.LOG_USE_COLORS, process.env.NODE_ENV !== "production"),
+    filePath: trimEnvWithFallback(process.env.LOG_FILE_PATH, path.join(root, "var", "log", "xtaskjs.io.log")),
+    correlationHeaderName: trimEnvWithFallback(process.env.LOG_CORRELATION_HEADER, "x-correlation-id").toLowerCase(),
+    requestLogEnabled: parseBooleanEnv(process.env.LOG_REQUESTS_ENABLED, true),
+  },
   admin: {
     username: adminUsername,
     email: adminEmail,
@@ -209,6 +225,8 @@ export const AppConfig: AppConfiguration = {
   },
   paths: {
     root,
+    var: path.join(root, "var"),
+    logs: path.join(root, "var", "log"),
     public: path.join(root, "public"),
     uploads: path.join(root, "public", "uploads"),
     views: path.join(root, "views"),

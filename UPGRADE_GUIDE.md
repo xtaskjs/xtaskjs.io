@@ -204,9 +204,11 @@ class ReportsScheduler {
 
 2. **Manifest Caching**: El primer build genera un manifest para optimizar startups posteriores.
 
-3. **TypeORM**: Actualizado a compatible con las nuevas versiones (0.3.28).
+3. **TypeORM**: Actualizado a compatible con las nuevas versiones (0.3.28), con soporte explícito para migrations y seeders en bootstrap (`runMigrationsOnServerStart`, `runSeedersOnServerStart`) y decoradores `TypeOrmMigration` / `TypeOrmSeeder`.
 
 4. **Express**: Actualizado a v5.2.1 - asegúrate de revisar los breaking changes si tienes middlewares personalizados.
+
+5. **Logging / Trazabilidad**: configuración de logger con persistencia a disco (`LOG_FILE_PATH`) y correlación HTTP configurable mediante `LOG_CORRELATION_HEADER`.
 
 ## 📚 Recursos
 

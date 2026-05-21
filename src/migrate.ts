@@ -1,18 +1,22 @@
-import { createAppDataSource } from "./data-source";
-import { AppConfig } from "./shared/infrastructure/config/app-config";
+import { initializeTypeOrmIntegration, shutdownTypeOrmIntegration } from "@xtaskjs/typeorm";
+import "./shared/infrastructure/typeorm/site.typeorm";
 
-async function runMigrations(): Promise<void> {
-  const dataSource = createAppDataSource(AppConfig.database.write);
-  console.log("[migrate] Connecting to database...");
-  await dataSource.initialize();
-  console.log("[migrate] Running pending migrations...");
-  const ran = await dataSource.runMigrations();
-  if (ran.length === 0) {
-    console.log("[migrate] No pending migrations.");
-  } else {
-    console.log(`[migrate] Ran ${ran.length} migration(s): ${ran.map((m) => m.name).join(", ")}`);
+type RunMigrationsOptions = {
+  readonly shutdownAfterRun?: boolean;
+};
+
+async function runMigrations(options: RunMigrationsOptions = {}): Promise<void> {
+  const shouldShutdown = options.shutdownAfterRun ?? true;
+
+  console.log("[migrate] Initializing @xtaskjs/typeorm integration...");
+  try {
+    await initializeTypeOrmIntegration();
+    console.log("[migrate] Migration and seeder lifecycle completed.");
+  } finally {
+    if (shouldShutdown) {
+      await shutdownTypeOrmIntegration();
+    }
   }
-  await dataSource.destroy();
 }
 
 if (require.main === module) {

@@ -1,5 +1,6 @@
-import { MigrationInterface, QueryRunner, Table } from "typeorm";
+import { MigrationInterface, QueryRunner, Table, TypeOrmMigration } from "@xtaskjs/typeorm";
 
+@TypeOrmMigration({ dataSourceName: "default" })
 export class CreateNewsTable1741737600000 implements MigrationInterface {
   name = "CreateNewsTable1741737600000";
 
