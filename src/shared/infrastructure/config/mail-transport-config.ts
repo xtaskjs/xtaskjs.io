@@ -27,12 +27,15 @@ const supportedProviders = new Set<MailTransportProvider>(["json", "mailtrap", "
 const hasCredentials = (account: MailTransportAccountConfig): boolean =>
   Boolean(account.username && account.password);
 
+const hasSmtpEndpoint = (account: MailTransportAccountConfig): boolean =>
+  Boolean(account.host || account.port);
+
 export const inferMailTransportProvider = (accounts: MailTransportAccounts): MailTransportProvider => {
   if (hasCredentials(accounts.mailtrap)) {
     return "mailtrap";
   }
 
-  if (hasCredentials(accounts.smtp)) {
+  if (hasCredentials(accounts.smtp) || hasSmtpEndpoint(accounts.smtp)) {
     return "smtp";
   }
 
@@ -61,7 +64,7 @@ export const resolveMailTransportProvider = (
     return hasCredentials(accounts.mailtrap) ? "mailtrap" : "json";
   }
 
-  return hasCredentials(accounts.smtp) ? "smtp" : "json";
+  return hasCredentials(accounts.smtp) || hasSmtpEndpoint(accounts.smtp) ? "smtp" : "json";
 };
 
 export const createMailTransport = (
@@ -84,7 +87,7 @@ export const createMailTransport = (
   }
 
   if (configuration.provider === "smtp") {
-    if (!hasCredentials(configuration.smtp)) {
+    if (!hasCredentials(configuration.smtp) && !hasSmtpEndpoint(configuration.smtp)) {
       return { jsonTransport: true };
     }
 
@@ -92,10 +95,14 @@ export const createMailTransport = (
       ...(configuration.smtp.host ? { host: configuration.smtp.host } : {}),
       ...(configuration.smtp.port ? { port: configuration.smtp.port } : {}),
       secure: configuration.smtp.secure,
-      auth: {
-        user: configuration.smtp.username,
-        pass: configuration.smtp.password,
-      },
+      ...(hasCredentials(configuration.smtp)
+        ? {
+            auth: {
+              user: configuration.smtp.username,
+              pass: configuration.smtp.password,
+            },
+          }
+        : {}),
     };
   }
 

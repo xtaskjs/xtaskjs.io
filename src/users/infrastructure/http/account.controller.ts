@@ -1,11 +1,10 @@
 import { AutoWired, Service } from "@xtaskjs/core";
 import type { Request, Response } from "express";
-import { Body, Controller, Get, Post, Query, Req, Res } from "@xtaskjs/common";
+import { Controller, Get, Post, Req, Res } from "@xtaskjs/common";
 import { CommandBus, InjectCommandBus } from "@xtaskjs/cqrs";
 import { view } from "@xtaskjs/express-http";
 import { AllowAnonymous, Authenticated } from "@xtaskjs/security";
-import { Transform } from "class-transformer";
-import { IsEmail, IsInt, IsNotEmpty, IsOptional, IsString, Min, MinLength } from "class-validator";
+import { z } from "zod";
 import { SessionViewService } from "../../../auth/application/session-view.service";
 import { AccountAccessService } from "../../../auth/application/account-access.service";
 import { RegisterAccountCommand, type RegisterAccountResult } from "../../../auth/application/cqrs/account-registration.messages";
@@ -20,6 +19,7 @@ import {
 import { UserService } from "../../application/user.service";
 import { resolveRequestAccessLocation } from "../../../shared/infrastructure/http/request-access-location";
 import { normalizeText } from "../../../shared/infrastructure/http/view-helpers";
+import { validateRequestData } from "../../../shared/infrastructure/http/request-validation";
 
 type AuthenticatedRequest = Request & {
   user?: { id?: number };
@@ -52,10 +52,10 @@ const buildCookieOptions = (req: Request) => ({
 
 const dashboardPathForRole = (roles: string[]): string => (roles.includes("admin") ? "/admin/users" : "/dashboard");
 
-const trimString = ({ value }: { value: unknown }): unknown =>
+const trimString = (value: unknown): unknown =>
   typeof value === "string" ? value.trim() : value;
 
-const trimLowercaseString = ({ value }: { value: unknown }): unknown =>
+const trimLowercaseString = (value: unknown): unknown =>
   typeof value === "string" ? value.trim().toLowerCase() : value;
 
 const parseCheckboxValue = (value: unknown): boolean => {
@@ -71,185 +71,82 @@ const parseCheckboxValue = (value: unknown): boolean => {
   return normalized === "on" || normalized === "true" || normalized === "1" || normalized === "yes";
 };
 
-class LoginPageQueryDto {
-  @IsOptional()
-  @IsString()
-  error?: string;
+const loginPageQuerySchema = z.object({
+  error: z.preprocess(trimString, z.string().optional()),
+  verified: z.preprocess(trimString, z.string().optional()),
+  reset: z.preprocess(trimString, z.string().optional()),
+  expired: z.preprocess(trimString, z.string().optional()),
+});
 
-  @IsOptional()
-  @IsString()
-  verified?: string;
+const loginBodySchema = z.object({
+  identifier: z.preprocess(trimString, z.string().min(1)),
+  password: z.string().min(1),
+});
 
-  @IsOptional()
-  @IsString()
-  reset?: string;
+const registerPageQuerySchema = z.object({
+  error: z.preprocess(trimString, z.string().optional()),
+  message: z.preprocess(trimString, z.string().optional()),
+});
 
-  @IsOptional()
-  @IsString()
-  expired?: string;
-}
+const registerBodySchema = z.object({
+  fullName: z.preprocess(trimString, z.string().min(1)),
+  username: z.preprocess(trimLowercaseString, z.string().min(1)),
+  email: z.preprocess(trimLowercaseString, z.string().email()),
+  password: z.string().min(8),
+  confirmPassword: z.string().min(8),
+  receiveNewsUpdates: z.union([z.string(), z.array(z.string())]).optional(),
+  newsletterSubscribed: z.union([z.string(), z.array(z.string())]).optional(),
+});
 
-class LoginBodyDto {
-  @Transform(trimString)
-  @IsString()
-  @IsNotEmpty()
-  identifier!: string;
+const dashboardQuerySchema = z.object({
+  preferences: z.preprocess(trimString, z.string().optional()),
+});
 
-  @IsString()
-  @IsNotEmpty()
-  password!: string;
-}
+const dashboardNewsletterBodySchema = z.object({
+  newsletterSubscribed: z.union([z.string(), z.array(z.string())]).optional(),
+});
 
-class RegisterPageQueryDto {
-  @IsOptional()
-  @IsString()
-  error?: string;
+const verifyEmailQuerySchema = z.object({
+  email: z.preprocess(trimLowercaseString, z.string().email().optional()),
+  code: z.preprocess(trimString, z.string().min(1).optional()),
+  error: z.preprocess(trimString, z.string().optional()),
+  sent: z.preprocess(trimString, z.string().optional()),
+});
 
-  @IsOptional()
-  @IsString()
-  message?: string;
-}
+const verifyEmailBodySchema = z.object({
+  email: z.preprocess(trimLowercaseString, z.string().email()),
+  code: z.preprocess(trimString, z.string().min(1)),
+});
 
-class RegisterBodyDto {
-  @Transform(trimString)
-  @IsString()
-  @IsNotEmpty()
-  fullName!: string;
+const resendVerifyEmailBodySchema = z.object({
+  email: z.preprocess(trimLowercaseString, z.string().email()),
+});
 
-  @Transform(trimLowercaseString)
-  @IsString()
-  @IsNotEmpty()
-  username!: string;
+const verifyLoginPageQuerySchema = z.object({
+  error: z.preprocess(trimString, z.string().optional()),
+  resent: z.preprocess(trimString, z.string().optional()),
+});
 
-  @Transform(trimLowercaseString)
-  @IsEmail()
-  email!: string;
+const verifyLoginBodySchema = z.object({
+  code: z.preprocess(trimString, z.string().min(1)),
+});
 
-  @IsString()
-  @MinLength(8)
-  password!: string;
+const forgotPasswordBodySchema = z.object({
+  email: z.preprocess(trimLowercaseString, z.string().email()),
+});
 
-  @IsString()
-  @MinLength(8)
-  confirmPassword!: string;
+const resetPasswordQuerySchema = z.object({
+  email: z.preprocess(trimLowercaseString, z.string().email().optional()),
+  code: z.preprocess(trimString, z.string().min(1).optional()),
+  error: z.preprocess(trimString, z.string().optional()),
+});
 
-  @IsOptional()
-  @IsString()
-  receiveNewsUpdates?: string;
-
-  @IsOptional()
-  @IsString()
-  newsletterSubscribed?: string;
-}
-
-class DashboardQueryDto {
-  @IsOptional()
-  @IsString()
-  preferences?: string;
-}
-
-class DashboardNewsletterBodyDto {
-  @IsOptional()
-  @IsString()
-  newsletterSubscribed?: string;
-}
-
-class VerifyEmailQueryDto {
-  @Transform(trimLowercaseString)
-  @IsOptional()
-  @IsEmail()
-  email?: string;
-
-  @Transform(trimString)
-  @IsOptional()
-  @IsString()
-  @MinLength(1)
-  code?: string;
-
-  @IsOptional()
-  @IsString()
-  error?: string;
-
-  @IsOptional()
-  @IsString()
-  sent?: string;
-}
-
-class VerifyEmailBodyDto {
-  @Transform(trimLowercaseString)
-  @IsEmail()
-  email!: string;
-
-  @Transform(trimString)
-  @IsString()
-  @IsNotEmpty()
-  code!: string;
-}
-
-class ResendVerifyEmailBodyDto {
-  @Transform(trimLowercaseString)
-  @IsEmail()
-  email!: string;
-}
-
-class VerifyLoginPageQueryDto {
-  @IsOptional()
-  @IsString()
-  error?: string;
-
-  @IsOptional()
-  @IsString()
-  resent?: string;
-}
-
-class VerifyLoginBodyDto {
-  @Transform(trimString)
-  @IsString()
-  @IsNotEmpty()
-  code!: string;
-}
-
-class ForgotPasswordBodyDto {
-  @Transform(trimLowercaseString)
-  @IsEmail()
-  email!: string;
-}
-
-class ResetPasswordQueryDto {
-  @Transform(trimLowercaseString)
-  @IsOptional()
-  @IsEmail()
-  email?: string;
-
-  @Transform(trimString)
-  @IsOptional()
-  @IsString()
-  @MinLength(1)
-  code?: string;
-
-  @IsOptional()
-  @IsString()
-  error?: string;
-}
-
-class ResetPasswordBodyDto {
-  @Transform(trimLowercaseString)
-  @IsEmail()
-  email!: string;
-
-  @Transform(trimString)
-  @IsString()
-  @IsNotEmpty()
-  code!: string;
-
-  @IsString()
-  @MinLength(8)
-  password!: string;
-
-  @IsString()
-  @MinLength(8)
-  confirmPassword!: string;
-}
+const resetPasswordBodySchema = z.object({
+  email: z.preprocess(trimLowercaseString, z.string().email()),
+  code: z.preprocess(trimString, z.string().min(1)),
+  password: z.string().min(8),
+  confirmPassword: z.string().min(8),
+});
 
 @Service()
 @Controller()
@@ -271,11 +168,8 @@ export class AccountController {
 
   @AllowAnonymous()
   @Get("/login")
-  async loginPage(
-    @Query() query: LoginPageQueryDto,
-    @Req() req: Request,
-    @Res() res: Response
-  ): Promise<ReturnType<typeof view> | void> {
+  async loginPage(@Req() req: Request, @Res() res: Response): Promise<ReturnType<typeof view> | void> {
+    const query = await validateRequestData(loginPageQuerySchema, req.query);
     const viewer = await this.sessionViewService.getViewer(req, res);
     if (viewer) {
       res.redirect(viewer.accountHref);
@@ -299,7 +193,8 @@ export class AccountController {
 
   @AllowAnonymous()
   @Post("/login")
-  async login(@Body() body: LoginBodyDto, @Req() req: Request, @Res() res: Response): Promise<void> {
+  async login(@Req() req: Request, @Res() res: Response): Promise<void> {
+    const body = await validateRequestData(loginBodySchema, req.body);
     const identifier = normalizeText(body.identifier);
     const password = body.password;
 
@@ -324,11 +219,8 @@ export class AccountController {
 
   @AllowAnonymous()
   @Get("/register")
-  async registerPage(
-    @Query() query: RegisterPageQueryDto,
-    @Req() req: Request,
-    @Res() res: Response
-  ): Promise<ReturnType<typeof view> | void> {
+  async registerPage(@Req() req: Request, @Res() res: Response): Promise<ReturnType<typeof view> | void> {
+    const query = await validateRequestData(registerPageQuerySchema, req.query);
     const viewer = await this.sessionViewService.getViewer(req, res);
     if (viewer) {
       res.redirect(viewer.accountHref);
@@ -346,7 +238,8 @@ export class AccountController {
 
   @AllowAnonymous()
   @Post("/register")
-  async register(@Body() body: RegisterBodyDto, @Req() req: Request, @Res() res: Response): Promise<ReturnType<typeof view> | void> {
+  async register(@Req() req: Request, @Res() res: Response): Promise<ReturnType<typeof view> | void> {
+    const body = await validateRequestData(registerBodySchema, req.body);
     const fullName = normalizeText(body.fullName);
     const username = normalizeText(body.username);
     const email = normalizeText(body.email);
@@ -445,11 +338,8 @@ export class AccountController {
 
   @AllowAnonymous()
   @Get("/verify-email")
-  async verifyEmailPage(
-    @Query() query: VerifyEmailQueryDto,
-    @Req() req: Request,
-    @Res() res: Response
-  ): Promise<ReturnType<typeof view> | void> {
+  async verifyEmailPage(@Req() req: Request, @Res() res: Response): Promise<ReturnType<typeof view> | void> {
+    const query = await validateRequestData(verifyEmailQuerySchema, req.query);
     const viewer = await this.sessionViewService.getViewer(req, res);
     if (viewer) {
       res.redirect(viewer.accountHref);
@@ -477,7 +367,8 @@ export class AccountController {
 
   @AllowAnonymous()
   @Post("/verify-email")
-  async verifyEmail(@Body() body: VerifyEmailBodyDto, @Res() res: Response): Promise<ReturnType<typeof view> | void> {
+  async verifyEmail(@Req() req: Request, @Res() res: Response): Promise<ReturnType<typeof view> | void> {
+    const body = await validateRequestData(verifyEmailBodySchema, req.body);
     const email = normalizeText(body.email);
     const code = normalizeText(body.code);
 
@@ -517,7 +408,8 @@ export class AccountController {
 
   @AllowAnonymous()
   @Post("/verify-email/resend")
-  async resendVerifyEmail(@Body() body: ResendVerifyEmailBodyDto): Promise<ReturnType<typeof view>> {
+  async resendVerifyEmail(@Req() req: Request): Promise<ReturnType<typeof view>> {
+    const body = await validateRequestData(resendVerifyEmailBodySchema, req.body);
     const email = normalizeText(body.email);
     await this.accountAccessService.resendEmailVerification(email);
 
@@ -534,11 +426,8 @@ export class AccountController {
 
   @AllowAnonymous()
   @Get("/login/verify")
-  async verifyLoginPage(
-    @Query() query: VerifyLoginPageQueryDto,
-    @Req() req: Request,
-    @Res() res: Response
-  ): Promise<ReturnType<typeof view> | void> {
+  async verifyLoginPage(@Req() req: Request, @Res() res: Response): Promise<ReturnType<typeof view> | void> {
+    const query = await validateRequestData(verifyLoginPageQuerySchema, req.query);
     const challengeToken = readLoginChallengeToken(req);
     const challenge = challengeToken ? this.tokenService.verifyLoginChallenge(challengeToken) : null;
     if (!challenge) {
@@ -559,7 +448,8 @@ export class AccountController {
 
   @AllowAnonymous()
   @Post("/login/verify")
-  async verifyLogin(@Body() body: VerifyLoginBodyDto, @Req() req: Request, @Res() res: Response): Promise<void> {
+  async verifyLogin(@Req() req: Request, @Res() res: Response): Promise<void> {
+    const body = await validateRequestData(verifyLoginBodySchema, req.body);
     const challengeToken = readLoginChallengeToken(req);
     const challenge = challengeToken ? this.tokenService.verifyLoginChallenge(challengeToken) : null;
     if (!challenge) {
@@ -629,7 +519,8 @@ export class AccountController {
 
   @AllowAnonymous()
   @Post("/forgot-password")
-  async forgotPassword(@Body() body: ForgotPasswordBodyDto): Promise<ReturnType<typeof view>> {
+  async forgotPassword(@Req() req: Request): Promise<ReturnType<typeof view>> {
+    const body = await validateRequestData(forgotPasswordBodySchema, req.body);
     const email = normalizeText(body.email);
     if (!email) {
       return view(
@@ -657,11 +548,8 @@ export class AccountController {
 
   @AllowAnonymous()
   @Get("/reset-password")
-  async resetPasswordPage(
-    @Query() query: ResetPasswordQueryDto,
-    @Req() req: Request,
-    @Res() res: Response
-  ): Promise<ReturnType<typeof view> | void> {
+  async resetPasswordPage(@Req() req: Request, @Res() res: Response): Promise<ReturnType<typeof view> | void> {
+    const query = await validateRequestData(resetPasswordQuerySchema, req.query);
     const viewer = await this.sessionViewService.getViewer(req, res);
     if (viewer) {
       res.redirect(viewer.accountHref);
@@ -680,7 +568,8 @@ export class AccountController {
 
   @AllowAnonymous()
   @Post("/reset-password")
-  async resetPassword(@Body() body: ResetPasswordBodyDto, @Res() res: Response): Promise<ReturnType<typeof view> | void> {
+  async resetPassword(@Req() req: Request, @Res() res: Response): Promise<ReturnType<typeof view> | void> {
+    const body = await validateRequestData(resetPasswordBodySchema, req.body);
     const email = normalizeText(body.email);
     const code = normalizeText(body.code);
     const password = body.password;
@@ -760,11 +649,8 @@ export class AccountController {
 
   @Authenticated("app-session")
   @Get("/dashboard")
-  async dashboard(
-    @Query() query: DashboardQueryDto,
-    @Req() req: Request,
-    @Res() res: Response
-  ): Promise<ReturnType<typeof view> | void> {
+  async dashboard(@Req() req: Request, @Res() res: Response): Promise<ReturnType<typeof view> | void> {
+    const query = await validateRequestData(dashboardQuerySchema, req.query);
     const viewer = await this.sessionViewService.getViewer(req, res);
     const authenticatedRequest = req as AuthenticatedRequest;
     const userId = Number(authenticatedRequest.user?.id || authenticatedRequest.auth?.user?.id || 0);
@@ -796,11 +682,8 @@ export class AccountController {
 
   @Authenticated("app-session")
   @Post("/dashboard/newsletter")
-  async updateDashboardNewsletter(
-    @Body() body: DashboardNewsletterBodyDto,
-    @Req() req: Request,
-    @Res() res: Response
-  ): Promise<void> {
+  async updateDashboardNewsletter(@Req() req: Request, @Res() res: Response): Promise<void> {
+    const body = await validateRequestData(dashboardNewsletterBodySchema, req.body);
     const authenticatedRequest = req as AuthenticatedRequest;
     const userId = Number(authenticatedRequest.user?.id || authenticatedRequest.auth?.user?.id || 0);
 

@@ -60,17 +60,17 @@ const warnIfMailConfigurationLooksWrong = (): void => {
 
   if (transportProvider === "smtp" && (!smtp.username || !smtp.password)) {
     console.warn(
-      "[auth-mailer] MAIL_TRANSPORT_PROVIDER is smtp but SMTP credentials are incomplete. The transport will fall back to JSON previews.",
+      "[auth-mailer] MAIL_TRANSPORT_PROVIDER is smtp without SMTP credentials. This is expected for preproduction MailHog-style sandboxes but should be avoided in production relays.",
     );
   }
 
-  if (transportProvider === "smtp" && defaultFrom !== smtp.username) {
+  if (transportProvider === "smtp" && smtp.username && defaultFrom !== smtp.username) {
     console.warn(
       `[auth-mailer] MAIL_FROM is ${defaultFrom} while SMTP authenticates as ${smtp.username}. Some providers reject sender addresses that do not match the authenticated mailbox or an allowed alias.`,
     );
   }
 
-  if (notificationsTransportProvider === "smtp" && notificationsFrom !== smtp.username) {
+  if (notificationsTransportProvider === "smtp" && smtp.username && notificationsFrom !== smtp.username) {
     console.warn(
       `[auth-mailer] MAIL_NOTIFICATIONS_FROM is ${notificationsFrom} while SMTP authenticates as ${smtp.username}. Some providers reject sender addresses that do not match the authenticated mailbox or an allowed alias.`,
     );

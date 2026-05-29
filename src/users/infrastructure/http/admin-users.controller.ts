@@ -1,13 +1,13 @@
 import { AutoWired, Service } from "@xtaskjs/core";
 import type { Request, Response } from "express";
-import { Body, Controller, Get, Post, Query, Req, Res } from "@xtaskjs/common";
+import { Controller, Get, Post, Req, Res } from "@xtaskjs/common";
 import { CommandBus, InjectCommandBus, InjectQueryBus, QueryBus } from "@xtaskjs/cqrs";
 import { view } from "@xtaskjs/express-http";
 import { Authenticated, Roles } from "@xtaskjs/security";
-import { Transform } from "class-transformer";
-import { IsIn, IsInt, IsOptional, IsString, Min } from "class-validator";
+import { z } from "zod";
 import { SessionViewService } from "../../../auth/application/session-view.service";
 import { normalizeText } from "../../../shared/infrastructure/http/view-helpers";
+import { validateRequestData } from "../../../shared/infrastructure/http/request-validation";
 import {
   type AdminUserDetailResult,
   GetAdminUserDetailQuery,
@@ -26,53 +26,29 @@ type AuthenticatedRequest = Request & {
 const PAGE_SIZE = 10;
 const LOGIN_HISTORY_PAGE_SIZE = 20;
 
-const trimString = ({ value }: { value: unknown }): unknown =>
+const trimString = (value: unknown): unknown =>
   typeof value === "string" ? value.trim() : value;
 
-class AdminUsersListQueryDto {
-  @Transform(trimString)
-  @IsOptional()
-  @IsString()
-  q?: string;
+const adminUsersListQuerySchema = z.object({
+  q: z.preprocess(trimString, z.string().optional()),
+  page: z.coerce.number().int().min(1).optional(),
+  message: z.preprocess(trimString, z.string().optional()),
+  error: z.preprocess(trimString, z.string().optional()),
+});
 
-  @IsOptional()
-  @IsInt()
-  @Min(1)
-  page?: number;
+const adminUserDetailQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).optional(),
+});
 
-  @IsOptional()
-  @IsString()
-  message?: string;
+const updateUserRoleBodySchema = z.object({
+  id: z.coerce.number().int().min(1),
+  role: z.enum(["admin", "user"]),
+});
 
-  @IsOptional()
-  @IsString()
-  error?: string;
-}
-
-class AdminUserDetailQueryDto {
-  @IsOptional()
-  @IsInt()
-  @Min(1)
-  page?: number;
-}
-
-class UpdateUserRoleBodyDto {
-  @IsInt()
-  @Min(1)
-  id!: number;
-
-  @IsIn(["admin", "user"])
-  role!: "admin" | "user";
-}
-
-class UpdateUserStatusBodyDto {
-  @IsInt()
-  @Min(1)
-  id!: number;
-
-  @IsIn(["active", "inactive"])
-  status!: "active" | "inactive";
-}
+const updateUserStatusBodySchema = z.object({
+  id: z.coerce.number().int().min(1),
+  status: z.enum(["active", "inactive"]),
+});
 
 const buildPages = (total: number, pageSize: number, currentPage: number) => {
   const totalPages = Math.ceil(total / pageSize);
@@ -128,11 +104,8 @@ export class AdminUsersController {
   private readonly sessionViewService!: SessionViewService;
 
   @Get("/:id")
-  async detail(
-    @Query() query: AdminUserDetailQueryDto,
-    @Req() req: Request,
-    @Res() res: Response
-  ): Promise<ReturnType<typeof view> | void> {
+  async detail(@Req() req: Request, @Res() res: Response): Promise<ReturnType<typeof view> | void> {
+    const query = await validateRequestData(adminUserDetailQuerySchema, req.query);
     const userId = Number(req.params.id || 0);
     if (!Number.isFinite(userId) || userId < 1) {
       res.redirect("/admin/users?error=Invalid%20user");
@@ -187,11 +160,8 @@ export class AdminUsersController {
   }
 
   @Get("/")
-  async list(
-    @Query() query: AdminUsersListQueryDto,
-    @Req() req: Request,
-    @Res() res: Response
-  ): Promise<ReturnType<typeof view>> {
+  async list(@Req() req: Request, @Res() res: Response): Promise<ReturnType<typeof view>> {
+    const query = await validateRequestData(adminUsersListQuerySchema, req.query);
     const search = normalizeText(query.q);
     const page = Math.max(1, query.page ?? 1);
     const result = await this.queryBus.execute<ListAdminUsersResult>(
@@ -212,11 +182,8 @@ export class AdminUsersController {
   }
 
   @Post("/role")
-  async updateRole(
-    @Body() body: UpdateUserRoleBodyDto,
-    @Req() req: Request,
-    @Res() res: Response
-  ): Promise<void> {
+  async updateRole(@Req() req: Request, @Res() res: Response): Promise<void> {
+    const body = await validateRequestData(updateUserRoleBodySchema, req.body);
     const authenticatedRequest = req as AuthenticatedRequest;
     const actorId = Number(authenticatedRequest.user?.id || 0);
 
@@ -230,11 +197,8 @@ export class AdminUsersController {
   }
 
   @Post("/status")
-  async updateStatus(
-    @Body() body: UpdateUserStatusBodyDto,
-    @Req() req: Request,
-    @Res() res: Response
-  ): Promise<void> {
+  async updateStatus(@Req() req: Request, @Res() res: Response): Promise<void> {
+    const body = await validateRequestData(updateUserStatusBodySchema, req.body);
     const authenticatedRequest = req as AuthenticatedRequest;
     const actorId = Number(authenticatedRequest.user?.id || 0);
     const isActive = body.status === "active";

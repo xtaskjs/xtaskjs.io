@@ -1,8 +1,8 @@
-# Guía de Actualización - xtaskjs v1.0.28
+# Guía de Actualización - xtaskjs v1.0.44
 
 ## 📝 Resumen de Cambios
 
-Se han actualizado todas las librerías de `@xtaskjs` a sus últimas versiones disponibles (mayo 2026), incluyendo mejoras significativas de rendimiento y nuevas características.
+Se han actualizado todas las librerías de `@xtaskjs` a sus últimas versiones disponibles (mayo 2026) y la infraestructura del proyecto se ha modernizado con `pnpm` y `turbo`, manteniendo la aplicación en la raíz para evitar una migración estructural innecesaria.
 ## 📚 Documentación Disponible
 
 - **[ARQUITECTURA_MEJORAS.md](docs/ARQUITECTURA_MEJORAS.md)** - Explicación detallada de mejoras arquitectónicas
@@ -26,24 +26,31 @@ Se han actualizado todas las librerías de `@xtaskjs` a sus últimas versiones d
 ## 🚀 Nuevas Versiones
 
 ### Core Packages
-- `@xtaskjs/core`: **1.0.28** (anteriormente 1.0.18)
-- `@xtaskjs/common`: **1.0.28** (anteriormente 1.0.18)
-- `@xtaskjs/express-http`: **1.0.25** (anteriormente 1.0.14)
-- `@xtaskjs/typeorm`: **1.0.16** (anteriormente 1.0.5)
+- `@xtaskjs/core`: **1.0.44**
+- `@xtaskjs/common`: **1.0.44**
+- `@xtaskjs/express-http`: **1.0.41**
+- `@xtaskjs/typeorm`: **1.0.32**
 
 ### Features & Integrations
-- `@xtaskjs/cache`: **1.0.7** (anteriormente 1.0.0)
-- `@xtaskjs/cqrs`: **1.1.5** (anteriormente 1.1.1)
-- `@xtaskjs/event-source`: **1.0.4** (anteriormente 1.0.1)
-- `@xtaskjs/internationalization`: **1.0.9** (anteriormente 1.0.0)
-- `@xtaskjs/mailer`: **1.0.12** (anteriormente 1.0.1)
-- `@xtaskjs/security`: **1.0.13** (anteriormente 1.0.2)
-- `@xtaskjs/value-objects`: **1.0.6** (anteriormente 1.0.1)
+- `@xtaskjs/cache`: **1.0.23**
+- `@xtaskjs/cqrs`: **1.1.21**
+- `@xtaskjs/event-source`: **1.0.20**
+- `@xtaskjs/internationalization`: **1.0.25**
+- `@xtaskjs/mailer`: **1.0.28**
+- `@xtaskjs/security`: **1.0.29**
+- `@xtaskjs/value-objects`: **1.0.22**
 
 ### Nuevos Packages
-- `@xtaskjs/scheduler`: **1.0.9** - Programación de tareas con retries y grupos nombrados
-- `@xtaskjs/socket-io`: **1.0.3** - Comunicación en tiempo real con gateways decorados
-- `@xtaskjs/throttler`: **1.0.2** - Rate limiting e integración de throttling
+- `@xtaskjs/scheduler`: **1.0.25** - Programación de tareas con retries y grupos nombrados
+- `@xtaskjs/socket-io`: **1.0.19** - Comunicación en tiempo real con gateways decorados
+- `@xtaskjs/throttler`: **1.0.18** - Rate limiting e integración de throttling
+
+## 🧱 Infraestructura Actualizada
+
+- `pnpm@11.4.0` como gestor oficial (`packageManager` en `package.json`)
+- `turbo@2.9.16` para orquestar `build`, `typecheck`, `test` y variantes
+- `pnpm-lock.yaml` como lockfile canónico
+- `turbo.json` y `pnpm-workspace.yaml` para estandarizar la ejecución local y en CI/CD
 
 ## ⚡ Mejoras de Rendimiento
 
@@ -51,8 +58,9 @@ Se han actualizado todas las librerías de `@xtaskjs` a sus últimas versiones d
 La construcción ahora incluye manifest caching para optimizar significativamente el tiempo de startup.
 
 ```bash
-npm run build          # Construye con manifest cache
-npm run build:production  # Build optimizado para producción
+pnpm build             # Construye con manifest cache
+pnpm build:production  # Build optimizado para producción
+pnpm turbo:build       # Ejecuta build mediante turbo
 ```
 
 **Beneficios:**
@@ -77,8 +85,8 @@ XTASK_IMPORT_CONCURRENCY=16
 ```
 
 Se incluyen en los scripts:
-- `npm run dev` usa `XTASK_IMPORT_CONCURRENCY=10`
-- `npm start` usa `XTASK_IMPORT_CONCURRENCY=16`
+- `pnpm dev` usa `XTASK_IMPORT_CONCURRENCY=10`
+- `pnpm start` usa `XTASK_IMPORT_CONCURRENCY=16`
 
 ### 3. **Parallel Scan con Worker Threads**
 El escaneo de archivos ahora utiliza worker threads para mejor rendimiento.
@@ -108,7 +116,8 @@ Variables nuevas/importantes:
 Para instalar todas las nuevas versiones:
 
 ```bash
-npm install
+corepack enable
+pnpm install
 ```
 
 ## ✅ Verificación de la Actualización
@@ -117,16 +126,20 @@ Ejecuta estos comandos para verificar que todo funciona correctamente:
 
 ```bash
 # Verificar tipos
-npm run typecheck
+pnpm typecheck
 
 # Construir con manifest
-npm run build
+pnpm build
 
 # Ejecutar tests
-npm run test
+pnpm test
+
+# Ejecutar mediante turbo
+pnpm turbo:typecheck
+pnpm turbo:test
 
 # Iniciar en desarrollo
-npm run dev
+pnpm dev
 ```
 
 ## 🔍 Nuevas Características Disponibles
@@ -219,7 +232,7 @@ class ReportsScheduler {
 ## 🆘 Troubleshooting
 
 ### Problem: "prebuild:manifest not found"
-**Solución**: Asegúrate de haber ejecutado `npm install` correctamente.
+**Solución**: Asegúrate de haber ejecutado `pnpm install` correctamente.
 
 ### Problem: Startup muy lento
 **Solución**: Aumenta `XTASK_IMPORT_CONCURRENCY` a 16 o 24 (depende del tamaño de la app).
@@ -229,11 +242,11 @@ class ReportsScheduler {
 
 ## 🎉 Próximos Pasos
 
-1. ✅ Actualizar dependencias: `npm install`
+1. ✅ Actualizar dependencias: `pnpm install`
 2. ✅ Configurar `.env`: `cp .env.example .env && nano .env`
-3. ✅ Build con manifest: `npm run build`
-4. ✅ Ejecutar tests: `npm run test`
-5. ✅ Iniciar aplicación: `npm start`
+3. ✅ Build con manifest: `pnpm build`
+4. ✅ Ejecutar tests: `pnpm test`
+5. ✅ Iniciar aplicación: `pnpm start`
 
 ## 📖 Documentación Detallada
 

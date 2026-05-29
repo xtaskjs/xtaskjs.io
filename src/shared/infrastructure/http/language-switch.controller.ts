@@ -1,19 +1,19 @@
 import { AutoWired, Service } from "@xtaskjs/core";
-import { Controller, Get, Query, Req, Res } from "@xtaskjs/common";
+import { Controller, Get, Req, Res } from "@xtaskjs/common";
 import { AllowAnonymous } from "@xtaskjs/security";
 import type { Request, Response } from "express";
-import { IsOptional, IsString } from "class-validator";
-import { Transform } from "class-transformer";
+import { z } from "zod";
 import {
   DEFAULT_SITE_LOCALE,
   SITE_LOCALE_COOKIE_NAME,
   resolveSupportedSiteLocale,
 } from "../internationalization/site-locales";
 import { LANGUAGE_SWITCH_PATH, normalizeLocaleRedirectTarget } from "./language-switch";
+import { validateRequestData } from "./request-validation";
 
 const YEAR_IN_MS = 1000 * 60 * 60 * 24 * 365;
 
-const trimString = ({ value }: { value: unknown }): unknown =>
+const trimString = (value: unknown): unknown =>
   typeof value === "string" ? value.trim() : value;
 
 const shouldUseSecureCookies = (req: Request): boolean => {
@@ -29,26 +29,20 @@ const shouldUseSecureCookies = (req: Request): boolean => {
   return typeof forwardedProto === "string" && forwardedProto.split(",").some((value) => value.trim() === "https");
 };
 
-class LanguageSwitchQueryDto {
-  @Transform(trimString)
-  @IsOptional()
-  @IsString()
-  locale?: string;
-
-  @Transform(trimString)
-  @IsOptional()
-  @IsString()
-  redirect?: string;
-}
+const languageSwitchQuerySchema = z.object({
+  locale: z.preprocess(trimString, z.string().optional()),
+  redirect: z.preprocess(trimString, z.string().optional()),
+});
 
 @Service()
 @Controller()
 export class LanguageSwitchController {
   @AllowAnonymous()
   @Get(LANGUAGE_SWITCH_PATH)
-  switchLanguage(@Query() query: LanguageSwitchQueryDto, @Req() req: Request, @Res() res: Response): void {
-    const locale = resolveSupportedSiteLocale(query.locale) || DEFAULT_SITE_LOCALE;
-    const redirectTarget = normalizeLocaleRedirectTarget(query.redirect);
+  async switchLanguage(@Req() req: Request, @Res() res: Response): Promise<void> {
+    const query = await validateRequestData(languageSwitchQuerySchema, req.query);
+    const locale = resolveSupportedSiteLocale(typeof query.locale === "string" ? query.locale : undefined) || DEFAULT_SITE_LOCALE;
+    const redirectTarget = normalizeLocaleRedirectTarget(typeof query.redirect === "string" ? query.redirect : undefined);
 
     res.cookie(SITE_LOCALE_COOKIE_NAME, locale, {
       httpOnly: true,

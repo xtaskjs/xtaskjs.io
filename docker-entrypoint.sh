@@ -2,4 +2,4 @@
 set -e
 
 echo "→ Starting application..."
-exec npm start
+exec pnpm start

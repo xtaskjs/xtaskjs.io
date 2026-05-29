@@ -88,6 +88,42 @@ const waitForHttpReady = async (url: string, timeoutMs = 180000): Promise<void> 
   throw new Error(`Timed out waiting for HTTP readiness at ${url}`);
 };
 
+const waitForHttpTextMatch = async (
+  url: string,
+  pattern: RegExp,
+  timeoutMs = 30000,
+): Promise<Response> => {
+  const start = Date.now();
+  let lastStatus: number | undefined;
+  let lastBody = "";
+
+  while (Date.now() - start < timeoutMs) {
+    try {
+      const response = await fetch(url);
+      const body = await response.text();
+
+      if (response.ok && pattern.test(body)) {
+        return new Response(body, {
+          status: response.status,
+          statusText: response.statusText,
+          headers: response.headers,
+        });
+      }
+
+      lastStatus = response.status;
+      lastBody = body.slice(0, 1000);
+    } catch {
+      // keep polling until timeout
+    }
+
+    await wait(500);
+  }
+
+  const responseDetails =
+    lastStatus === undefined ? "" : ` (last status: ${lastStatus}, body: ${JSON.stringify(lastBody)})`;
+  throw new Error(`Timed out waiting for HTTP response at ${url} to match ${pattern}${responseDetails}`);
+};
+
 const isDockerAvailable = async (): Promise<boolean> => {
   try {
     await execFileAsync("docker", ["info"]);
@@ -157,6 +193,52 @@ const waitForDockerHealth = async (containerName: string, timeoutMs = 45000): Pr
   }
 
   throw new Error(`Timed out waiting for Docker health on container ${containerName}`);
+};
+
+const waitForPostgresConnection = async (
+  postgres: Pick<EphemeralPostgres, "host" | "port" | "database" | "username" | "password">,
+  timeoutMs = 30000,
+): Promise<void> => {
+  const start = Date.now();
+
+  while (Date.now() - start < timeoutMs) {
+    const client = new Client({
+      host: postgres.host,
+      port: postgres.port,
+      database: postgres.database,
+      user: postgres.username,
+      password: postgres.password,
+      connectionTimeoutMillis: 2000,
+    });
+
+    try {
+      await client.connect();
+      await client.query("select 1");
+      return;
+    } catch {
+      await wait(500);
+    } finally {
+      await client.end().catch(() => undefined);
+    }
+  }
+
+  throw new Error(
+    `Timed out connecting to Postgres at ${postgres.host}:${postgres.port}/${postgres.database}`,
+  );
+};
+
+const waitForRedisConnection = async (host: string, port: number, timeoutMs = 30000): Promise<void> => {
+  const start = Date.now();
+
+  while (Date.now() - start < timeoutMs) {
+    if (await isTcpPortOpen(host, port)) {
+      return;
+    }
+
+    await wait(250);
+  }
+
+  throw new Error(`Timed out connecting to Redis at ${host}:${port}`);
 };
 
 const startEphemeralPostgres = async (): Promise<EphemeralPostgres> => {
@@ -233,6 +315,8 @@ const startEphemeralRedis = async (): Promise<EphemeralRedis> => {
 
   try {
     const port = await waitForDockerPort(containerName, "6379/tcp");
+    await waitForRedisConnection("127.0.0.1", port);
+
     return {
       host: "127.0.0.1",
       port,
@@ -375,6 +459,7 @@ test("public news page reads from the configured read database instead of the wr
     await postgres.cleanup().catch(() => undefined);
   });
 
+  await waitForPostgresConnection(postgres);
   await createDatabase(postgres, readDatabase);
   await createReadNewsSchema(postgres, readDatabase);
 
@@ -414,7 +499,7 @@ test("public news page reads from the configured read database instead of the wr
   });
 
   await Promise.race([
-    waitForHttpReady(`${publicUrl}/news`),
+    waitForHttpReady(`${publicUrl}/health`),
     waitForChildExit(child).then(({ code, signal }) => {
       throw new Error(`Application exited before readiness (code: ${code}, signal: ${signal})\n${output}`);
     }),
@@ -429,9 +514,8 @@ test("public news page reads from the configured read database instead of the wr
   assert.doesNotMatch(staleHtml, /Write Only News/);
 
   await insertNews(postgres, readDatabase, "Replica News");
-  await wait(1500);
 
-  const replicatedResponse = await fetch(`${publicUrl}/news`);
+  const replicatedResponse = await waitForHttpTextMatch(`${publicUrl}/news`, /Replica News/);
   const replicatedHtml = await replicatedResponse.text();
 
   assert.equal(replicatedResponse.status, 200);

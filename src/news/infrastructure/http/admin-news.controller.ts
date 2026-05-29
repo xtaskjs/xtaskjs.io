@@ -1,11 +1,10 @@
 import { AutoWired, Service } from "@xtaskjs/core";
 import type { Request, Response } from "express";
-import { Body, Controller, Get, Post, Query, Req, Res } from "@xtaskjs/common";
+import { Controller, Get, Post, Req, Res } from "@xtaskjs/common";
 import { CommandBus, InjectCommandBus, InjectQueryBus, QueryBus } from "@xtaskjs/cqrs";
 import { view } from "@xtaskjs/express-http";
 import { Authenticated, Roles } from "@xtaskjs/security";
-import { Transform } from "class-transformer";
-import { IsBoolean, IsInt, IsNotEmpty, IsOptional, IsString, Min } from "class-validator";
+import { z } from "zod";
 import {
   CreateNewsItemCommand,
   DeleteNewsItemCommand,
@@ -17,71 +16,52 @@ import {
 import { normalizeText, toNewsViewModel } from "../../../shared/infrastructure/http/view-helpers";
 import { UploadsService } from "../../../shared/infrastructure/http/uploads.service";
 import { SessionViewService } from "../../../auth/application/session-view.service";
+import { validateRequestData } from "../../../shared/infrastructure/http/request-validation";
 import type { News } from "../../domain/news";
 
 const PAGE_SIZE = 8;
 
-const trimString = ({ value }: { value: unknown }): unknown =>
+const trimString = (value: unknown): unknown =>
   typeof value === "string" ? value.trim() : value;
 
-class AdminNewsListQueryDto {
-  @Transform(trimString)
-  @IsOptional()
-  @IsString()
-  q?: string;
+const parseBooleanValue = (value: unknown): boolean => {
+  if (typeof value === "boolean") {
+    return value;
+  }
 
-  @IsOptional()
-  @IsInt()
-  @Min(1)
-  page?: number;
+  if (typeof value !== "string") {
+    return false;
+  }
 
-  @IsOptional()
-  @IsString()
-  message?: string;
-}
+  const normalized = value.trim().toLowerCase();
+  return normalized === "true" || normalized === "1" || normalized === "yes" || normalized === "on";
+};
 
-class AdminNewsEditQueryDto {
-  @IsInt()
-  @Min(1)
-  id!: number;
-}
+const adminNewsListQuerySchema = z.object({
+  q: z.preprocess(trimString, z.string().optional()),
+  page: z.coerce.number().int().min(1).optional(),
+  message: z.preprocess(trimString, z.string().optional()),
+});
 
-class CreateNewsBodyDto {
-  @Transform(trimString)
-  @IsString()
-  @IsNotEmpty()
-  title!: string;
+const adminNewsEditQuerySchema = z.object({
+  id: z.coerce.number().int().min(1),
+});
 
-  @Transform(trimString)
-  @IsString()
-  @IsNotEmpty()
-  summary!: string;
+const createNewsBodySchema = z.object({
+  title: z.preprocess(trimString, z.string().min(1)),
+  summary: z.preprocess(trimString, z.string().min(1)),
+  content: z.preprocess(trimString, z.string().min(1)),
+  isPublished: z.preprocess((value) => parseBooleanValue(value), z.boolean()).optional(),
+});
 
-  @Transform(trimString)
-  @IsString()
-  @IsNotEmpty()
-  content!: string;
+const updateNewsBodySchema = createNewsBodySchema.extend({
+  id: z.coerce.number().int().min(1),
+  removeImage: z.preprocess((value) => parseBooleanValue(value), z.boolean()).optional(),
+});
 
-  @IsOptional()
-  @IsBoolean()
-  isPublished?: boolean;
-}
-
-class UpdateNewsBodyDto extends CreateNewsBodyDto {
-  @IsInt()
-  @Min(1)
-  id!: number;
-
-  @IsOptional()
-  @IsBoolean()
-  removeImage?: boolean;
-}
-
-class DeleteNewsBodyDto {
-  @IsInt()
-  @Min(1)
-  id!: number;
-}
+const deleteNewsBodySchema = z.object({
+  id: z.coerce.number().int().min(1),
+});
 
 const buildPages = (total: number, pageSize: number, currentPage: number) => {
   const totalPages = Math.ceil(total / pageSize);
@@ -116,11 +96,8 @@ export class AdminNewsController {
   private readonly sessionViewService!: SessionViewService;
 
   @Get("/")
-  async list(
-    @Query() query: AdminNewsListQueryDto,
-    @Req() req: Request,
-    @Res() res: Response
-  ): Promise<ReturnType<typeof view>> {
+  async list(@Req() req: Request, @Res() res: Response): Promise<ReturnType<typeof view>> {
+    const query = await validateRequestData(adminNewsListQuerySchema, req.query);
     const search = normalizeText(query.q);
     const page = Math.max(1, query.page ?? 1);
 
@@ -152,15 +129,12 @@ export class AdminNewsController {
   }
 
   @Post("/")
-  async create(
-    @Body() body: CreateNewsBodyDto,
-    @Req() req: Request,
-    @Res() res: Response
-  ): Promise<ReturnType<typeof view> | void> {
+  async create(@Req() req: Request, @Res() res: Response): Promise<ReturnType<typeof view> | void> {
+    const body = await validateRequestData(createNewsBodySchema, req.body);
     const title = normalizeText(body.title);
     const summary = normalizeText(body.summary);
     const content = normalizeText(body.content);
-    const isPublished = body.isPublished ?? false;
+    const isPublished = parseBooleanValue(body.isPublished);
 
     if (!title || !summary || !content) {
       return view(
@@ -184,11 +158,8 @@ export class AdminNewsController {
   }
 
   @Get("/edit")
-  async editPage(
-    @Query() query: AdminNewsEditQueryDto,
-    @Req() req: Request,
-    @Res() res: Response
-  ): Promise<ReturnType<typeof view> | void> {
+  async editPage(@Req() req: Request, @Res() res: Response): Promise<ReturnType<typeof view> | void> {
+    const query = await validateRequestData(adminNewsEditQuerySchema, req.query);
     const news = await this.queryBus.execute<News | null>(new GetNewsByIdQuery(query.id));
 
     if (!news) {
@@ -205,16 +176,13 @@ export class AdminNewsController {
   }
 
   @Post("/update")
-  async update(
-    @Body() body: UpdateNewsBodyDto,
-    @Req() req: Request,
-    @Res() res: Response
-  ): Promise<ReturnType<typeof view> | void> {
+  async update(@Req() req: Request, @Res() res: Response): Promise<ReturnType<typeof view> | void> {
+    const body = await validateRequestData(updateNewsBodySchema, req.body);
     const { id } = body;
     const title = normalizeText(body.title);
     const summary = normalizeText(body.summary);
     const content = normalizeText(body.content);
-    const isPublished = body.isPublished ?? false;
+    const isPublished = parseBooleanValue(body.isPublished);
 
     if (!title || !summary || !content) {
       return view(
@@ -231,7 +199,7 @@ export class AdminNewsController {
     }
 
     const imageUrl = this.uploadsService.toOptionalImageUrl(req.file);
-    const removeImage = body.removeImage ?? false;
+    const removeImage = parseBooleanValue(body.removeImage);
 
     await this.commandBus.execute(
       new UpdateNewsItemCommand(id, title, summary, content, imageUrl, removeImage, isPublished)
@@ -240,7 +208,8 @@ export class AdminNewsController {
   }
 
   @Post("/delete")
-  async delete(@Body() body: DeleteNewsBodyDto, @Res() res: Response): Promise<void> {
+  async delete(@Req() req: Request, @Res() res: Response): Promise<void> {
+    const body = await validateRequestData(deleteNewsBodySchema, req.body);
     await this.commandBus.execute(new DeleteNewsItemCommand(body.id));
     res.redirect("/admin/news?message=deleted");
   }

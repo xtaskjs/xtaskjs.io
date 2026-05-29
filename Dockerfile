@@ -1,10 +1,11 @@
-FROM node:current-alpine AS base
+FROM node:22-alpine AS base
 
 WORKDIR /app
 
-COPY package*.json ./
-RUN  npm install -g npm@11.11.1
-RUN npm i
+RUN npm install -g pnpm@11.4.0
+
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json ./
+RUN pnpm install --frozen-lockfile
 
 COPY . .
 

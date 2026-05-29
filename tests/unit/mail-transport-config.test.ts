@@ -52,11 +52,28 @@ test("resolveMailTransportProvider falls back to json for incomplete explicit pr
   const provider = resolveMailTransportProvider(
     "smtp",
     createAccounts({
-      smtp: { username: "smtp-user", secure: false },
+      smtp: { secure: false, host: undefined, port: undefined },
     }),
   );
 
   assert.equal(provider, "json");
+});
+
+test("resolveMailTransportProvider accepts explicit smtp without credentials when endpoint is configured", () => {
+  const provider = resolveMailTransportProvider(
+    "smtp",
+    createAccounts({
+      smtp: {
+        username: undefined,
+        password: undefined,
+        host: "mailhog",
+        port: 1025,
+        secure: false,
+      },
+    }),
+  );
+
+  assert.equal(provider, "smtp");
 });
 
 test("createMailTransport returns smtp transport options", () => {
@@ -104,5 +121,26 @@ test("createMailTransport returns mailtrap helper options", () => {
       user: "mailtrap-user",
       pass: "mailtrap-pass",
     },
+  });
+});
+
+test("createMailTransport returns smtp transport without auth for preproduction sandbox hosts", () => {
+  const transport = createMailTransport({
+    provider: "smtp",
+    ...createAccounts({
+      smtp: {
+        username: undefined,
+        password: undefined,
+        host: "mailhog",
+        port: 1025,
+        secure: false,
+      },
+    }),
+  });
+
+  assert.deepEqual(transport, {
+    host: "mailhog",
+    port: 1025,
+    secure: false,
   });
 });

@@ -132,19 +132,40 @@ const smtpAccount: MailTransportAccountConfig = {
   secure: parseBooleanEnv(process.env.MAIL_SMTP_SECURE),
 };
 
+const usePreprodMailSandbox =
+  process.env.NODE_ENV !== "production" && parseBooleanEnv(process.env.MAIL_PREPROD_SANDBOX, false);
+
+const smtpAccountForRuntime: MailTransportAccountConfig = usePreprodMailSandbox
+  ? {
+      username: undefined,
+      password: undefined,
+      host: trimEnvWithFallback(process.env.MAIL_PREPROD_SMTP_HOST, "mailhog"),
+      port: parseOptionalNumberEnv(process.env.MAIL_PREPROD_SMTP_PORT) || 1025,
+      secure: parseBooleanEnv(process.env.MAIL_PREPROD_SMTP_SECURE, false),
+    }
+  : smtpAccount;
+
+const requestedMailTransportProvider = usePreprodMailSandbox
+  ? "smtp"
+  : trimOptionalEnv(process.env.MAIL_TRANSPORT_PROVIDER);
+
+const requestedNotificationsTransportProvider = usePreprodMailSandbox
+  ? "smtp"
+  : trimOptionalEnv(process.env.MAIL_NOTIFICATIONS_TRANSPORT_PROVIDER) || "json";
+
 const mailTransportProvider = resolveMailTransportProvider(
-  trimOptionalEnv(process.env.MAIL_TRANSPORT_PROVIDER),
+  requestedMailTransportProvider,
   {
     mailtrap: mailtrapAccount,
-    smtp: smtpAccount,
+    smtp: smtpAccountForRuntime,
   },
 );
 
 const notificationsMailTransportProvider = resolveMailTransportProvider(
-  trimOptionalEnv(process.env.MAIL_NOTIFICATIONS_TRANSPORT_PROVIDER) || "json",
+  requestedNotificationsTransportProvider,
   {
     mailtrap: mailtrapAccount,
-    smtp: smtpAccount,
+    smtp: smtpAccountForRuntime,
   },
 );
 
@@ -199,7 +220,7 @@ export const AppConfig: AppConfiguration = {
     transportProvider: mailTransportProvider,
     notificationsTransportProvider: notificationsMailTransportProvider,
     mailtrap: mailtrapAccount,
-    smtp: smtpAccount,
+    smtp: smtpAccountForRuntime,
   },
   database: {
     write: {

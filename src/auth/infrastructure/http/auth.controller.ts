@@ -1,9 +1,8 @@
 import { AutoWired, Service } from "@xtaskjs/core";
 import type { Request, Response } from "express";
-import { Body, Controller, Get, Post, Query, Req, Res } from "@xtaskjs/common";
+import { Controller, Get, Post, Req, Res } from "@xtaskjs/common";
 import { view } from "@xtaskjs/express-http";
-import { Transform } from "class-transformer";
-import { IsNotEmpty, IsOptional, IsString } from "class-validator";
+import { z } from "zod";
 import {
   AllowAnonymous,
 } from "@xtaskjs/security";
@@ -12,6 +11,7 @@ import { SessionTokenService } from "../../application/admin-session-token.servi
 import { LOGIN_CHALLENGE_COOKIE_NAME, LOGIN_CHALLENGE_MAX_AGE_MS, SESSION_COOKIE_NAME, SESSION_MAX_AGE_MS } from "../../domain/session";
 import { normalizeText } from "../../../shared/infrastructure/http/view-helpers";
 import { SessionViewService } from "../../application/session-view.service";
+import { validateRequestData } from "../../../shared/infrastructure/http/request-validation";
 
 const baseCookieOptions = {
   httpOnly: true,
@@ -37,29 +37,18 @@ const buildCookieOptions = (req: Request) => ({
   secure: shouldUseSecureCookies(req),
 });
 
-const trimString = ({ value }: { value: unknown }): unknown =>
+const trimString = (value: unknown): unknown =>
   typeof value === "string" ? value.trim() : value;
 
-class AdminLoginPageQueryDto {
-  @IsOptional()
-  @IsString()
-  error?: string;
+const adminLoginPageQuerySchema = z.object({
+  error: z.preprocess(trimString, z.string().optional()),
+  expired: z.preprocess(trimString, z.string().optional()),
+});
 
-  @IsOptional()
-  @IsString()
-  expired?: string;
-}
-
-class AdminLoginBodyDto {
-  @Transform(trimString)
-  @IsString()
-  @IsNotEmpty()
-  username!: string;
-
-  @IsString()
-  @IsNotEmpty()
-  password!: string;
-}
+const adminLoginBodySchema = z.object({
+  username: z.preprocess(trimString, z.string().min(1)),
+  password: z.string().min(1),
+});
 
 @Service()
 @Controller("/admin")
@@ -75,11 +64,8 @@ export class AuthController {
 
   @AllowAnonymous()
   @Get("/login")
-  async loginPage(
-    @Query() query: AdminLoginPageQueryDto,
-    @Req() req: Request,
-    @Res() res: Response
-  ): Promise<ReturnType<typeof view> | void> {
+  async loginPage(@Req() req: Request, @Res() res: Response): Promise<ReturnType<typeof view> | void> {
+    const query = await validateRequestData(adminLoginPageQuerySchema, req.query);
     const viewer = await this.sessionViewService.getViewer(req, res);
     if (viewer?.isAdmin) {
       res.redirect("/admin/users");
@@ -101,7 +87,8 @@ export class AuthController {
 
   @AllowAnonymous()
   @Post("/login")
-  async login(@Body() body: AdminLoginBodyDto, @Req() req: Request, @Res() res: Response): Promise<void> {
+  async login(@Req() req: Request, @Res() res: Response): Promise<void> {
+    const body = await validateRequestData(adminLoginBodySchema, req.body);
     const username = normalizeText(body.username);
     const password = body.password;
 

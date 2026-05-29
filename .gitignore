@@ -3,4 +3,5 @@
 /public/uploads/*.*
 /var/log/*.log
 package-lock.json
+.turbo
 .env
