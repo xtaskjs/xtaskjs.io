@@ -30,6 +30,15 @@
           <a href="{{href}}"{{#if isCurrent}} class="is-current"{{/if}}>{{label}}</a>
         {{/each}}
       </nav>
+      <div class="docs-sidebar-focus">
+        <p class="eyebrow">{{t "site.docs.hub.onThisPage"}}</p>
+        <nav class="docs-sidebar-nav docs-sidebar-nav-featured" aria-label="{{t "site.docs.hub.onThisPage"}}">
+          <a href="#quick-start">{{t "site.docs.hub.quickStartTitle"}}</a>
+          <a href="#cli-flow">{{t "site.docs.hub.cliFlowTitle"}}</a>
+          <a href="#sections">{{t "site.docs.hub.sectionsTitle"}}</a>
+          <a href="#highlights">{{t "site.docs.hub.highlightsTitle"}}</a>
+        </nav>
+      </div>
       <div class="docs-sidebar-meta">
         <p>{{t "site.docs.hub.repo"}} <a href="{{repoUrl}}" target="_blank" rel="noreferrer">xtaskjs/xtask</a></p>
         <p>{{t "site.docs.hub.scope"}}</p>
@@ -54,6 +63,44 @@
         </div>
       </section>
 
+      <section class="section docs-section" id="cli-flow">
+        <div class="docs-section-heading">
+          <p class="eyebrow">{{t "site.docs.hub.cliFlowEyebrow"}}</p>
+          <h2>{{t "site.docs.hub.cliFlowTitle"}}</h2>
+          <p>{{t "site.docs.hub.cliFlowIntro"}}</p>
+        </div>
+        <div class="docs-stage-grid">
+          <article class="feature-card docs-stage-card docs-cli-stage docs-cli-stage-scaffold">
+            <p class="docs-cli-step-kicker"><span class="docs-cli-step-icon" aria-hidden="true"><svg viewBox="0 0 16 16" class="docs-cli-step-icon-svg" focusable="false"><rect x="2" y="2" width="5" height="5" rx="1"></rect><rect x="9" y="2" width="5" height="5" rx="1"></rect><rect x="2" y="9" width="5" height="5" rx="1"></rect><path d="M10 9h4v4h-4z"></path></svg></span>{{t "site.docs.hub.cliFlowScaffoldLabel"}}</p>
+            <h3>{{t "site.docs.hub.cliFlowCreateTitle"}}</h3>
+            <p>{{t "site.docs.hub.cliFlowCreateText"}}</p>
+            <div class="docs-code-block"><pre><code>{{cliFlow.create}}</code></pre></div>
+            <a href="/documentation/cli" class="cta-secondary inline-btn">{{t "site.docs.hub.openCli"}}</a>
+          </article>
+          <article class="feature-card docs-stage-card docs-cli-stage docs-cli-stage-codegen">
+            <p class="docs-cli-step-kicker"><span class="docs-cli-step-icon" aria-hidden="true"><svg viewBox="0 0 16 16" class="docs-cli-step-icon-svg" focusable="false"><path d="M5 3L2 8l3 5"></path><path d="M11 3l3 5-3 5"></path><path d="M7 12l2-8"></path></svg></span>{{t "site.docs.hub.cliFlowCodegenLabel"}}</p>
+            <h3>{{t "site.docs.hub.cliFlowGenerateTitle"}}</h3>
+            <p>{{t "site.docs.hub.cliFlowGenerateText"}}</p>
+            <div class="docs-code-block"><pre><code>{{cliFlow.generate}}</code></pre></div>
+            <a href="/documentation/cli" class="cta-secondary inline-btn">{{t "site.docs.hub.openCli"}}</a>
+          </article>
+          <article class="feature-card docs-stage-card docs-cli-stage docs-cli-stage-modules">
+            <p class="docs-cli-step-kicker"><span class="docs-cli-step-icon" aria-hidden="true"><svg viewBox="0 0 16 16" class="docs-cli-step-icon-svg" focusable="false"><path d="M2 5l6-3 6 3-6 3-6-3z"></path><path d="M2 8l6 3 6-3"></path><path d="M2 11l6 3 6-3"></path></svg></span>{{t "site.docs.hub.cliFlowModulesLabel"}}</p>
+            <h3>{{t "site.docs.hub.cliFlowAddTitle"}}</h3>
+            <p>{{t "site.docs.hub.cliFlowAddText"}}</p>
+            <div class="docs-code-block"><pre><code>{{cliFlow.add}}</code></pre></div>
+            <a href="/documentation/cli" class="cta-secondary inline-btn">{{t "site.docs.hub.openCli"}}</a>
+          </article>
+          <article class="feature-card docs-stage-card docs-cli-stage docs-cli-stage-ops">
+            <p class="docs-cli-step-kicker"><span class="docs-cli-step-icon" aria-hidden="true"><svg viewBox="0 0 16 16" class="docs-cli-step-icon-svg" focusable="false"><path d="M3 11a5 5 0 1110 0"></path><path d="M8 8l3-3"></path><circle cx="8" cy="11" r="1"></circle></svg></span>{{t "site.docs.hub.cliFlowOpsLabel"}}</p>
+            <h3>{{t "site.docs.hub.cliFlowCacheTitle"}}</h3>
+            <p>{{t "site.docs.hub.cliFlowCacheText"}}</p>
+            <div class="docs-code-block"><pre><code>{{cliFlow.cache}}</code></pre></div>
+            <a href="/documentation/cli" class="cta-secondary inline-btn">{{t "site.docs.hub.openCli"}}</a>
+          </article>
+        </div>
+      </section>
+
       <section class="section docs-section" id="sections">
         <div class="docs-section-heading">
           <p class="eyebrow">{{t "site.docs.hub.sectionsEyebrow"}}</p>
@@ -72,18 +119,24 @@
       </section>
 
       <section class="section docs-section" id="highlights">
-        <div class="docs-section-heading">
-          <p class="eyebrow">{{t "site.docs.hub.highlightsEyebrow"}}</p>
-          <h2>{{t "site.docs.hub.highlightsTitle"}}</h2>
-        </div>
-        <div class="docs-overview-grid">
-          {{#each highlights}}
-            <article class="feature-card docs-overview-card">
-              <h3>{{title}}</h3>
-              <p>{{text}}</p>
-            </article>
-          {{/each}}
-        </div>
+        <details class="feature-card docs-disclosure-card" data-disclosure-key="hub-highlights">
+          <summary class="docs-disclosure-summary">
+            <div class="docs-section-heading">
+              <p class="eyebrow">{{t "site.docs.hub.highlightsEyebrow"}}</p>
+              <h2>{{t "site.docs.hub.highlightsTitle"}}</h2>
+            </div>
+          </summary>
+          <div class="docs-disclosure-body">
+            <div class="docs-overview-grid">
+              {{#each highlights}}
+                <article class="feature-card docs-overview-card">
+                  <h3>{{title}}</h3>
+                  <p>{{text}}</p>
+                </article>
+              {{/each}}
+            </div>
+          </div>
+        </details>
       </section>
     </div>
   </section>

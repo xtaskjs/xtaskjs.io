@@ -42,32 +42,48 @@
       </div>
     </aside>
 
-    <div class="docs-content">
+    <div class="docs-content" data-docs-filter-root>
       <section class="section docs-section" id="samples">
         <div class="docs-section-heading">
           <p class="eyebrow">{{t "site.docs.samples.catalogEyebrow"}}</p>
           <h2>{{t "site.docs.samples.catalogTitle"}}</h2>
         </div>
+        <div class="docs-filter-bar">
+          <input
+            type="search"
+            class="docs-filter-input"
+            data-docs-filter-input
+            data-docs-filter-target=".docs-sample-search-item"
+            data-docs-filter-empty="#samples-no-results"
+            placeholder="{{t "site.docs.samples.searchPlaceholder"}}"
+            aria-label="{{t "site.docs.samples.searchAria"}}"
+          />
+        </div>
+        <p class="docs-filter-empty" id="samples-no-results" hidden>{{t "site.docs.samples.noResults"}}</p>
         <div class="docs-sample-grid">
           {{#each samples}}
-            <article class="feature-card docs-sample-card" id="sample-{{name}}">
-              <p class="eyebrow">{{folder}}</p>
-              <h3>{{name}}</h3>
-              <p>{{summary}}</p>
-              <p class="stack docs-install-chip">{{stack}}</p>
-              <h3>{{t "site.docs.samples.endpoints"}}</h3>
-              <ul class="docs-list">
-                {{#each endpoints}}
-                  <li>{{this}}</li>
-                {{/each}}
-              </ul>
-              <h3>{{t "site.docs.samples.typicalFlow"}}</h3>
-              <ol class="docs-list docs-list-numbered">
-                {{#each flow}}
-                  <li>{{this}}</li>
-                {{/each}}
-              </ol>
-            </article>
+            <details class="feature-card docs-sample-card docs-disclosure-card docs-sample-search-item" data-docs-filter-item data-disclosure-key="sample-{{name}}" id="sample-{{name}}"{{#if @first}} open{{/if}}>
+              <summary class="docs-disclosure-summary">
+                <p class="eyebrow">{{folder}}</p>
+                <h3>{{name}}</h3>
+                <p>{{summary}}</p>
+                <p class="stack docs-install-chip">{{stack}}</p>
+              </summary>
+              <div class="docs-disclosure-body">
+                <h3>{{t "site.docs.samples.endpoints"}}</h3>
+                <ul class="docs-list">
+                  {{#each endpoints}}
+                    <li>{{this}}</li>
+                  {{/each}}
+                </ul>
+                <h3>{{t "site.docs.samples.typicalFlow"}}</h3>
+                <ol class="docs-list docs-list-numbered">
+                  {{#each flow}}
+                    <li>{{this}}</li>
+                  {{/each}}
+                </ol>
+              </div>
+            </details>
           {{/each}}
         </div>
       </section>

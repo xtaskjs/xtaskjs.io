@@ -2,7 +2,7 @@
 
 ## 📚 Guía de Ejemplos Disponibles
 
-xTaskJS incluye 24 samples progresivos que demuestran diferentes características y patrones. Esta guía te ayuda a encontrar el ejemplo correcto para tu caso de uso.
+xTaskJS incluye 29 samples progresivos que demuestran diferentes características y patrones. Esta guía te ayuda a encontrar el ejemplo correcto para tu caso de uso.
 
 ---
 
@@ -31,7 +31,12 @@ xTaskJS incluye 24 samples progresivos que demuestran diferentes característica
 ├── 21. event_source_rabbitmq_app        ← Event sourcing
 ├── 22. event_source_cqrs_app            ← Event-source + CQRS
 ├── 23. socket_io_express_app            ← Real-time (Socket.IO)
-└── 24. throttler_app                    ← Rate limiting
+├── 24. throttler_app                    ← Rate limiting
+├── 25. testing_app                      ← Testing runtime + overrides DI
+├── 26. bots_app                         ← Bots multi-plataforma
+├── 27. bots_webhook_security_app        ← Webhooks + Security
+├── 28. mcp_server_app                   ← MCP server con stdio y HTTP
+└── 29. mcp_auth_http_app                ← MCP HTTP con auth
 ```
 
 ---
@@ -845,6 +850,50 @@ cd samples/24-throttler_app && npm start
 
 ---
 
+### 🤖 **MCP / MODEL CONTEXT PROTOCOL**
+
+#### 28. mcp_server_app
+**Propósito:** Servidor MCP con tools, prompts y recursos sobre stdio y Streamable HTTP.
+
+**Stack:**
+- `@xtaskjs/mcp`
+- `@modelcontextprotocol/sdk`
+- Stdio
+- Streamable HTTP (`/mcp`)
+
+**Aprender:**
+- Declarar `@McpServer`, `@McpTool`, `@McpPrompt` y `@McpResource`
+- Usar hooks `@OnMcpServerStart` y `@OnMcpServerStop`
+- Conectar transportes oficiales del SDK
+- Exponer un servidor MCP reutilizable desde DI
+
+```bash
+cd samples/28-mcp_server_app && npm start
+```
+
+---
+
+#### 29. mcp_auth_http_app
+**Propósito:** Servidor MCP HTTP protegido con autenticación Bearer/OAuth sobre `/mcp`.
+
+**Stack:**
+- `@xtaskjs/mcp`
+- `@modelcontextprotocol/sdk`
+- Express HTTP
+- Security / auth middleware
+
+**Aprender:**
+- Proteger el endpoint MCP con autenticación
+- Servir transporte HTTP autenticado
+- Combinar MCP con seguridad y control de acceso
+- Publicar tools y prompts en un servidor accesible por red
+
+```bash
+cd samples/29-mcp_auth_http_app && npm start
+```
+
+---
+
 ## 🚀 Guía Rápida por Caso de Uso
 
 ### "Quiero construir una REST API simple"
@@ -867,6 +916,11 @@ cd samples/24-throttler_app && npm start
 ### "Quiero real-time capabilities"
 1. Comienza con **23-socket_io_express_app**
 2. Combina con otros patterns según necesidad
+
+### "Quiero exponer un servidor MCP"
+1. Comienza con **28-mcp_server_app** para stdio o HTTP simple
+2. Usa **29-mcp_auth_http_app** si necesitas autenticación en `/mcp`
+3. Añade `@xtaskjs/security` si el endpoint debe quedar protegido
 
 ### "Quiero proteger APIs contra abuso"
 1. Agrega **24-throttler_app** (rate limiting)

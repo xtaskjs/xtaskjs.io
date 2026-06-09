@@ -48,6 +48,18 @@
           <a href="{{href}}"{{#if isCurrent}} class="is-current"{{/if}}>{{label}}</a>
         {{/each}}
       </nav>
+      <div class="docs-sidebar-focus">
+        <p class="eyebrow">{{t "site.docs.hub.onThisPage"}}</p>
+        <nav class="docs-sidebar-nav docs-sidebar-nav-featured" aria-label="{{t "site.docs.hub.onThisPage"}}">
+          <a href="#package-runtime">{{t "site.docs.packages.runtimeChartTitle"}}</a>
+          <a href="#package-flow">{{t "site.docs.packages.flowTitle"}}</a>
+          <a href="#package-api">{{t "site.docs.packages.apiTitle"}}</a>
+          <a href="#package-usage">{{t "site.docs.packages.usageTitle"}}</a>
+          <a href="#package-example">{{t "site.docs.packages.exampleTitle"}}</a>
+          <a href="#package-samples">{{t "site.docs.packages.samplesTitle"}}</a>
+          <a href="#package-related">{{t "site.docs.packages.relatedTitle"}}</a>
+        </nav>
+      </div>
       <div class="docs-sidebar-meta">
         <p>{{t "site.docs.hub.repo"}} <a href="{{repoUrl}}" target="_blank" rel="noreferrer">xtaskjs/xtask</a></p>
         <p>{{t "site.docs.packages.focus"}}</p>
@@ -55,78 +67,102 @@
     </aside>
 
     <div class="docs-content">
-      <section class="section docs-section">
-        <div class="docs-section-heading">
-          <p class="eyebrow">{{t "site.docs.packages.runtimeChartEyebrow"}}</p>
-          <h2>{{t "site.docs.packages.runtimeChartTitle"}}</h2>
-        </div>
-        <div class="docs-score-grid">
-          {{#each packageDoc.runtimeChart}}
-            <article class="feature-card docs-score-card">
-              <div class="docs-score-header">
-                <h3>{{label}}</h3>
-                <span>{{t "site.docs.packages.scoreLabel" score=score}}</span>
-              </div>
-              <div class="docs-score-bar" style="--score: {{score}};">
-                <span class="docs-score-fill"></span>
-              </div>
-            </article>
-          {{/each}}
-        </div>
+      <section class="section docs-section" id="package-runtime">
+        <details class="feature-card docs-disclosure-card" data-disclosure-key="package-detail-runtime" open>
+          <summary class="docs-disclosure-summary">
+            <div class="docs-section-heading">
+              <p class="eyebrow">{{t "site.docs.packages.runtimeChartEyebrow"}}</p>
+              <h2>{{t "site.docs.packages.runtimeChartTitle"}}</h2>
+            </div>
+          </summary>
+          <div class="docs-disclosure-body">
+            <div class="docs-score-grid">
+              {{#each packageDoc.runtimeChart}}
+                <article class="feature-card docs-score-card">
+                  <div class="docs-score-header">
+                    <h3>{{label}}</h3>
+                    <span>{{t "site.docs.packages.scoreLabel" score=score}}</span>
+                  </div>
+                  <div class="docs-score-bar" style="--score: {{score}};">
+                    <span class="docs-score-fill"></span>
+                  </div>
+                </article>
+              {{/each}}
+            </div>
+          </div>
+        </details>
       </section>
 
-      <section class="section docs-section">
-        <div class="docs-section-heading">
-          <p class="eyebrow">{{t "site.docs.packages.flowEyebrow"}}</p>
-          <h2>{{t "site.docs.packages.flowTitle"}}</h2>
-        </div>
-        <div class="docs-diagram-flow">
-          {{#each packageDoc.lifecycle}}
-            <article class="feature-card docs-stage-card docs-flow-diagram-card">
-              <h3>{{title}}</h3>
-              <p>{{text}}</p>
-            </article>
-          {{/each}}
-        </div>
+      <section class="section docs-section" id="package-flow">
+        <details class="feature-card docs-disclosure-card" data-disclosure-key="package-detail-flow">
+          <summary class="docs-disclosure-summary">
+            <div class="docs-section-heading">
+              <p class="eyebrow">{{t "site.docs.packages.flowEyebrow"}}</p>
+              <h2>{{t "site.docs.packages.flowTitle"}}</h2>
+            </div>
+          </summary>
+          <div class="docs-disclosure-body">
+            <div class="docs-diagram-flow">
+              {{#each packageDoc.lifecycle}}
+                <article class="feature-card docs-stage-card docs-flow-diagram-card">
+                  <h3>{{title}}</h3>
+                  <p>{{text}}</p>
+                </article>
+              {{/each}}
+            </div>
+          </div>
+        </details>
       </section>
 
-      <section class="section docs-section">
-        <div class="docs-section-heading">
-          <p class="eyebrow">{{t "site.docs.packages.apiEyebrow"}}</p>
-          <h2>{{t "site.docs.packages.apiTitle"}}</h2>
-        </div>
-        <div class="docs-api-grid">
-          {{#each apiGroups}}
-            <article class="feature-card docs-api-card">
-              <div class="docs-api-card-head">
-                <h3>{{title}}</h3>
-              </div>
-              <ul class="docs-list docs-api-list">
-                {{#each exports}}
-                  <li><span>{{this}}</span></li>
-                {{/each}}
-              </ul>
-            </article>
-          {{/each}}
-        </div>
+      <section class="section docs-section" id="package-api">
+        <details class="feature-card docs-disclosure-card" data-disclosure-key="package-detail-api" open>
+          <summary class="docs-disclosure-summary">
+            <div class="docs-section-heading">
+              <p class="eyebrow">{{t "site.docs.packages.apiEyebrow"}}</p>
+              <h2>{{t "site.docs.packages.apiTitle"}}</h2>
+            </div>
+          </summary>
+          <div class="docs-disclosure-body">
+            <div class="docs-api-grid">
+              {{#each apiGroups}}
+                <article class="feature-card docs-api-card">
+                  <div class="docs-api-card-head">
+                    <h3>{{title}}</h3>
+                  </div>
+                  <ul class="docs-list docs-api-list">
+                    {{#each exports}}
+                      <li><span>{{this}}</span></li>
+                    {{/each}}
+                  </ul>
+                </article>
+              {{/each}}
+            </div>
+          </div>
+        </details>
       </section>
 
-      <section class="section docs-section">
-        <div class="docs-section-heading">
-          <p class="eyebrow">{{t "site.docs.packages.usageEyebrow"}}</p>
-          <h2>{{t "site.docs.packages.usageTitle"}}</h2>
-        </div>
-        <div class="docs-stage-grid">
-          {{#each packageDoc.usage}}
-            <article class="feature-card docs-stage-card">
-              <h3>{{title}}</h3>
-              <p>{{text}}</p>
-            </article>
-          {{/each}}
-        </div>
+      <section class="section docs-section" id="package-usage">
+        <details class="feature-card docs-disclosure-card" data-disclosure-key="package-detail-usage">
+          <summary class="docs-disclosure-summary">
+            <div class="docs-section-heading">
+              <p class="eyebrow">{{t "site.docs.packages.usageEyebrow"}}</p>
+              <h2>{{t "site.docs.packages.usageTitle"}}</h2>
+            </div>
+          </summary>
+          <div class="docs-disclosure-body">
+            <div class="docs-stage-grid">
+              {{#each packageDoc.usage}}
+                <article class="feature-card docs-stage-card">
+                  <h3>{{title}}</h3>
+                  <p>{{text}}</p>
+                </article>
+              {{/each}}
+            </div>
+          </div>
+        </details>
       </section>
 
-      <section class="section docs-section">
+      <section class="section docs-section" id="package-example">
         <div class="docs-section-heading">
           <p class="eyebrow">{{t "site.docs.packages.exampleEyebrow"}}</p>
           <h2>{{t "site.docs.packages.exampleTitle"}}</h2>
@@ -139,38 +175,50 @@
         </article>
       </section>
 
-      <section class="section docs-section">
-        <div class="docs-section-heading">
-          <p class="eyebrow">{{t "site.docs.packages.samplesEyebrow"}}</p>
-          <h2>{{t "site.docs.packages.samplesTitle"}}</h2>
-        </div>
-        <p class="stack docs-install-chip">{{t "site.docs.packages.referenceSamples" sample=packageDoc.sample}}</p>
-        <div class="docs-package-grid docs-related-grid">
-          {{#each sampleLinks}}
-            <article class="project-card docs-package-card docs-related-card">
-              <p class="eyebrow">samples</p>
-              <h3>{{name}}</h3>
-              <a href="{{href}}" class="cta-secondary inline-btn">{{t "site.docs.packages.openSample"}}</a>
-            </article>
-          {{/each}}
-        </div>
+      <section class="section docs-section" id="package-samples">
+        <details class="feature-card docs-disclosure-card" data-disclosure-key="package-detail-samples">
+          <summary class="docs-disclosure-summary">
+            <div class="docs-section-heading">
+              <p class="eyebrow">{{t "site.docs.packages.samplesEyebrow"}}</p>
+              <h2>{{t "site.docs.packages.samplesTitle"}}</h2>
+            </div>
+          </summary>
+          <div class="docs-disclosure-body">
+            <p class="stack docs-install-chip">{{t "site.docs.packages.referenceSamples" sample=packageDoc.sample}}</p>
+            <div class="docs-package-grid docs-related-grid">
+              {{#each sampleLinks}}
+                <article class="project-card docs-package-card docs-related-card">
+                  <p class="eyebrow">samples</p>
+                  <h3>{{name}}</h3>
+                  <a href="{{href}}" class="cta-secondary inline-btn">{{t "site.docs.packages.openSample"}}</a>
+                </article>
+              {{/each}}
+            </div>
+          </div>
+        </details>
       </section>
 
-      <section class="section docs-section">
-        <div class="docs-section-heading">
-          <p class="eyebrow">{{t "site.docs.packages.relatedEyebrow"}}</p>
-          <h2>{{t "site.docs.packages.relatedTitle"}}</h2>
-        </div>
-        <div class="docs-package-grid docs-related-grid">
-          {{#each relatedPackages}}
-            <article class="project-card docs-package-card docs-related-card">
-              <p class="eyebrow">{{path}}</p>
-              <h3><a href="{{href}}">{{name}}</a></h3>
-              <p>{{tagline}}</p>
-              <a href="{{href}}" class="cta-secondary inline-btn">{{t "site.docs.packages.openRelatedPackage"}}</a>
-            </article>
-          {{/each}}
-        </div>
+      <section class="section docs-section" id="package-related">
+        <details class="feature-card docs-disclosure-card" data-disclosure-key="package-detail-related">
+          <summary class="docs-disclosure-summary">
+            <div class="docs-section-heading">
+              <p class="eyebrow">{{t "site.docs.packages.relatedEyebrow"}}</p>
+              <h2>{{t "site.docs.packages.relatedTitle"}}</h2>
+            </div>
+          </summary>
+          <div class="docs-disclosure-body">
+            <div class="docs-package-grid docs-related-grid">
+              {{#each relatedPackages}}
+                <article class="project-card docs-package-card docs-related-card">
+                  <p class="eyebrow">{{path}}</p>
+                  <h3><a href="{{href}}">{{name}}</a></h3>
+                  <p>{{tagline}}</p>
+                  <a href="{{href}}" class="cta-secondary inline-btn">{{t "site.docs.packages.openRelatedPackage"}}</a>
+                </article>
+              {{/each}}
+            </div>
+          </div>
+        </details>
       </section>
     </div>
   </section>

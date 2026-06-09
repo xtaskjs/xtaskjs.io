@@ -1676,6 +1676,55 @@ html[data-theme="dark"] .astra-final-cta {
   min-height: 0;
 }
 
+.docs-decorators-focus {
+  display: grid;
+  gap: 0.6rem;
+  margin-top: 0.45rem;
+  padding: 0.8rem;
+  border-radius: 0.9rem;
+  border: 1px solid rgba(31, 94, 168, 0.16);
+  background: linear-gradient(130deg, rgba(31, 94, 168, 0.08), rgba(197, 221, 139, 0.18));
+}
+
+.docs-decorators-focus-intro {
+  margin: 0;
+  color: #355d8d;
+  font-size: 0.94rem;
+}
+
+.docs-decorators-focus-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.6rem;
+}
+
+.docs-featured-link {
+  display: grid;
+  gap: 0.3rem;
+  padding: 0.7rem 0.75rem;
+  border-radius: 0.75rem;
+  text-decoration: none;
+  border: 1px solid rgba(31, 94, 168, 0.18);
+  background: rgba(255, 255, 255, 0.65);
+  color: #17365f;
+}
+
+.docs-featured-link strong {
+  font-size: 0.92rem;
+}
+
+.docs-featured-link span {
+  color: #3e648f;
+  font-size: 0.86rem;
+  line-height: 1.4;
+}
+
+.docs-featured-link:hover {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.84);
+  border-color: rgba(31, 94, 168, 0.28);
+}
+
 .docs-layout {
   display: grid;
   grid-template-columns: 280px minmax(0, 1fr);
@@ -1733,6 +1782,17 @@ html[data-theme="dark"] .astra-final-cta {
   font-weight: 700;
 }
 
+.docs-sidebar-focus {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.docs-sidebar-nav-featured a {
+  font-size: 0.9rem;
+  border: 1px solid rgba(31, 94, 168, 0.12);
+  background: rgba(31, 94, 168, 0.04);
+}
+
 .docs-content {
   display: grid;
   gap: 1.4rem;
@@ -1745,6 +1805,35 @@ html[data-theme="dark"] .astra-final-cta {
 .docs-section-heading {
   display: grid;
   gap: 0.25rem;
+}
+
+.docs-filter-bar {
+  display: grid;
+  margin-bottom: 0.65rem;
+}
+
+.docs-filter-input {
+  width: 100%;
+  max-width: 780px;
+  min-height: 2.8rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(31, 94, 168, 0.2);
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--ink);
+  font: inherit;
+}
+
+.docs-filter-input:focus {
+  outline: none;
+  border-color: rgba(31, 94, 168, 0.45);
+  box-shadow: 0 0 0 3px rgba(31, 94, 168, 0.12);
+}
+
+.docs-filter-empty {
+  margin: 0 0 0.9rem;
+  color: #355d8d;
+  font-weight: 700;
 }
 
 .docs-two-column {
@@ -1823,13 +1912,13 @@ html[data-theme="dark"] .astra-final-cta {
 .docs-package-grid,
 .docs-sample-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
   gap: 1rem;
 }
 
 .docs-decorator-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
   gap: 1rem;
 }
 
@@ -1913,6 +2002,42 @@ html[data-theme="dark"] .astra-final-cta {
   gap: 0.9rem;
 }
 
+.docs-disclosure-card {
+  overflow: clip;
+}
+
+.docs-disclosure-card summary {
+  cursor: pointer;
+  list-style: none;
+}
+
+.docs-disclosure-card summary::-webkit-details-marker {
+  display: none;
+}
+
+.docs-disclosure-summary {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.docs-disclosure-summary > :last-child {
+  margin-bottom: 0;
+}
+
+.docs-disclosure-body {
+  display: grid;
+  gap: 1rem;
+  padding-top: 0.9rem;
+}
+
+.docs-disclosure-card[open] {
+  box-shadow: var(--shadow-soft);
+}
+
+.docs-disclosure-card[open] .docs-disclosure-summary h3 {
+  color: var(--logo-blue);
+}
+
 .docs-score-grid,
 .docs-stage-grid,
 .docs-related-grid {
@@ -1933,6 +2058,82 @@ html[data-theme="dark"] .astra-final-cta {
 .docs-related-card {
   display: grid;
   gap: 0.85rem;
+}
+
+.docs-cli-step-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--docs-cli-accent-text, #2f5c8c);
+}
+
+.docs-cli-step-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.35rem;
+  height: 1.35rem;
+  border-radius: 999px;
+  border: 1px solid var(--docs-cli-accent-border, rgba(31, 94, 168, 0.3));
+  background: linear-gradient(140deg, var(--docs-cli-accent-from, rgba(31, 94, 168, 0.2)), var(--docs-cli-accent-to, rgba(197, 221, 139, 0.3)));
+  color: #17406f;
+  line-height: 0;
+}
+
+.docs-cli-step-icon-svg {
+  width: 0.9rem;
+  height: 0.9rem;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.docs-cli-stage {
+  --docs-cli-accent-text: #2f5c8c;
+  --docs-cli-accent-border: rgba(31, 94, 168, 0.3);
+  --docs-cli-accent-rail: rgba(31, 94, 168, 0.38);
+  --docs-cli-accent-from: rgba(31, 94, 168, 0.2);
+  --docs-cli-accent-to: rgba(197, 221, 139, 0.3);
+  border-left: 3px solid var(--docs-cli-accent-rail);
+}
+
+.docs-cli-stage-scaffold {
+  --docs-cli-accent-text: #2f5c8c;
+  --docs-cli-accent-border: rgba(31, 94, 168, 0.3);
+  --docs-cli-accent-rail: rgba(31, 94, 168, 0.38);
+  --docs-cli-accent-from: rgba(31, 94, 168, 0.2);
+  --docs-cli-accent-to: rgba(197, 221, 139, 0.3);
+}
+
+.docs-cli-stage-codegen {
+  --docs-cli-accent-text: #2f6178;
+  --docs-cli-accent-border: rgba(48, 122, 149, 0.28);
+  --docs-cli-accent-rail: rgba(48, 122, 149, 0.36);
+  --docs-cli-accent-from: rgba(48, 122, 149, 0.18);
+  --docs-cli-accent-to: rgba(156, 214, 223, 0.26);
+}
+
+.docs-cli-stage-modules {
+  --docs-cli-accent-text: #35625f;
+  --docs-cli-accent-border: rgba(58, 128, 114, 0.28);
+  --docs-cli-accent-rail: rgba(58, 128, 114, 0.36);
+  --docs-cli-accent-from: rgba(58, 128, 114, 0.17);
+  --docs-cli-accent-to: rgba(182, 224, 188, 0.26);
+}
+
+.docs-cli-stage-ops {
+  --docs-cli-accent-text: #4a5c84;
+  --docs-cli-accent-border: rgba(88, 108, 167, 0.28);
+  --docs-cli-accent-rail: rgba(88, 108, 167, 0.36);
+  --docs-cli-accent-from: rgba(88, 108, 167, 0.18);
+  --docs-cli-accent-to: rgba(198, 200, 236, 0.28);
 }
 
 .docs-flow-diagram-card {
@@ -2069,5 +2270,22 @@ html[data-theme="dark"] .astra-final-cta {
   .docs-flow-diagram-card::after,
   .docs-flow-diagram-card::before {
     display: none;
+  }
+
+  .docs-cli-step-kicker {
+    font-size: 0.74rem;
+  }
+
+  .docs-cli-step-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  .docs-cli-stage {
+    border-left-width: 4px;
+  }
+
+  .docs-decorators-focus-grid {
+    grid-template-columns: 1fr;
   }
 }

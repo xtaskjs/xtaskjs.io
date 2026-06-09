@@ -11,6 +11,20 @@
         <a href="/documentation/packages" class="cta-secondary">{{t "site.docs.decorators.openPackages"}}</a>
       </div>
       <p class="stack stack-inline">{{t "site.docs.decorators.stats" decorators=decoratorCount groups=decoratorGroupCount}}</p>
+      <div class="docs-decorators-focus">
+        <p class="eyebrow">{{t "site.docs.decorators.featuredEyebrow"}}</p>
+        <p class="docs-decorators-focus-intro">{{t "site.docs.decorators.featuredIntro"}}</p>
+        <div class="docs-decorators-focus-grid">
+          <a href="#decorators-validation" class="docs-featured-link">
+            <strong>{{t "site.docs.decorators.featuredValidationTitle"}}</strong>
+            <span>{{t "site.docs.decorators.featuredValidationText"}}</span>
+          </a>
+          <a href="#decorators-bots" class="docs-featured-link">
+            <strong>{{t "site.docs.decorators.featuredBotsTitle"}}</strong>
+            <span>{{t "site.docs.decorators.featuredBotsText"}}</span>
+          </a>
+        </div>
+      </div>
     </div>
     <div class="docs-overview-grid">
       <article class="feature-card docs-overview-card">
@@ -36,21 +50,40 @@
           <a href="{{href}}"{{#if isCurrent}} class="is-current"{{/if}}>{{label}}</a>
         {{/each}}
       </nav>
+      <div class="docs-sidebar-focus">
+        <p class="eyebrow">{{t "site.docs.decorators.featuredSidebarTitle"}}</p>
+        <nav class="docs-sidebar-nav docs-sidebar-nav-featured" aria-label="{{t "site.docs.decorators.featuredSidebarTitle"}}">
+          <a href="#decorators-validation">{{t "site.docs.decorators.featuredValidationTitle"}}</a>
+          <a href="#decorators-bots">{{t "site.docs.decorators.featuredBotsTitle"}}</a>
+        </nav>
+      </div>
       <div class="docs-sidebar-meta">
         <p>{{t "site.docs.hub.repo"}} <a href="{{repoUrl}}" target="_blank" rel="noreferrer">xtaskjs/xtask</a></p>
         <p>{{t "site.docs.decorators.coverage"}} {{#each packageCoverage}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}</p>
       </div>
     </aside>
 
-    <div class="docs-content">
+    <div class="docs-content" data-docs-filter-root>
       <section class="section docs-section" id="decorator-catalog">
         <div class="docs-section-heading">
           <p class="eyebrow">{{t "site.docs.decorators.catalogEyebrow"}}</p>
           <h2>{{t "site.docs.decorators.catalogTitle"}}</h2>
         </div>
+        <div class="docs-filter-bar">
+          <input
+            type="search"
+            class="docs-filter-input"
+            data-docs-filter-input
+            data-docs-filter-target=".docs-decorator-search-item"
+            data-docs-filter-empty="#decorators-no-results"
+            placeholder="{{t "site.docs.decorators.searchPlaceholder"}}"
+            aria-label="{{t "site.docs.decorators.searchAria"}}"
+          />
+        </div>
+        <p class="docs-filter-empty" id="decorators-no-results" hidden>{{t "site.docs.decorators.noResults"}}</p>
         <div class="docs-package-grid">
           {{#each decoratorGroups}}
-            <article class="project-card docs-package-card">
+            <article class="project-card docs-package-card docs-decorator-search-item" data-docs-filter-item>
               <p class="eyebrow">{{t "site.docs.decorators.groupBadge"}}</p>
               <h3><a href="#{{id}}">{{title}}</a></h3>
               <p>{{description}}</p>
@@ -62,28 +95,32 @@
 
       {{#each decoratorGroups}}
         <section class="section docs-section" id="{{id}}">
-          <div class="docs-section-heading">
+          <div class="docs-section-heading docs-decorator-search-item" data-docs-filter-item>
             <p class="eyebrow">{{t "site.docs.decorators.groupBadge"}}</p>
             <h2>{{title}}</h2>
             <p>{{description}}</p>
           </div>
           <div class="docs-decorator-grid">
             {{#each decorators}}
-              <article class="feature-card docs-decorator-card">
-                <div class="docs-decorator-meta">
-                  <div class="docs-tag-row">
-                    <span class="docs-pill">{{packageName}}</span>
-                    <span class="docs-pill">{{kind}}</span>
-                    <span class="docs-pill">{{targets}}</span>
+              <details class="feature-card docs-decorator-card docs-disclosure-card docs-decorator-search-item" data-docs-filter-item data-disclosure-key="decorator-{{id}}"{{#if @first}} open{{/if}}>
+                <summary class="docs-disclosure-summary">
+                  <div class="docs-decorator-meta">
+                    <div class="docs-tag-row">
+                      <span class="docs-pill">{{packageName}}</span>
+                      <span class="docs-pill">{{kind}}</span>
+                      <span class="docs-pill">{{targets}}</span>
+                    </div>
+                  </div>
+                  <h3>{{name}}</h3>
+                  <p>{{summary}}</p>
+                </summary>
+                <div class="docs-disclosure-body">
+                  <div class="docs-code-block">
+                    <div class="docs-code-header">{{exampleTitle}}</div>
+                    <pre><code>{{exampleCode}}</code></pre>
                   </div>
                 </div>
-                <h3>{{name}}</h3>
-                <p>{{summary}}</p>
-                <div class="docs-code-block">
-                  <div class="docs-code-header">{{exampleTitle}}</div>
-                  <pre><code>{{exampleCode}}</code></pre>
-                </div>
-              </article>
+              </details>
             {{/each}}
           </div>
         </section>

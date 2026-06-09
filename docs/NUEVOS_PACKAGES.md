@@ -6,7 +6,101 @@ Esta documentación cubre los nuevos packages introducidos recientemente en xTas
 - **@xtaskjs/throttler** - Rate limiting
 - **@xtaskjs/socket-io** - Comunicación en tiempo real
 - **@xtaskjs/scheduler** - Programación de tareas
+- **@xtaskjs/config** - Configuración typed y fail-fast
+- **@xtaskjs/validation** - Validación schema-first (Zod/Valibot)
+- **@xtaskjs/testing** - Testing module y overrides DI
+- **@xtaskjs/bots** - Runtime unificado para bots multi-plataforma
+- **@xtaskjs/mcp** - Servidores MCP con tools, prompts, resources y transporte oficial SDK
 - Mejoras en **@xtaskjs/queues**, **@xtaskjs/event-source**, **@xtaskjs/cache**, **@xtaskjs/cqrs**
+
+---
+
+## 🔄 Actualización Junio 2026
+
+Además de los paquetes runtime, se incorporan cambios de tooling y plantilla oficial:
+
+- **xtask-cli**
+  - Comandos principales: `create`, `generate`, `cache`, `add`
+  - Nuevos generadores y flujos de test: `controller-test`, `service-test`, `resource-tests`
+  - Nuevas opciones de generación: `--run` y `--quiet`
+  - Instalación de módulos oficiales con `add`, incluyendo `@xtaskjs/testing`, `@xtaskjs/mcp` y `@xtaskjs/bots`
+
+- **typescript-starter**
+  - Scripts de arranque paralelo con `XTASK_SCAN_WORKERS` (`start:parallel`, `start:single-worker`)
+  - Integración con `turbo` para build/test/typecheck
+  - Bootstrap alineado con configuración de manifiesto y hot watcher
+
+---
+
+## @xtaskjs/mcp
+
+### Descripción
+
+Package para construir servidores Model Context Protocol (MCP) con decoradores de servidor, tools, prompts, resources y hooks de ciclo de vida.
+
+### Casos de uso
+
+- Exponer tools reutilizables para asistentes y agentes
+- Publicar prompts y resources a través de MCP
+- Arrancar transportes `stdio` o `Streamable HTTP`
+- Proteger `/mcp` con `@xtaskjs/security` cuando hace falta auth
+
+### Instalación
+
+```bash
+npm install @xtaskjs/mcp reflect-metadata @modelcontextprotocol/sdk
+```
+
+### Uso básico
+
+```typescript
+import { Service } from "@xtaskjs/core";
+import { McpPrompt, McpServer, McpTool, OnMcpServerStart, OnMcpServerStop } from "@xtaskjs/mcp";
+
+@Service()
+@McpServer({
+  name: "docs-mcp",
+  version: "1.0.0",
+  instructions: "Expose documentation helpers over MCP",
+})
+export class DocsMcpServer {
+  @OnMcpServerStart()
+  onStart() {}
+
+  @OnMcpServerStop()
+  onStop() {}
+
+  @McpTool("search-docs", { description: "Search docs" })
+  searchDocs(payload: { query: string }) {
+    return { query: payload.query };
+  }
+
+  @McpPrompt("welcome", { description: "Generate a welcome prompt" })
+  welcome(input?: { name?: string }) {
+    return `Welcome ${input?.name || "world"}`;
+  }
+}
+```
+
+### Integración recomendada
+
+- `@McpServer(options)`
+- `@McpTool(name, options)`
+- `@McpPrompt(name, options)`
+- `@McpResource(uriTemplate, options)`
+- `@OnMcpServerStart(options)`
+- `@OnMcpServerStop(options)`
+- `@InjectMcpService()`
+- `@InjectMcpLifecycleManager()`
+- `createMcpSdkServerAdapter(...)`
+- `connectMcpSdkStdio(...)`
+- `bindMcpSdkStreamableHttp(...)`
+
+### Samples relacionados
+
+- [Sample: 28-mcp_server_app](https://github.com/xtaskjs/xtask/tree/main/samples/28-mcp_server_app)
+- [Sample: 29-mcp_auth_http_app](https://github.com/xtaskjs/xtask/tree/main/samples/29-mcp_auth_http_app)
+- [Documentación Completa](https://github.com/xtaskjs/xtask/tree/main/packages/mcp#readme)
 
 ---
 

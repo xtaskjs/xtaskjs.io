@@ -554,6 +554,43 @@ export const generatedPackageApiGroups: Readonly<Record<string, readonly { reado
       ]
     }
   ],
+  "mcp": [
+    {
+      "title": "Server decorators",
+      "sourcePath": "packages/mcp/src/decorators.ts",
+      "exports": [
+        "McpServer",
+        "McpTool",
+        "McpPrompt",
+        "McpResource"
+      ]
+    },
+    {
+      "title": "Lifecycle and runtime",
+      "sourcePath": "packages/mcp/src",
+      "exports": [
+        "McpService",
+        "InjectMcpService",
+        "InjectMcpLifecycleManager",
+        "OnMcpServerStart",
+        "OnMcpServerStop",
+        "getMcpServiceToken",
+        "getMcpLifecycleToken"
+      ]
+    },
+    {
+      "title": "Lifecycle and SDK adapters",
+      "sourcePath": "packages/mcp/src",
+      "exports": [
+        "initializeMcpIntegration",
+        "shutdownMcpIntegration",
+        "resetMcpIntegration",
+        "createMcpSdkServerAdapter",
+        "connectMcpSdkStdio",
+        "bindMcpSdkStreamableHttp"
+      ]
+    }
+  ],
   "value-objects": [
     {
       "title": "Types and contracts",

@@ -62,25 +62,29 @@
         </div>
         <div class="docs-package-grid">
           {{#each commands}}
-            <article class="feature-card docs-decorator-card">
-              <div class="docs-tag-row">
-                <span class="docs-pill">{{../binaryName}}</span>
-                <span class="docs-pill">{{name}}</span>
-              </div>
-              <h3>{{name}}</h3>
-              <p>{{summary}}</p>
-              <div class="docs-code-block">
-                <div class="docs-code-header">{{t "site.docs.cli.usageLabel"}}</div>
-                <pre><code>{{usage}}</code></pre>
-              </div>
-              <h3>{{t "site.docs.cli.examplesLabel"}}</h3>
-              {{#each examples}}
-                <div class="docs-code-block">
-                  <div class="docs-code-header">{{title}}</div>
-                  <pre><code>{{command}}</code></pre>
+            <details class="feature-card docs-decorator-card docs-disclosure-card" data-disclosure-key="cli-command-{{name}}"{{#if @first}} open{{/if}}>
+              <summary class="docs-disclosure-summary">
+                <div class="docs-tag-row">
+                  <span class="docs-pill">{{../binaryName}}</span>
+                  <span class="docs-pill">{{name}}</span>
                 </div>
-              {{/each}}
-            </article>
+                <h3>{{name}}</h3>
+                <p>{{summary}}</p>
+              </summary>
+              <div class="docs-disclosure-body">
+                <div class="docs-code-block">
+                  <div class="docs-code-header">{{t "site.docs.cli.usageLabel"}}</div>
+                  <pre><code>{{usage}}</code></pre>
+                </div>
+                <h3>{{t "site.docs.cli.examplesLabel"}}</h3>
+                {{#each examples}}
+                  <div class="docs-code-block">
+                    <div class="docs-code-header">{{title}}</div>
+                    <pre><code>{{command}}</code></pre>
+                  </div>
+                {{/each}}
+              </div>
+            </details>
           {{/each}}
         </div>
       </section>
@@ -92,20 +96,24 @@
         </div>
         <div class="docs-api-grid">
           {{#each optionGroups}}
-            <article class="feature-card docs-api-card">
-              <div class="docs-api-card-head">
-                <h3>{{title}}</h3>
-                <p>{{description}}</p>
+            <details class="feature-card docs-api-card docs-disclosure-card" data-disclosure-key="cli-options-{{title}}"{{#if @first}} open{{/if}}>
+              <summary class="docs-disclosure-summary">
+                <div class="docs-api-card-head">
+                  <h3>{{title}}</h3>
+                  <p>{{description}}</p>
+                </div>
+              </summary>
+              <div class="docs-disclosure-body">
+                <ul class="docs-api-list">
+                  {{#each options}}
+                    <li>
+                      <span>{{flag}}</span>
+                      <p>{{description}}</p>
+                    </li>
+                  {{/each}}
+                </ul>
               </div>
-              <ul class="docs-api-list">
-                {{#each options}}
-                  <li>
-                    <span>{{flag}}</span>
-                    <p>{{description}}</p>
-                  </li>
-                {{/each}}
-              </ul>
-            </article>
+            </details>
           {{/each}}
         </div>
       </section>

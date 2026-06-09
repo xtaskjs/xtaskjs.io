@@ -29,6 +29,16 @@ test("DocumentationService returns package detail API groups and sample links", 
   ]);
 });
 
+test("DocumentationService hub exposes CLI flow commands", () => {
+  const service = createService("en-US");
+  const hub = service.getHubViewModel();
+
+  assert.match(hub.cliFlow.create, /xtask create/);
+  assert.match(hub.cliFlow.generate, /xtask generate resource/);
+  assert.match(hub.cliFlow.add, /xtask add .*mcp.*bots/);
+  assert.match(hub.cliFlow.cache, /xtask cache http-route/);
+});
+
 test("DocumentationService ignores prose-only sample descriptions", () => {
   const service = createService("en-US");
   const detail = service.getPackageDetailViewModel("common");
@@ -138,17 +148,67 @@ test("DocumentationService returns CLI docs with command and option groups", () 
   const cli = service.getCliViewModel();
 
   assert.equal(cli.packageName, "@xtaskjs/cli");
-  assert.equal(cli.commandCount, 2);
+  assert.equal(cli.commandCount, 4);
   assert.match(cli.installDocs[0]?.command || "", /npm install -g @xtaskjs\/cli/);
   assert.equal(cli.optionGroups[2]?.options.some((option) => option.flag === "--crud"), true);
-  assert.equal(cli.highlights.some((highlight) => highlight.title === "Cache workflow"), true);
+  assert.equal(cli.optionGroups[2]?.options.some((option) => option.flag === "--run"), true);
+  assert.equal(cli.optionGroups[2]?.options.some((option) => option.flag === "--quiet"), true);
+  assert.equal(cli.highlights.some((highlight) => highlight.title === "Runtime cache operations"), true);
   assert.equal(
     cli.commands[1]?.examples.some((example) => example.command === "xtask generate resource cache-entries --path src/modules --crud --with-dto"),
     true,
   );
   assert.equal(
+    cli.commands[3]?.examples.some((example) => example.command === "xtask add testing"),
+    true,
+  );
+  assert.equal(
+    cli.commands[3]?.examples.some((example) => example.command === "xtask add mcp"),
+    true,
+  );
+  assert.equal(
+    cli.commands[3]?.examples.some((example) => example.command === "xtask add bots"),
+    true,
+  );
+  assert.equal(
     cli.notes.some((note) => note.includes("does not ship a dedicated cache generator")),
     true,
+  );
+});
+
+test("DocumentationService returns config package detail and links ecosystem samples", () => {
+  const service = createService("en-US");
+  const detail = service.getPackageDetailViewModel("config");
+
+  assert.ok(detail);
+  assert.equal(detail?.apiGroups.length, 0);
+  assert.equal(detail?.sampleLinks.some((entry) => entry.name === "26-bots_app"), true);
+  assert.equal(detail?.sampleLinks.some((entry) => entry.name === "27-bots_webhook_security_app"), true);
+});
+
+test("DocumentationService returns testing package detail with sample coverage", () => {
+  const service = createService("en-US");
+  const detail = service.getPackageDetailViewModel("testing");
+
+  assert.ok(detail);
+  assert.equal(detail?.sampleLinks.map((entry) => entry.name).includes("25-testing_app"), true);
+});
+
+test("DocumentationService exposes latest upstream samples in the catalog", () => {
+  const service = createService("en-US");
+  const samples = service.getSamplesViewModel();
+
+  assert.equal(
+    samples.samples.some((sample) => sample.name === "25-testing_app"),
+    true
+  );
+  assert.equal(
+    samples.samples.some((sample) => sample.name === "26-bots_app"),
+    true
+  );
+  assert.equal(
+    samples.samples.some((sample) => sample.name === "27-bots_webhook_security_app"),
+    true
   );
 });
 
@@ -186,6 +246,44 @@ test("DocumentationService exposes value-object decorators in the catalog", () =
   assert.ok(valueObjectGroup);
   assert.equal(valueObjectGroup?.decorators[0]?.name, "TransformValueObject");
   assert.match(valueObjectGroup?.decorators[0]?.exampleCode || "", /@TransformValueObject\(EmailAddress\)/);
+});
+
+test("DocumentationService exposes validation decorators in the catalog", () => {
+  const service = createService("en-US");
+  const decorators = service.getDecoratorsViewModel();
+  const validationGroup = decorators.decoratorGroups.find(
+    (group) => group.id === "decorators-validation"
+  );
+
+  assert.equal(decorators.packageCoverage.includes("@xtaskjs/validation"), true);
+  assert.ok(validationGroup);
+  assert.equal(
+    validationGroup?.decorators.some((decorator) => decorator.name === "ValidatedBody"),
+    true
+  );
+  assert.equal(
+    validationGroup?.decorators.some((decorator) => decorator.name === "SchemaDto"),
+    true
+  );
+});
+
+test("DocumentationService exposes bots decorators in the catalog", () => {
+  const service = createService("en-US");
+  const decorators = service.getDecoratorsViewModel();
+  const botsGroup = decorators.decoratorGroups.find(
+    (group) => group.id === "decorators-bots"
+  );
+
+  assert.equal(decorators.packageCoverage.includes("@xtaskjs/bots"), true);
+  assert.ok(botsGroup);
+  assert.equal(
+    botsGroup?.decorators.some((decorator) => decorator.name === "BotGateway"),
+    true
+  );
+  assert.equal(
+    botsGroup?.decorators.some((decorator) => decorator.name === "OnCommand"),
+    true
+  );
 });
 
 test("DocumentationService exposes queue samples and decorators in the catalog", () => {

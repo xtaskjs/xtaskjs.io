@@ -12,6 +12,7 @@
   const toggle = document.getElementById("menu-toggle");
   const menu = document.getElementById("mobile-menu");
   const backdrop = document.getElementById("mobile-backdrop");
+  const docsDisclosureStoragePrefix = "xtask-docs-disclosures";
 
   const getCookieConsentDecision = () => window.localStorage.getItem(cookieConsentStorageKey);
 
@@ -97,6 +98,99 @@
   themeButtons.forEach((button) => {
     button.addEventListener("click", toggleTheme);
   });
+
+  const initDocsDisclosurePersistence = () => {
+    const disclosureNodes = Array.from(document.querySelectorAll("details[data-disclosure-key]"));
+    if (!disclosureNodes.length) {
+      return;
+    }
+
+    const storageKey = `${docsDisclosureStoragePrefix}:${window.location.pathname}`;
+    let disclosureState = {};
+
+    try {
+      const raw = window.localStorage.getItem(storageKey);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === "object") {
+          disclosureState = parsed;
+        }
+      }
+    } catch {
+      disclosureState = {};
+    }
+
+    disclosureNodes.forEach((node) => {
+      const key = node.dataset.disclosureKey;
+      if (!key) {
+        return;
+      }
+
+      if (Object.prototype.hasOwnProperty.call(disclosureState, key)) {
+        node.open = disclosureState[key] === true;
+      }
+
+      node.addEventListener("toggle", () => {
+        disclosureState[key] = node.open;
+        try {
+          window.localStorage.setItem(storageKey, JSON.stringify(disclosureState));
+        } catch {
+          // Ignore storage failures to avoid breaking navigation behavior.
+        }
+      });
+    });
+  };
+
+  const initDocsFilters = () => {
+    const filterRoots = Array.from(document.querySelectorAll("[data-docs-filter-root]"));
+    if (!filterRoots.length) {
+      return;
+    }
+
+    filterRoots.forEach((root) => {
+      const input = root.querySelector("[data-docs-filter-input]");
+      if (!(input instanceof HTMLInputElement)) {
+        return;
+      }
+
+      const targetSelector = input.dataset.docsFilterTarget;
+      if (!targetSelector) {
+        return;
+      }
+
+      const emptySelector = input.dataset.docsFilterEmpty;
+      const emptyState = emptySelector ? root.querySelector(emptySelector) : null;
+      const items = Array.from(root.querySelectorAll(targetSelector));
+
+      if (!items.length) {
+        return;
+      }
+
+      const applyFilter = () => {
+        const query = input.value.trim().toLowerCase();
+        let visibleCount = 0;
+
+        items.forEach((item) => {
+          const haystack = (item.textContent || "").toLowerCase();
+          const visible = !query || haystack.includes(query);
+          item.hidden = !visible;
+          if (visible) {
+            visibleCount += 1;
+          }
+        });
+
+        if (emptyState instanceof HTMLElement) {
+          emptyState.hidden = visibleCount > 0;
+        }
+      };
+
+      input.addEventListener("input", applyFilter);
+      applyFilter();
+    });
+  };
+
+  initDocsDisclosurePersistence();
+  initDocsFilters();
 
   if (cookieConsent && cookieConsentAcceptButton && cookieConsentEssentialButton && cookieConsentCustomizeButton) {
     if (hasCookieConsentDecision()) {

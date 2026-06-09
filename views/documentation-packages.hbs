@@ -42,22 +42,38 @@
       </div>
     </aside>
 
-    <div class="docs-content">
+    <div class="docs-content" data-docs-filter-root>
       <section class="section docs-section" id="package-catalog">
         <div class="docs-section-heading">
           <p class="eyebrow">{{t "site.docs.packages.catalogEyebrow"}}</p>
           <h2>{{t "site.docs.packages.catalogTitle"}}</h2>
         </div>
+        <div class="docs-filter-bar">
+          <input
+            type="search"
+            class="docs-filter-input"
+            data-docs-filter-input
+            data-docs-filter-target=".docs-package-search-item"
+            data-docs-filter-empty="#packages-no-results"
+            placeholder="{{t "site.docs.packages.searchPlaceholder"}}"
+            aria-label="{{t "site.docs.packages.searchAria"}}"
+          />
+        </div>
+        <p class="docs-filter-empty" id="packages-no-results" hidden>{{t "site.docs.packages.noResults"}}</p>
         <div class="docs-package-grid">
           {{#each packages}}
-            <article class="project-card docs-package-card">
-              <p class="eyebrow">{{path}}</p>
-              <h3><a href="/documentation/packages/{{slug}}">{{name}}</a></h3>
-              <p>{{tagline}}</p>
-              <p class="docs-package-purpose">{{purpose}}</p>
-              <p class="docs-sample-chip">{{t "site.docs.packages.sampleCoverage" sample=sample}}</p>
-              <a href="/documentation/packages/{{slug}}" class="cta-secondary inline-btn docs-package-index-link">{{t "site.docs.packages.openPackage"}}</a>
-            </article>
+            <details class="project-card docs-package-card docs-disclosure-card docs-package-search-item" data-docs-filter-item data-disclosure-key="package-{{slug}}"{{#if @first}} open{{/if}}>
+              <summary class="docs-disclosure-summary">
+                <p class="eyebrow">{{path}}</p>
+                <h3><a href="/documentation/packages/{{slug}}">{{name}}</a></h3>
+                <p>{{tagline}}</p>
+              </summary>
+              <div class="docs-disclosure-body">
+                <p class="docs-package-purpose">{{purpose}}</p>
+                <p class="docs-sample-chip">{{t "site.docs.packages.sampleCoverage" sample=sample}}</p>
+                <a href="/documentation/packages/{{slug}}" class="cta-secondary inline-btn docs-package-index-link">{{t "site.docs.packages.openPackage"}}</a>
+              </div>
+            </details>
           {{/each}}
         </div>
       </section>

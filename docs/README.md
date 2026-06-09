@@ -2,6 +2,20 @@
 
 Bienvenido a la documentación completa de la actualización a xTaskJS v1.0.28+. Esta documentación cubre todas las mejoras, nuevos packages y ejemplos disponibles.
 
+## 🔄 Actualización Junio 2026
+
+Ecosistema oficial xTaskJS actualizado:
+- `xtask`: runtime, paquetes y samples oficiales
+- `xtask-cli`: cliente CLI con `create`, `generate`, `cache` y `add`
+- `typescript-starter`: plantilla usada por `xtask create`
+- `xtaskjs.io`: web de documentación (este proyecto)
+
+Cambios incluidos en esta actualización documental:
+- Nuevos paquetes cubiertos: `@xtaskjs/config`, `@xtaskjs/validation`, `@xtaskjs/testing`, `@xtaskjs/bots`, `@xtaskjs/mcp`
+- CLI actualizado con generadores de tests (`controller-test`, `service-test`, `resource-tests`) y opciones `--run`/`--quiet`
+- Starter actualizado con scripts de arranque paralelo (`XTASK_SCAN_WORKERS`) y orquestación `turbo`
+- Catálogo de samples actualizado a 29 proyectos
+
 ---
 
 ## 🗂️ Estructura de Documentación
@@ -30,7 +44,7 @@ Bienvenido a la documentación completa de la actualización a xTaskJS v1.0.28+.
 │   └── @xtaskjs/cqrs (Mejorado)
 │
 └── EJEMPLOS_SAMPLES.md
-    ├── 24 Samples disponibles
+   ├── 29 Samples disponibles
     ├── Guía por categoría
     ├── Guía rápida por caso de uso
     └── Instrucciones de ejecución
@@ -62,7 +76,7 @@ Bienvenido a la documentación completa de la actualización a xTaskJS v1.0.28+.
 
 ### 4️⃣ Ejecutar Ejemplos
 **Lee:** [EJEMPLOS_SAMPLES.md](EJEMPLOS_SAMPLES.md)
-- Ubicación de 24 samples
+- Ubicación de 29 samples
 - Qué enseña cada sample
 - Cómo ejecutar
 - Guía por caso de uso
@@ -88,6 +102,10 @@ Bienvenido a la documentación completa de la actualización a xTaskJS v1.0.28+.
 | throttler | Rate limiting | 1.0.2 |
 | socket-io | Real-time | 1.0.3 |
 | scheduler | Task scheduling | 1.0.9 |
+| config | Configuración typed y fail-fast | 1.x |
+| validation | Validación schema-first (Zod/Valibot) | 1.x |
+| testing | Testing module + overrides DI | 1.x |
+| bots | Runtime multi-plataforma (Telegram/Slack/WhatsApp) | 1.x |
 
 ### 📈 Versiones Actualizadas
 
@@ -99,7 +117,7 @@ Bienvenido a la documentación completa de la actualización a xTaskJS v1.0.28+.
 
 **Todas actualizado a latest (mayo 2026)**
 
-### 📚 24 Ejemplos
+### 📚 29 Ejemplos
 
 ```
 01-new_app                          ← Comenzar aquí
@@ -109,6 +127,11 @@ Bienvenido a la documentación completa de la actualización a xTaskJS v1.0.28+.
 ...
 23-socket_io_express_app
 24-throttler_app
+25-testing_app
+26-bots_app
+27-bots_webhook_security_app
+28-mcp_server_app
+29-mcp_auth_http_app
 ```
 
 ---
@@ -274,7 +297,7 @@ La plataforma ahora es más rápida, más poderosa y más fácil de usar.
 ⏰ Task scheduling integrado
 🚦 Rate limiting built-in
 💾 Caching avanzado
-📚 24 ejemplos progresivos
+📚 29 ejemplos progresivos
 
 **¡A programar! 🚀**
 
