@@ -63,6 +63,29 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
+  # Proxy inverso con certificados Let's Encrypt automáticos (perfil "https").
+  # Arranque: docker compose --profile https up -d --build
+  caddy:
+    image: caddy:2-alpine
+    profiles: ["https"]
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      SITE_DOMAIN: ${SITE_DOMAIN:-xtaskjs.io}
+      SITE_ALIAS: ${SITE_ALIAS:-www.xtaskjs.io}
+      ACME_EMAIL: ${ACME_EMAIL:-ops@xtaskjs.io}
+      ACME_CA: ${ACME_CA:-https://acme-v02.api.letsencrypt.org/directory}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      # Certificados y cuenta ACME: no borrar este volumen (límites de Let's Encrypt).
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - app
+    restart: unless-stopped
+
   db:
     image: postgres:16-alpine
     environment:
@@ -103,3 +126,5 @@ services:
 volumes:
   postgres_data:
   uploads_data:
+  caddy_data:
+  caddy_config:

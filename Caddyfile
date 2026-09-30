@@ -1,0 +1,34 @@
+# Reverse proxy con certificados TLS automáticos (Let's Encrypt).
+#
+# Caddy obtiene, instala y renueva solos los certificados de los dominios
+# declarados abajo. La app Node sigue sirviendo HTTP plano en app:3000 y
+# Caddy le envía X-Forwarded-Proto / X-Forwarded-For, que la app ya usa para
+# las cookies seguras y la geolocalización de accesos.
+#
+# Variables (se pasan desde docker-compose.yml / .env):
+#   SITE_DOMAIN  dominio canónico, el que debe coincidir con PUBLIC_URL
+#   SITE_ALIAS   dominio alternativo que redirige al canónico (p. ej. www)
+#   ACME_EMAIL   email para avisos de caducidad de Let's Encrypt
+#   ACME_CA      directorio ACME (producción por defecto; staging para pruebas)
+
+{
+	email {$ACME_EMAIL:ops@xtaskjs.io}
+	acme_ca {$ACME_CA:https://acme-v02.api.letsencrypt.org/directory}
+}
+
+{$SITE_DOMAIN:xtaskjs.io} {
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		-Server
+	}
+
+	# HTTP/1.1, HTTP/2 y WebSockets (socket.io) pasan por aquí sin más ajustes.
+	reverse_proxy app:3000
+}
+
+{$SITE_ALIAS:www.xtaskjs.io} {
+	redir https://{$SITE_DOMAIN:xtaskjs.io}{uri} permanent
+}
